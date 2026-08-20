@@ -1,9 +1,805 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>MHEnt Workspace</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MHEnt Workspace | Không Gian Làm Việc Số All-In-One</title>
+  
+  <!-- PWA & SEO Meta -->
+  <meta name="description" content="Trạm chỉ huy số tích hợp Chat, Mail, Meet, Todo, Drive, Calendar và Trợ lý AI AISA (Harmony & Echo) cho MHEnt Universe.">
+  <meta name="theme-color" content="#090D16">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icon.png" type="image/png">
+
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/apps.css">
 </head>
 <body>
-    <h1>Đại bản doanh MHEnt Workspace đang được xây dựng! 🚀</h1>
+
+  <div id="app-container">
+    
+    <!-- ==========================================
+         1. NAVIGATION RAIL (LEFT - 68px)
+         ========================================== -->
+    <nav id="nav-rail" aria-label="Main Navigation">
+      <div class="rail-top">
+        <div class="rail-brand" title="MHEnt Universe HQ" id="btn-switch-team">
+          🪐
+        </div>
+        <div class="rail-divider"></div>
+
+        <button class="rail-btn active" data-app="chat" title="MHEnt Chat (Tin nhắn realtime)" id="nav-btn-chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+
+        <button class="rail-btn" data-app="mail" title="MHEnt Mail (Hộp thư nội bộ)" id="nav-btn-mail">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span class="rail-badge">2</span>
+        </button>
+
+        <button class="rail-btn" data-app="meet" title="MHEnt Meet (Họp video bảo mật)" id="nav-btn-meet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg>
+        </button>
+
+        <button class="rail-btn" data-app="todo" title="MHEnt Todo (Quản lý công việc Kanban)" id="nav-btn-todo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+        </button>
+
+        <button class="rail-btn" data-app="drive" title="MHEnt Drive (Kho tài nguyên Media)" id="nav-btn-drive">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+        </button>
+
+        <button class="rail-btn" data-app="calendar" title="MHEnt Calendar (Lịch đồng bộ)" id="nav-btn-calendar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        </button>
+
+        <button class="rail-btn" data-app="tools" title="Phân Khu Đặc Nhiệm (QR Check-in, Wiki & Tools)" id="nav-btn-tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </button>
+      </div>
+
+      <div class="rail-bottom">
+        <button class="rail-btn" id="btn-toggle-theme" title="Chuyển đổi Chế độ Sáng/Tối">
+          <span id="theme-icon-text">🌙</span>
+        </button>
+        <div class="rail-avatar" id="btn-open-auth-modal" title="Bấm để Đăng nhập / Cấp tài khoản Firebase">
+          <span class="user-display-avatar">👑</span>
+          <div class="rail-avatar-status"></div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ==========================================
+         2. CONTEXT SIDEBAR (MIDDLE - 260px)
+         ========================================== -->
+    <aside id="context-sidebar">
+      <div class="sidebar-header">
+        <div class="workspace-badge" onclick="window.AuthModule.openTeamModal()">
+          <div>
+            <div class="workspace-name">MHEnt Universe HQ</div>
+            <span class="workspace-code">MHENT-CORE-2026</span>
+          </div>
+        </div>
+        <span class="badge badge-primary user-display-role">MASTER</span>
+      </div>
+
+      <div class="sidebar-content">
+        <!-- 1. CHAT SIDEBAR SECTION -->
+        <div class="sidebar-app-section" id="sidebar-sec-chat">
+          <div class="sidebar-section-title">
+            <span>Kênh Hội Thoại</span>
+            <button class="add-btn" title="Tạo kênh mới" onclick="window.UI.showToast('Tính năng đang mở rộng', 'Kênh mới sẽ được đồng bộ Firestore', 'info')">➕</button>
+          </div>
+          <ul class="sidebar-nav-list" id="chat-channel-list"></ul>
+
+          <div class="sidebar-section-title" style="margin-top: 18px;">
+            <span>Tin Nhắn Riêng (DMs)</span>
+          </div>
+          <ul class="sidebar-nav-list">
+            <li class="sidebar-nav-item">
+              <div class="item-left">
+                <span class="item-icon">🌸</span>
+                <span>Harmony (AI)</span>
+              </div>
+              <span class="badge badge-success">Online</span>
+            </li>
+            <li class="sidebar-nav-item">
+              <div class="item-left">
+                <span class="item-icon">😈</span>
+                <span>Echo (AI)</span>
+              </div>
+              <span class="badge badge-purple">Online</span>
+            </li>
+            <li class="sidebar-nav-item">
+              <div class="item-left">
+                <span class="item-icon">💻</span>
+                <span>Kaelen (Dev Lead)</span>
+              </div>
+            </li>
+            <li class="sidebar-nav-item">
+              <div class="item-left">
+                <span class="item-icon">🎨</span>
+                <span>Sara (Media Dir)</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 2. MAIL SIDEBAR SECTION -->
+        <div class="sidebar-app-section" id="sidebar-sec-mail" style="display: none;">
+          <button class="btn btn-primary" id="btn-compose-mail" style="width: 100%; margin-bottom: 16px;">
+            ✏️ Soạn Thư Mới
+          </button>
+          <div class="sidebar-section-title"><span>Hộp Thư</span></div>
+          <ul class="sidebar-nav-list">
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">📥</span><span>Hộp Thư Đến</span></div><span class="item-badge">2</span></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">⭐</span><span>Đã Gắn Dấu Sao</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">📤</span><span>Đã Gửi</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">📝</span><span>Bản Nháp</span></div></li>
+          </ul>
+        </div>
+
+        <!-- 3. MEET SIDEBAR SECTION -->
+        <div class="sidebar-app-section" id="sidebar-sec-meet" style="display: none;">
+          <div class="sidebar-section-title"><span>Phòng Họp Team</span></div>
+          <ul class="sidebar-nav-list">
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">📹</span><span># HQ Conference</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">🎨</span><span># Media Room</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">💻</span><span># Dev Daily Standup</span></div></li>
+          </ul>
+        </div>
+
+        <!-- 4. TODO SIDEBAR SECTION -->
+        <div class="sidebar-app-section" id="sidebar-sec-todo" style="display: none;">
+          <button class="btn btn-primary" id="btn-add-task" style="width: 100%; margin-bottom: 16px;">
+            ➕ Tạo Task Mới
+          </button>
+          <div class="sidebar-section-title"><span>Dự Án Trọng Tâm</span></div>
+          <ul class="sidebar-nav-list">
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">🚀</span><span>Workspace V1.0</span></div><span class="item-badge">3</span></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">🎬</span><span>Sự Kiện Tháng 9</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">🤖</span><span>AISA 2.0 Integration</span></div></li>
+          </ul>
+        </div>
+
+        <!-- 5. DRIVE SIDEBAR SECTION -->
+        <div class="sidebar-app-section" id="sidebar-sec-drive" style="display: none;">
+          <button class="btn btn-primary" id="btn-upload-file" style="width: 100%; margin-bottom: 16px;">
+            📁 Tải Tệp Lên
+          </button>
+          <input type="file" id="file-upload-input" style="display: none;">
+          <div class="sidebar-section-title"><span>Thư Mục</span></div>
+          <ul class="sidebar-nav-list">
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">📂</span><span>Tất Cả Tệp</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">🎨</span><span>Media Assets</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">📝</span><span>Tài Liệu & Kịch Bản</span></div></li>
+          </ul>
+        </div>
+
+        <!-- 6. CALENDAR SIDEBAR SECTION -->
+        <div class="sidebar-app-section" id="sidebar-sec-calendar" style="display: none;">
+          <button class="btn btn-primary" id="btn-add-event" style="width: 100%; margin-bottom: 16px;">
+            📅 Thêm Sự Kiện
+          </button>
+          <div class="sidebar-section-title"><span>Bộ Lọc Lịch</span></div>
+          <ul class="sidebar-nav-list">
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">🟣</span><span>Cuộc Họp (Meetings)</span></div></li>
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">🔴</span><span>Hạn Chót (Deadlines)</span></div></li>
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">🟢</span><span>Ra Mắt (Launches)</span></div></li>
+          </ul>
+        </div>
+
+        <!-- 7. TOOLS SIDEBAR SECTION -->
+        <div class="sidebar-app-section" id="sidebar-sec-tools" style="display: none;">
+          <div class="sidebar-section-title"><span>Trạm Công Cụ</span></div>
+          <ul class="sidebar-nav-list">
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">📱</span><span>QR Check-in & Điểm Danh</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">📖</span><span>Wiki & Noticeboard</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">⚡</span><span>Quick Media Converter</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==========================================
+         3. MAIN WORKSPACE STAGE (FLEX-1)
+         ========================================== -->
+    <main id="main-stage">
+      <!-- Topbar Header -->
+      <header class="stage-topbar">
+        <div class="topbar-left">
+          <div class="stage-title-wrap">
+            <h1 class="stage-title" id="stage-title">MHEnt Chat</h1>
+            <span class="stage-desc" id="stage-desc">Kênh giao tiếp thời gian thực nội bộ</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="quick-search-btn" id="btn-open-command-palette">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span>Tìm nhanh...</span>
+            <kbd>Ctrl K</kbd>
+          </button>
+
+          <button class="aisa-toggle-btn active" id="btn-toggle-aisa">
+            <span>🌸</span>
+            <span>AISA Copilot</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- App Views Container -->
+      <div id="app-content-container">
+        
+        <!-- 1. CHAT APP VIEW -->
+        <div class="app-stage-view chat-app-view" id="view-chat">
+          <div class="chat-messages-container" id="chat-messages-wrap"></div>
+          <form class="chat-input-bar" id="chat-form">
+            <button type="button" class="btn btn-secondary btn-icon" title="Đính kèm tệp">📎</button>
+            <input type="text" class="chat-input-field" id="chat-input-text" placeholder="Nhập tin nhắn... (Gõ @AISA để gọi Harmony & Echo hỗ trợ)">
+            <button type="submit" class="btn btn-primary" style="background: var(--app-chat); border-color: var(--app-chat);">Gửi 🚀</button>
+          </form>
+        </div>
+
+        <!-- 2. MAIL APP VIEW -->
+        <div class="app-stage-view mail-app-view" id="view-mail" style="display: none;">
+          <div class="mail-list-pane">
+            <div class="mail-list-header">
+              <span style="font-weight: 800; font-size: 14px;">Hộp Thư Đến</span>
+              <span class="badge badge-primary">2 Thư</span>
+            </div>
+            <div class="mail-items-container" id="mail-items-list"></div>
+          </div>
+          <div class="mail-reader-pane" id="mail-reader-content"></div>
+        </div>
+
+        <!-- 3. MEET APP VIEW -->
+        <div class="app-stage-view meet-app-view" id="view-meet" style="display: none;">
+          <div class="meet-lobby" id="meet-lobby-screen">
+            <div class="meet-card">
+              <div class="meet-icon-circle">📹</div>
+              <h2>MHEnt Meet - Phòng Họp Bảo Mật</h2>
+              <p style="color: var(--text-muted); font-size: 13.5px; line-height: 1.5;">
+                Tích hợp máy chủ Jitsi Meet không giới hạn thời gian, hỗ trợ chia sẻ màn hình 4K và mã hóa cuộc gọi theo mã Team.
+              </p>
+              <div class="form-group" style="width: 100%;">
+                <label class="form-label" style="text-align: left;">Tên Phòng Họp</label>
+                <input type="text" class="input-text" id="meet-room-name" value="hq-conference">
+              </div>
+              <button class="btn btn-primary" id="btn-start-meet" style="width: 100%; padding: 12px; background: var(--app-meet); box-shadow: 0 4px 15px var(--app-meet-glow);">
+                🚀 Bắt Đầu Cuộc Họp Ngay
+              </button>
+            </div>
+          </div>
+
+          <div id="jitsi-container"></div>
+
+          <div id="meet-active-controls" style="display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--bg-glass-strong); backdrop-filter: blur(16px); padding: 10px 18px; border-radius: var(--radius-full); border: 1px solid var(--border-medium); gap: 12px; z-index: 100;">
+            <button class="btn btn-secondary" id="btn-copy-meet-link">🔗 Sao chép link mời</button>
+            <button class="btn btn-danger" id="btn-leave-meet">🔴 Kết thúc cuộc họp</button>
+          </div>
+        </div>
+
+        <!-- 4. TODO APP VIEW -->
+        <div class="app-stage-view todo-app-view" id="view-todo" style="display: none;">
+          <div class="kanban-toolbar">
+            <div style="font-weight: 800; font-size: 15px; color: var(--text-high);">Bảng Tiến Độ Dự Án</div>
+            <button class="btn btn-primary" onclick="window.TodoModule.init()" style="background: var(--app-todo); box-shadow: 0 4px 12px var(--app-todo-glow);">➕ Thêm Công Việc</button>
+          </div>
+          <div class="kanban-board">
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-col-title"><span>⏳ Cần Làm</span></div>
+                <span class="kanban-count-pill" id="count-todo">0</span>
+              </div>
+              <div class="kanban-cards-area" id="col-todo-cards" data-status="todo"></div>
+            </div>
+
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-col-title"><span>⚡ Đang Xử Lý</span></div>
+                <span class="kanban-count-pill" id="count-progress">0</span>
+              </div>
+              <div class="kanban-cards-area" id="col-progress-cards" data-status="in-progress"></div>
+            </div>
+
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-col-title"><span>✅ Đã Hoàn Thành</span></div>
+                <span class="kanban-count-pill" id="count-done">0</span>
+              </div>
+              <div class="kanban-cards-area" id="col-done-cards" data-status="done"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. DRIVE APP VIEW -->
+        <div class="app-stage-view drive-app-view" id="view-drive" style="display: none;">
+          <div class="storage-quota-card">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span style="font-size: 28px;">📁</span>
+              <div>
+                <div style="font-weight: 800; font-size: 14px;">Dung lượng MHEnt Drive</div>
+                <div style="font-size: 12px; color: var(--text-muted);">Đã sử dụng 1.4 GB / 5.0 GB Cloud Storage</div>
+              </div>
+            </div>
+            <div class="quota-progress-bar">
+              <div class="quota-progress-fill"></div>
+            </div>
+            <button class="btn btn-primary" onclick="document.getElementById('file-upload-input').click()" style="background: var(--app-drive); box-shadow: 0 4px 12px var(--app-drive-glow);">
+              ⬆️ Tải Tệp Mới
+            </button>
+          </div>
+          <div class="drive-grid" id="drive-files-grid"></div>
+        </div>
+
+        <!-- 6. CALENDAR APP VIEW -->
+        <div class="app-stage-view calendar-app-view" id="view-calendar" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h2 style="font-size: 18px; font-weight: 800;">Tháng 8, 2026</h2>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" id="btn-find-free-time">✨ Tìm Giờ Rảnh Chung (AISA)</button>
+              <button class="btn btn-primary" id="btn-calendar-add-event" onclick="window.UI.openModal('modal-add-event')" style="background: var(--app-calendar);">➕ Thêm Sự Kiện</button>
+            </div>
+          </div>
+          <div class="calendar-grid">
+            <div class="calendar-weekday">T2</div>
+            <div class="calendar-weekday">T3</div>
+            <div class="calendar-weekday">T4</div>
+            <div class="calendar-weekday">T5</div>
+            <div class="calendar-weekday">T6</div>
+            <div class="calendar-weekday">T7</div>
+            <div class="calendar-weekday">CN</div>
+            <div id="calendar-grid-cells" style="grid-column: span 7; display: contents;"></div>
+          </div>
+        </div>
+
+        <!-- 7. TOOLS APP VIEW -->
+        <div class="app-stage-view tools-app-view" id="view-tools" style="display: none;">
+          <div class="tools-nav-tabs">
+            <button class="tool-tab-btn active" data-tab="qr">📱 QR Check-in</button>
+            <button class="tool-tab-btn" data-tab="wiki">📖 Wiki & Noticeboard</button>
+            <button class="tool-tab-btn" data-tab="media">⚡ Quick Media Tools</button>
+          </div>
+
+          <!-- Tab 1: QR Checkin -->
+          <div class="tool-pane active" id="tool-pane-qr">
+            <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 280px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
+                <h3 style="margin-bottom: 12px; font-size: 16px;">Tạo Mã QR Điểm Danh Sự Kiện</h3>
+                <div class="form-group">
+                  <label class="form-label">Nội Dung / Mã Sự Kiện</label>
+                  <input type="text" class="input-text" id="qr-input-text" value="MHENT-EVENT-CHECKIN-2026">
+                </div>
+                <button class="btn btn-primary" id="btn-gen-qr" style="background: var(--app-tools);">Tạo Lại Mã QR</button>
+                <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center;">
+                  <canvas id="qr-display-canvas" width="240" height="240" style="border-radius: var(--radius-sm); box-shadow: var(--shadow-md);"></canvas>
+                  <span id="qr-code-content-text" style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 8px;"></span>
+                </div>
+              </div>
+
+              <div style="flex: 1; min-width: 280px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
+                <h3 style="margin-bottom: 12px; font-size: 16px;">Máy Quét Mã QR Camera</h3>
+                <div class="qr-scanner-box">
+                  <div class="qr-scan-line"></div>
+                  <span style="color: var(--text-muted); font-size: 13px; z-index: 2;">📷 Khung ngắm Camera Scanner</span>
+                </div>
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 14px;" onclick="window.UI.showToast('Điểm danh thành công! ✅', 'Thành viên đã check-in', 'success')">
+                  Bấm Thử Quét Mã Thành Viên
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Wiki -->
+          <div class="tool-pane" id="tool-pane-wiki">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px;">
+              <h2 style="font-size: 20px; margin-bottom: 12px;">🌟 MHEnt Universe - Quy Chuẩn & Thiết Lập Thế Giới</h2>
+              <div style="line-height: 1.7; color: var(--text-medium); font-size: 14px;">
+                <p><strong>1. Tôn chỉ hoạt động:</strong> Sáng tạo vô cực, kết nối không gian mạng, tối ưu năng suất và bảo tồn bản sắc MHEnt.</p>
+                <p><strong>2. Hệ thống nhân cách AISA:</strong></p>
+                <ul>
+                  <li>🌸 <strong>Harmony:</strong> Luôn hỗ trợ tận tình, ngọt ngào, xưng 'em' và gọi người dùng là 'Master'.</li>
+                  <li>😈 <strong>Echo:</strong> Đanh đá, sắc sảo, thích cà khịa nhưng luôn bám sát tiến độ công việc để nhắc nhở team.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: Media Tools -->
+          <div class="tool-pane" id="tool-pane-media">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; max-width: 600px;">
+              <h3 style="margin-bottom: 14px;">⚡ Trạm Chuyển Đổi Video (MKV ➔ MP4)</h3>
+              <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
+                Chạy hoàn toàn trên máy khách với WebAssembly (FFmpeg WASM), đảm bảo không cần tải video lên máy chủ, riêng tư tuyệt đối.
+              </p>
+              <div class="form-group">
+                <label class="form-label">Chọn tệp video nguồn</label>
+                <input type="file" class="input-text" accept=".mkv,.mp4,.mov,.avi">
+              </div>
+              <button class="btn btn-primary" id="btn-start-convert" style="background: var(--app-tools);">Bắt Đầu Chuyển Đổi Sang MP4</button>
+              
+              <div style="margin-top: 18px;">
+                <div style="height: 6px; background: var(--bg-surface-elevated); border-radius: var(--radius-full); overflow: hidden;">
+                  <div id="media-convert-progress" style="width: 0%; height: 100%; background: var(--app-tools); transition: width 0.3s ease;"></div>
+                </div>
+                <div id="media-convert-status" style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">Sẵn sàng xử lý tệp...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ==========================================
+         4. AISA COPILOT DRAWER (RIGHT - 340px)
+         ========================================== -->
+    <aside id="aisa-drawer">
+      <div class="aisa-drawer-header">
+        <div class="aisa-header-info">
+          <div class="aisa-logo-badge">🌸</div>
+          <div>
+            <div class="aisa-title-text">AISA Copilot</div>
+            <div class="aisa-subtitle-text">Harmony 🌸 & Echo 😈</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btn-close-aisa-drawer">✕</button>
+      </div>
+
+      <div class="persona-switch">
+        <button class="persona-btn active both" data-persona="both">🌸😈 Cả Hai</button>
+        <button class="persona-btn harmony" data-persona="harmony">🌸 Harmony</button>
+        <button class="persona-btn echo" data-persona="echo">😈 Echo</button>
+      </div>
+
+      <div class="aisa-quick-chips">
+        <button class="quick-chip" data-action="summary">✨ Tóm tắt kênh</button>
+        <button class="quick-chip" data-action="deadline">🔔 Kiểm tra deadline</button>
+        <button class="quick-chip" data-action="brainstorm">💡 Ý tưởng kịch bản</button>
+      </div>
+
+      <div class="aisa-messages-box" id="aisa-messages-list"></div>
+
+      <div class="aisa-input-wrapper">
+        <div class="aisa-input-box">
+          <input type="text" class="aisa-input-field" id="aisa-input-text" placeholder="Hỏi Harmony & Echo bất cứ điều gì...">
+          <button class="aisa-send-btn" id="aisa-send-btn" title="Gửi">➤</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ==========================================
+       5. MODAL DIALOGS
+       ========================================== -->
+  <!-- Modal: Firebase Auth & Org Account -->
+  <div class="modal-overlay" id="modal-auth">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🔐 Cổng Xác Thực MHEnt Org</h3>
+        <button class="modal-close-btn">✕</button>
+      </div>
+      <div style="display: flex; background: var(--bg-surface-elevated); margin: 16px 22px 0 22px; border-radius: var(--radius-full); padding: 3px; border: 1px solid var(--border-subtle);">
+        <button type="button" class="auth-tab-btn active" data-mode="login" style="flex: 1; padding: 7px; border-radius: var(--radius-full); border: none; background: var(--primary); color: white; font-size: 13px; font-weight: 800; cursor: pointer;">Đăng Nhập</button>
+        <button type="button" class="auth-tab-btn" data-mode="register" style="flex: 1; padding: 7px; border-radius: var(--radius-full); border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 800; cursor: pointer;">Cấp Account Mới</button>
+      </div>
+
+      <!-- Pane: Login -->
+      <div id="auth-pane-login" class="modal-body">
+        <form id="form-firebase-login">
+          <div class="form-group">
+            <label class="form-label">Tên Định Danh / Email Tổ Chức</label>
+            <div style="position: relative;">
+              <input type="text" class="input-text" id="login-username" placeholder="yurika (hoặc yurika@mhentuniverse.internal)" style="width: 100%;" required>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Tự động gắn đuôi <strong>@mhentuniverse.internal</strong> nếu chỉ gõ tên.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mật Khẩu</label>
+            <input type="password" class="input-text" id="login-password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">
+            🚀 Đăng Nhập Firebase
+          </button>
+        </form>
+      </div>
+
+      <!-- Pane: Register -->
+      <div id="auth-pane-register" class="modal-body" style="display: none;">
+        <form id="form-firebase-register">
+          <div class="form-group">
+            <label class="form-label">Tên Đăng Nhập (Username)</label>
+            <input type="text" class="input-text" id="reg-username" placeholder="VD: sara hoặc kaelen" required>
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Sẽ tạo email: <strong>username@mhentuniverse.internal</strong></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Họ & Tên Hiển Thị</label>
+            <input type="text" class="input-text" id="reg-fullname" placeholder="VD: Sara (Media Dir)" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mật Khẩu Khởi Tạo</label>
+            <input type="password" class="input-text" id="reg-password" placeholder="Ít nhất 6 ký tự" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phân Quyền Ban Đầu</label>
+            <select class="input-select" id="reg-role">
+              <option value="member">Member (Thành viên tổ chức)</option>
+              <option value="master">Master (Chủ quản quyền cao)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px; background: var(--app-drive);">
+            ✨ Cấp Tài Khoản Mới Ngay
+          </button>
+        </form>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between;">
+        <span style="font-size: 12px; color: var(--text-muted);">Firebase Project: <strong>mhentuniverse</strong></span>
+        <button type="button" class="btn btn-secondary modal-close-btn">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Compose Mail -->
+  <div class="modal-overlay" id="modal-compose-mail">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">✉️ Soạn Thư Nội Bộ MHEnt</h3>
+        <button class="modal-close-btn">✕</button>
+      </div>
+      <form id="form-compose-mail">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Người Nhận</label>
+            <input type="text" class="input-text" id="mail-to-recipient" value="all-team@mhentuniverse.internal" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Chủ Đề</label>
+            <input type="text" class="input-text" id="mail-to-subject" placeholder="Nhập tiêu đề thư..." required>
+          </div>
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label class="form-label">Nội Dung</label>
+              <button type="button" class="btn btn-ghost" id="btn-ai-draft-mail" style="font-size: 11px; color: var(--aisa-harmony);">✨ AISA Viết Hộ</button>
+            </div>
+            <textarea class="input-textarea" id="mail-to-body" rows="6" placeholder="Nhập nội dung thư..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close-btn">Hủy</button>
+          <button type="submit" class="btn btn-primary" style="background: var(--app-mail);">Gửi Thư Ngay 📤</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Task -->
+  <div class="modal-overlay" id="modal-add-task">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">📋 Tạo Công Việc Mới</h3>
+        <button class="modal-close-btn">✕</button>
+      </div>
+      <form id="form-add-task">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Tên Công Việc</label>
+            <input type="text" class="input-text" id="task-title" placeholder="VD: Render video trailer 4K" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mô Tả Chi Tiết</label>
+            <textarea class="input-textarea" id="task-desc" placeholder="Yêu cầu, ghi chú đặc biệt..."></textarea>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Người Phụ Trách</label>
+              <select class="input-select" id="task-assignee">
+                <option value="Sara">Sara (Media)</option>
+                <option value="Kaelen">Kaelen (Dev)</option>
+                <option value="Master Yurika">Master Yurika</option>
+                <option value="Ray">Ray (Logistics)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mức Độ Ưu Tiên</label>
+              <select class="input-select" id="task-priority">
+                <option value="normal">Bình thường</option>
+                <option value="high">Ưu tiên cao</option>
+                <option value="urgent">Khẩn cấp ⚡</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hạn Chót (Deadline)</label>
+            <input type="date" class="input-text" id="task-deadline" value="2026-08-25">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close-btn">Hủy</button>
+          <button type="submit" class="btn btn-primary" style="background: var(--app-todo);">Thêm Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Event -->
+  <div class="modal-overlay" id="modal-add-event">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">📅 Thêm Sự Kiện Vào Lịch</h3>
+        <button class="modal-close-btn">✕</button>
+      </div>
+      <form id="form-add-event">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Tên Sự Kiện</label>
+            <input type="text" class="input-text" id="event-title" placeholder="VD: Họp tổng duyệt kịch bản" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Ngày Diễn Ra</label>
+              <input type="date" class="input-text" id="event-date" value="2026-08-22" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Khung Giờ</label>
+              <input type="text" class="input-text" id="event-time" value="14:00 - 15:30">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phân Loại</label>
+            <select class="input-select" id="event-type">
+              <option value="meeting">Cuộc họp (Meeting)</option>
+              <option value="deadline">Hạn chót (Deadline)</option>
+              <option value="launch">Ra mắt (Launch)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close-btn">Hủy</button>
+          <button type="submit" class="btn btn-primary" style="background: var(--app-calendar);">Lưu Sự Kiện</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: File Preview -->
+  <div class="modal-overlay" id="modal-file-preview">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="file-preview-title">Xem Trước Tệp</h3>
+        <button class="modal-close-btn">✕</button>
+      </div>
+      <div class="modal-body" id="file-preview-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Team Switcher & Profile Settings -->
+  <div class="modal-overlay" id="modal-team-switcher">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">🪐 Thông Tin Hồ Sơ & Mã Team</h3>
+        <button class="modal-close-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Tài Khoản Hiện Tại</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated); padding: 12px 16px; border-radius: var(--radius-sm);">
+            <div>
+              <div style="font-weight: 800;" class="user-display-name">Master Yurika</div>
+              <div style="font-size: 12px; color: var(--text-muted);" class="user-display-email">yurika@mhentuniverse.internal</div>
+              <div style="font-size: 11px; margin-top: 4px;" class="user-display-role">MASTER</div>
+            </div>
+            <button class="btn btn-secondary" onclick="window.AuthModule.toggleRole()">Đổi Role Nhanh</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 18px;">
+          <label class="form-label">Nhập Mã Team Để Tham Gia</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" class="input-text" id="join-team-code-input" placeholder="VD: MHENT-MEDIA-2026">
+            <button type="button" class="btn btn-primary" onclick="window.AuthModule.joinTeam(document.getElementById('join-team-code-input').value)">Gia Nhập</button>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-primary" style="flex: 1;" onclick="window.UI.closeModal('modal-team-switcher'); window.UI.openModal('modal-auth');">
+            🔑 Đăng Nhập / Cấp Tài Khoản Firebase
+          </button>
+          <button type="button" class="btn btn-danger" id="btn-logout" style="flex: 0.5;">
+            Đăng Xuất
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-close-btn">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       6. COMMAND PALETTE (CTRL + K)
+       ========================================== -->
+  <div id="command-palette-overlay">
+    <div class="command-palette-box">
+      <div class="command-search-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" class="command-search-input" id="command-search-input" placeholder="Gõ lệnh hoặc tìm kiếm ứng dụng, task, email...">
+      </div>
+      <div class="command-results-list" id="command-results-list"></div>
+      <div class="command-footer">
+        <span>Dùng phím <kbd>↑</kbd> <kbd>↓</kbd> để di chuyển</span>
+        <span>Phím <kbd>Esc</kbd> để đóng</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       7. TOAST NOTIFICATIONS
+       ========================================== -->
+  <div id="toast-container"></div>
+
+  <!-- ==========================================
+       8. MOBILE BOTTOM NAVIGATION BAR
+       ========================================== -->
+  <nav id="mobile-nav-bar">
+    <button class="mobile-nav-btn active" data-app="chat">
+      <span style="font-size: 18px;">💬</span>
+      <span>Chat</span>
+    </button>
+    <button class="mobile-nav-btn" data-app="mail">
+      <span style="font-size: 18px;">✉️</span>
+      <span>Mail</span>
+    </button>
+    <button class="mobile-nav-btn" data-app="todo">
+      <span style="font-size: 18px;">📋</span>
+      <span>Todo</span>
+    </button>
+    <button class="mobile-nav-btn" data-app="drive">
+      <span style="font-size: 18px;">📁</span>
+      <span>Drive</span>
+    </button>
+    <button class="mobile-nav-btn" data-app="tools">
+      <span style="font-size: 18px;">🛠️</span>
+      <span>Tools</span>
+    </button>
+  </nav>
+
+  <!-- Application Logic Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/chat.js"></script>
+  <script src="js/modules/mail.js"></script>
+  <script src="js/modules/meet.js"></script>
+  <script src="js/modules/todo.js"></script>
+  <script src="js/modules/drive.js"></script>
+  <script src="js/modules/calendar.js"></script>
+  <script src="js/modules/tools.js"></script>
+  <script src="js/modules/aisa.js"></script>
+  <script src="js/ui.js"></script>
+
+  <script>
+    // Bootstrapping
+    document.addEventListener("DOMContentLoaded", () => {
+      window.UI.init();
+      window.AuthModule.init();
+      window.AisaModule.init();
+      
+      // PWA Service Worker Registration
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      }
+    });
+  </script>
 </body>
 </html>

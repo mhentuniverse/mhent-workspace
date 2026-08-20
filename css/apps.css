@@ -1,0 +1,614 @@
+/* ==========================================================================
+   MHENT WORKSPACE - SUB-APP SPECIFIC STYLES (V1.0)
+   ========================================================================== */
+
+/* ==========================================
+   1. CHAT APP STYLES
+   ========================================== */
+.chat-app-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-canvas);
+}
+
+.chat-messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chat-message-row {
+  display: flex;
+  gap: 12px;
+  max-width: 85%;
+  animation: fadeIn 0.25s ease;
+}
+.chat-message-row.self {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.chat-avt {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: white;
+  flex-shrink: 0;
+}
+.chat-avt.harmony { background: linear-gradient(135deg, #f472b6, #ec4899); box-shadow: 0 0 10px var(--aisa-harmony-glow); }
+.chat-avt.echo { background: linear-gradient(135deg, #a855f7, #7c3aed); box-shadow: 0 0 10px var(--aisa-echo-glow); }
+
+.chat-bubble-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.chat-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.chat-sender-name {
+  font-weight: 800;
+  color: var(--text-high);
+}
+.chat-message-row.self .chat-meta {
+  justify-content: flex-end;
+}
+
+.chat-bubble {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  color: var(--text-high);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.chat-message-row.self .chat-bubble {
+  background: var(--primary);
+  border-color: transparent;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+.chat-bubble.harmony-bot {
+  background: rgba(244, 114, 182, 0.12);
+  border-color: rgba(244, 114, 182, 0.4);
+}
+.chat-bubble.echo-bot {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.chat-mention {
+  color: #38bdf8;
+  font-weight: 800;
+  background: rgba(56, 189, 248, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.chat-input-bar {
+  padding: 14px 20px;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chat-input-field {
+  flex: 1;
+  background: var(--bg-glass-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  color: var(--text-high);
+  outline: none;
+  font-size: 14px;
+}
+.chat-input-field:focus {
+  border-color: var(--app-chat);
+  box-shadow: 0 0 10px var(--app-chat-glow);
+}
+
+/* ==========================================
+   2. MAIL APP STYLES
+   ========================================== */
+.mail-app-view {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.mail-list-pane {
+  width: 360px;
+  height: 100%;
+  border-right: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+}
+.mail-list-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mail-items-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.mail-item-row {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mail-item-row:hover {
+  background: var(--bg-surface-hover);
+}
+.mail-item-row.active {
+  background: rgba(244, 63, 94, 0.1);
+  border-left: 3px solid var(--app-mail);
+}
+.mail-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mail-from {
+  font-weight: 800;
+  font-size: 13.5px;
+  color: var(--text-high);
+}
+.mail-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.mail-subject {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mail-snippet {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mail-reader-pane {
+  flex: 1;
+  height: 100%;
+  background: var(--bg-canvas);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 24px 30px;
+}
+.mail-reader-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 20px;
+}
+.mail-reader-subject {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--text-high);
+  margin-bottom: 8px;
+}
+.mail-reader-body {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--text-medium);
+}
+
+/* ==========================================
+   3. MEET APP STYLES (JITSI IFRAME & LOBBY)
+   ========================================== */
+.meet-app-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-deep);
+  position: relative;
+}
+
+.meet-lobby {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+.meet-card {
+  max-width: 480px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 36px 30px;
+  box-shadow: var(--shadow-lg), 0 0 30px var(--app-meet-glow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.meet-icon-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--app-meet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+#jitsi-container {
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+#jitsi-container.active {
+  display: block;
+}
+
+/* ==========================================
+   4. TODO KANBAN BOARD STYLES
+   ========================================== */
+.todo-app-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  padding: 20px;
+  background: var(--bg-canvas);
+}
+
+.kanban-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.kanban-board {
+  flex: 1;
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.kanban-column {
+  flex: 1;
+  min-width: 290px;
+  max-width: 340px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+.kanban-column-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kanban-col-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-high);
+}
+.kanban-count-pill {
+  padding: 2px 8px;
+  background: var(--bg-surface-elevated);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.kanban-cards-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 100px;
+}
+
+.kanban-card {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  cursor: grab;
+  transition: var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.kanban-card:hover {
+  border-color: var(--border-medium);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+.kanban-card.overdue {
+  border-left: 3px solid #ef4444;
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-high);
+}
+.card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.card-aisa-remark {
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+  font-size: 11px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card-aisa-remark.harmony { background: rgba(244, 114, 182, 0.15); color: #f472b6; }
+.card-aisa-remark.echo { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+
+/* ==========================================
+   5. DRIVE APP STYLES
+   ========================================== */
+.drive-app-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.storage-quota-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.quota-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-surface-elevated);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.quota-progress-fill {
+  height: 100%;
+  width: 28%;
+  background: linear-gradient(90deg, #10b981, #06b6d4);
+  border-radius: var(--radius-full);
+}
+
+.drive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+.drive-file-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.drive-file-card:hover {
+  border-color: var(--app-drive);
+  box-shadow: 0 4px 20px var(--app-drive-glow);
+  transform: translateY(-2px);
+}
+.file-card-icon {
+  font-size: 28px;
+  color: var(--app-drive);
+}
+.file-card-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-high);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-card-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ==========================================
+   6. CALENDAR APP STYLES
+   ========================================== */
+.calendar-app-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+}
+
+.calendar-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: auto repeat(5, 1fr);
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+.calendar-weekday {
+  text-align: center;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 6px 0;
+}
+.calendar-day-cell {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 80px;
+  cursor: pointer;
+}
+.calendar-day-cell.today {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.08);
+}
+.day-number {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-high);
+}
+.event-pill {
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.event-pill.meeting { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; }
+.event-pill.deadline { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+.event-pill.launch { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+
+/* ==========================================
+   7. SPECIAL TOOLS APP STYLES
+   ========================================== */
+.tools-app-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  overflow-y: auto;
+  gap: 24px;
+}
+
+.tools-nav-tabs {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+}
+.tool-tab-btn {
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.tool-tab-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-high);
+}
+.tool-tab-btn.active {
+  background: var(--app-tools);
+  border-color: var(--app-tools);
+  color: white;
+  box-shadow: 0 0 14px var(--app-tools-glow);
+}
+
+.tool-pane {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+}
+.tool-pane.active {
+  display: flex;
+}
+
+.qr-scanner-box {
+  width: 100%;
+  max-width: 400px;
+  height: 280px;
+  background: #000;
+  border-radius: var(--radius-md);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border-medium);
+}
+.qr-scan-line {
+  position: absolute;
+  width: 90%;
+  height: 2px;
+  background: var(--primary);
+  box-shadow: 0 0 12px var(--primary);
+  animation: floatAnim 2s infinite ease-in-out;
+}

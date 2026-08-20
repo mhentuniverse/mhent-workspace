@@ -1,0 +1,131 @@
+/**
+ * MHENT WORKSPACE - CHAT MODULE
+ */
+window.ChatModule = {
+  init() {
+    this.renderChannels();
+    this.renderMessages();
+    this.bindEvents();
+  },
+
+  bindEvents() {
+    const form = document.getElementById("chat-form");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.sendMessage();
+      });
+    }
+
+    const input = document.getElementById("chat-input-text");
+    if (input) {
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          this.sendMessage();
+        }
+      });
+    }
+  },
+
+  renderChannels() {
+    const listEl = document.getElementById("chat-channel-list");
+    if (!listEl) return;
+
+    const channels = [
+      { id: "general", name: "# tổng-quan", icon: "💬" },
+      { id: "media", name: "# ban-media", icon: "🎨" },
+      { id: "dev", name: "# dev-team", icon: "💻" }
+    ];
+
+    listEl.innerHTML = channels.map(ch => `
+      <li class="sidebar-nav-item ${window.store.state.activeChannel === ch.id ? 'active' : ''}" 
+          onclick="window.ChatModule.selectChannel('${ch.id}')">
+        <div class="item-left">
+          <span class="item-icon">${ch.icon}</span>
+          <span>${ch.name}</span>
+        </div>
+      </li>
+    `).join("");
+  },
+
+  selectChannel(channelId) {
+    window.store.state.activeChannel = channelId;
+    window.store.save();
+    this.renderChannels();
+    this.renderMessages();
+  },
+
+  renderMessages() {
+    const container = document.getElementById("chat-messages-wrap");
+    if (!container) return;
+
+    const currentChannel = window.store.state.activeChannel || "general";
+    const messages = window.store.state.chatChannels[currentChannel] || [];
+
+    container.innerHTML = messages.map(m => {
+      let isBotClass = "";
+      if (m.isBot === "harmony") isBotClass = "harmony";
+      if (m.isBot === "echo") isBotClass = "echo";
+
+      let bubbleBotClass = "";
+      if (m.isBot === "harmony") bubbleBotClass = "harmony-bot";
+      if (m.isBot === "echo") bubbleBotClass = "echo-bot";
+
+      const formattedText = this.formatMentions(m.text);
+
+      return `
+        <div class="chat-message-row ${m.isSelf ? 'self' : ''}">
+          <div class="chat-avt ${isBotClass}">${m.avt || '👤'}</div>
+          <div class="chat-bubble-wrap">
+            <div class="chat-meta">
+              <span class="chat-sender-name">${m.sender}</span>
+              <span class="chat-time">${m.time}</span>
+            </div>
+            <div class="chat-bubble ${bubbleBotClass}">
+              ${formattedText}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    container.scrollTop = container.scrollHeight;
+  },
+
+  formatMentions(text) {
+    return text.replace(/(@AISA|@Harmony|@Echo)/gi, '<span class="chat-mention">$1</span>');
+  },
+
+  sendMessage() {
+    const input = document.getElementById("chat-input-text");
+    if (!input || !input.value.trim()) return;
+
+    const text = input.value.trim();
+    input.value = "";
+
+    const user = window.store.state.currentUser;
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+    const newMsg = {
+      id: "msg-" + Date.now(),
+      sender: user.name,
+      avt: user.avatar,
+      time: timeStr,
+      text: text,
+      isSelf: true
+    };
+
+    const currentChannel = window.store.state.activeChannel || "general";
+    window.store.addChatMessage(currentChannel, newMsg);
+    this.renderMessages();
+
+    // Check for AISA mentions
+    if (/@(AISA|Harmony|Echo)/i.test(text)) {
+      if (window.AisaModule) {
+        window.AisaModule.handleChatMention(text, currentChannel);
+      }
+    }
+  }
+};
