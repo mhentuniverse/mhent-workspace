@@ -1,5 +1,5 @@
 /**
- * MHENT WORKSPACE - TODO KANBAN MODULE
+ * MHENT WORKSPACE - TODO KANBAN MODULE (CLOUD ENABLED)
  */
 window.TodoModule = {
   init() {
@@ -106,21 +106,27 @@ window.TodoModule = {
       col.addEventListener("dragleave", () => {
         col.style.background = "";
       });
-      col.addEventListener("drop", (e) => {
+      col.addEventListener("drop", async (e) => {
         e.preventDefault();
         col.style.background = "";
         const taskId = e.dataTransfer.getData("text/plain");
         const targetStatus = col.getAttribute("data-status");
         if (taskId && targetStatus) {
+          // 1. Cập nhật Cloud Firestore
+          if (window.CloudModule && window.CloudModule.isLive) {
+            await window.CloudModule.updateTaskStatus(taskId, targetStatus);
+          }
+
+          // 2. Cập nhật Local Store
           window.store.updateTaskStatus(taskId, targetStatus);
           this.renderBoard();
-          window.UI.showToast("Đã chuyển trạng thái Task!", `Chuyển sang: ${targetStatus.toUpperCase()}`, "info");
+          window.UI.showToast("Đã đồng bộ Task lên Cloud! ⚡", `Trạng thái: ${targetStatus.toUpperCase()}`, "info");
         }
       });
     });
   },
 
-  saveNewTask() {
+  async saveNewTask() {
     const titleInput = document.getElementById("task-title");
     const descInput = document.getElementById("task-desc");
     const assigneeInput = document.getElementById("task-assignee");
@@ -129,7 +135,6 @@ window.TodoModule = {
 
     if (!titleInput || !titleInput.value.trim()) return;
 
-    // AI automatic remark generation based on priority
     let aiRemark = "";
     if (priorityInput.value === "urgent") {
       aiRemark = "Echo: Nhiệm vụ khẩn cấp đấy, tập trung làm ngay đi!";
@@ -138,7 +143,6 @@ window.TodoModule = {
     }
 
     const newTask = {
-      id: "task-" + Date.now(),
       title: titleInput.value.trim(),
       desc: descInput.value.trim(),
       status: "todo",
@@ -148,6 +152,14 @@ window.TodoModule = {
       remark: aiRemark
     };
 
+    // 1. Gửi lên Cloud Firestore
+    let cloudDocId = null;
+    if (window.CloudModule && window.CloudModule.isLive) {
+      cloudDocId = await window.CloudModule.createTask(newTask);
+    }
+
+    // 2. Lưu vào Local Store
+    newTask.id = cloudDocId || ("task-" + Date.now());
     window.store.addTask(newTask);
     this.renderBoard();
     window.UI.closeModal("modal-add-task");
@@ -155,6 +167,6 @@ window.TodoModule = {
     titleInput.value = "";
     descInput.value = "";
 
-    window.UI.showToast("Đã tạo công việc mới! 📋", newTask.title, "success");
+    window.UI.showToast("Đã lưu Task lên Cloud Firestore! 📋", newTask.title, "success");
   }
 };

@@ -1,5 +1,5 @@
 /**
- * MHENT WORKSPACE - MAIL MODULE
+ * MHENT WORKSPACE - MAIL MODULE (CLOUD ENABLED)
  */
 window.MailModule = {
   init() {
@@ -44,7 +44,7 @@ window.MailModule = {
           <span class="mail-time">${m.time}</span>
         </div>
         <div class="mail-subject">${m.subject}</div>
-        <div class="mail-snippet">${m.body.replace(/\n/g, ' ')}</div>
+        <div class="mail-snippet">${(m.body || '').replace(/\n/g, ' ')}</div>
       </div>
     `).join("");
   },
@@ -83,11 +83,13 @@ window.MailModule = {
           <button class="btn btn-secondary btn-icon" title="Tóm tắt bằng AISA" onclick="window.AisaModule.summarizeMail('${mail.id}')">
             ✨
           </button>
-          <button class="btn btn-secondary btn-icon" title="Trả lời">↩️</button>
+          <button class="btn btn-secondary btn-icon" title="Tạo Task từ thư này" onclick="window.MailModule.convertMailToTask('${mail.id}')">
+            📋
+          </button>
         </div>
       </div>
       <div class="mail-reader-body">
-        ${mail.body.replace(/\n/g, '<br>')}
+        ${(mail.body || '').replace(/\n/g, '<br>')}
       </div>
     `;
   },
@@ -106,7 +108,7 @@ window.MailModule = {
     window.UI.showToast("AISA đã soạn xong bản nháp!", "Bạn có thể chỉnh sửa lại trước khi gửi.", "info");
   },
 
-  sendMail() {
+  async sendMail() {
     const toInput = document.getElementById("mail-to-recipient");
     const subjectInput = document.getElementById("mail-to-subject");
     const bodyInput = document.getElementById("mail-to-body");
@@ -114,7 +116,6 @@ window.MailModule = {
     if (!toInput || !subjectInput || !bodyInput) return;
 
     const newMail = {
-      id: "mail-" + Date.now(),
       from: window.store.state.currentUser.name,
       fromEmail: window.store.state.currentUser.email,
       subject: subjectInput.value || "(Không có chủ đề)",
@@ -124,6 +125,13 @@ window.MailModule = {
       body: bodyInput.value
     };
 
+    // 1. Gửi lên Cloud Firestore
+    if (window.CloudModule && window.CloudModule.isLive) {
+      await window.CloudModule.sendEmail(newMail);
+    }
+
+    // 2. Lưu local
+    newMail.id = "mail-" + Date.now();
     window.store.addMail(newMail);
     window.store.state.activeMailId = newMail.id;
     window.store.save();
@@ -136,6 +144,20 @@ window.MailModule = {
     subjectInput.value = "";
     bodyInput.value = "";
 
-    window.UI.showToast("Đã gửi thư nội bộ thành công! ✉️", newMail.subject, "success");
+    window.UI.showToast("Đã gửi thư lên Cloud Firestore! ✉️", newMail.subject, "success");
+  },
+
+  convertMailToTask(mailId) {
+    const mail = window.store.state.mails.find(m => m.id === mailId);
+    if (!mail) return;
+
+    const taskTitle = document.getElementById("task-title");
+    const taskDesc = document.getElementById("task-desc");
+
+    if (taskTitle) taskTitle.value = `Xử lý thư: ${mail.subject}`;
+    if (taskDesc) taskDesc.value = `Nội dung từ ${mail.from}:\n${mail.body.slice(0, 150)}...`;
+
+    window.UI.openModal("modal-add-task");
+    window.UI.showToast("Đã chuyển thư thành Task!", "Vui lòng chọn người phụ trách và deadline.", "info");
   }
 };

@@ -1,5 +1,5 @@
 /**
- * MHENT WORKSPACE - MEET MODULE (JITSI INTEGRATION)
+ * MHENT WORKSPACE - MEET MODULE (JITSI INTEGRATION & CLOUD BROADCAST)
  */
 window.MeetModule = {
   jitsiApi: null,
@@ -49,6 +49,7 @@ window.MeetModule = {
 
     const wsCode = window.store.state.workspace.code.toLowerCase().replace(/[^a-z0-9]/g, "");
     const fullRoomName = `mhent-${wsCode}-${roomName}`;
+    const fullRoomUrl = `https://meet.jit.si/${fullRoomName}`;
 
     window.UI.showToast("Đang khởi tạo phòng họp video...", "Kết nối máy chủ Jitsi Meet", "info");
 
@@ -98,6 +99,11 @@ window.MeetModule = {
 
       this.jitsiApi = new window.JitsiMeetExternalAPI(domain, options);
       this.currentRoom = fullRoomName;
+
+      // SYNERGY: Bắn thông báo mời họp vào kênh chat #general trên Cloud
+      if (window.CloudModule && window.CloudModule.isLive) {
+        await window.CloudModule.broadcastMeeting(roomName, fullRoomUrl);
+      }
 
       this.jitsiApi.addEventListener("videoConferenceLeft", () => {
         this.leaveMeeting();

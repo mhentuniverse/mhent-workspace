@@ -171,32 +171,26 @@ window.AisaModule = {
     }
   },
 
-  handleChatMention(text, channel) {
-    setTimeout(() => {
+  async handleChatMention(text, channel) {
+    setTimeout(async () => {
       const now = new Date();
       const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
-      const hMsg = {
-        id: "msg-h-" + Date.now(),
-        sender: "Harmony",
-        avt: "🌸",
-        time: timeStr,
-        text: `Dạ em nghe Master gọi trong #${channel} rồi ạ! Mọi yêu cầu em đều ghi nhớ và sẵn sàng hỗ trợ nhé! 🌸`,
-        isBot: "harmony"
-      };
+      const hText = `Dạ em nghe Master gọi trong #${channel} rồi ạ! Mọi yêu cầu em đều ghi nhớ và sẵn sàng hỗ trợ nhé! 🌸`;
+      const eText = `Tag cái gì đấy? Việc gì cần xử lý thì nói ngắn gọn thôi nhé, tôi bận lắm! 😈`;
 
-      const eMsg = {
-        id: "msg-e-" + (Date.now() + 1),
-        sender: "Echo",
-        avt: "😈",
-        time: timeStr,
-        text: `Tag cái gì đấy? Việc gì cần xử lý thì nói ngắn gọn thôi nhé, tôi bận lắm! 😈`,
-        isBot: "echo"
-      };
-
-      window.store.addChatMessage(channel, hMsg);
-      window.store.addChatMessage(channel, eMsg);
-      if (window.ChatModule) window.ChatModule.renderMessages();
+      // 1. Gửi lên Cloud Firestore nếu đang kết nối
+      if (window.CloudModule && window.CloudModule.isLive) {
+        await window.CloudModule.sendChatMessage(channel, hText, "harmony", { name: "Harmony", avatar: "🌸", id: "bot-harmony" });
+        await window.CloudModule.sendChatMessage(channel, eText, "echo", { name: "Echo", avatar: "😈", id: "bot-echo" });
+      } else {
+        // Fallback local
+        const hMsg = { id: "msg-h-" + Date.now(), sender: "Harmony", avt: "🌸", time: timeStr, text: hText, isBot: "harmony" };
+        const eMsg = { id: "msg-e-" + (Date.now() + 1), sender: "Echo", avt: "😈", time: timeStr, text: eText, isBot: "echo" };
+        window.store.addChatMessage(channel, hMsg);
+        window.store.addChatMessage(channel, eMsg);
+        if (window.ChatModule) window.ChatModule.renderMessages();
+      }
     }, 600);
   },
 

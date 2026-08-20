@@ -280,11 +280,18 @@ window.AuthModule = {
 
   joinTeam(code) {
     if (!code) return;
-    window.store.state.workspace.code = code.trim().toUpperCase();
-    window.store.state.workspace.name = `Workspace [${code.trim().toUpperCase()}]`;
+    const cleanCode = code.trim().toUpperCase();
+    window.store.state.workspace.code = cleanCode;
+    window.store.state.workspace.name = `Workspace [${cleanCode}]`;
     window.store.save();
     this.updateUserUI();
+
+    // Re-bind Cloud Realtime Stream to new Workspace
+    if (window.CloudModule && window.CloudModule.isLive) {
+      window.CloudModule.bindWorkspace(cleanCode);
+    }
+
     window.UI.closeModal("modal-team-switcher");
-    window.UI.showToast("Gia nhập Team thành công!", `Mã không gian: ${code}`, "success");
+    window.UI.showToast("Gia nhập Team Cloud thành công! ⚡", `Không gian Firestore: ${cleanCode}`, "success");
   }
 };

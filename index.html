@@ -777,6 +777,7 @@
   <!-- Application Logic Scripts -->
   <script src="js/config.js"></script>
   <script src="js/state.js"></script>
+  <script src="js/modules/cloud.js"></script>
   <script src="js/modules/auth.js"></script>
   <script src="js/modules/chat.js"></script>
   <script src="js/modules/mail.js"></script>
@@ -791,8 +792,9 @@
   <script>
     // Bootstrapping
     document.addEventListener("DOMContentLoaded", () => {
-      window.UI.init();
       window.AuthModule.init();
+      if (window.CloudModule) window.CloudModule.init();
+      window.UI.init();
       window.AisaModule.init();
       
       // PWA Service Worker Registration

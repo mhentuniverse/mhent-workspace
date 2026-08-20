@@ -1,5 +1,5 @@
 /**
- * MHENT WORKSPACE - CALENDAR MODULE
+ * MHENT WORKSPACE - CALENDAR MODULE (CLOUD ENABLED)
  */
 window.CalendarModule = {
   init() {
@@ -33,25 +33,23 @@ window.CalendarModule = {
     const gridEl = document.getElementById("calendar-grid-cells");
     if (!gridEl) return;
 
-    const daysInMonth = 31; // Tháng 8 có 31 ngày
-    const firstDayOffset = 5; // Thứ Sáu là ngày 1/8/2026
+    const daysInMonth = 31;
+    const firstDayOffset = 5;
     const events = window.store.state.events || [];
 
     let cellsHtml = "";
     
-    // Ngày trống trước tháng
     for (let i = 0; i < firstDayOffset; i++) {
       cellsHtml += `<div class="calendar-day-cell" style="opacity: 0.3;"></div>`;
     }
 
-    // Các ngày trong tháng
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `2026-08-${day.toString().padStart(2, '0')}`;
       const dayEvents = events.filter(e => e.date === dateStr);
       const isToday = day === 20;
 
       const eventPills = dayEvents.map(ev => `
-        <div class="event-pill ${ev.type}" title="${ev.title} (${ev.time})">
+        <div class="event-pill ${ev.type || 'meeting'}" title="${ev.title} (${ev.time || ''})">
           ${ev.title}
         </div>
       `).join("");
@@ -73,7 +71,7 @@ window.CalendarModule = {
     window.UI.openModal("modal-add-event");
   },
 
-  saveEvent() {
+  async saveEvent() {
     const titleInput = document.getElementById("event-title");
     const dateInput = document.getElementById("event-date");
     const timeInput = document.getElementById("event-time");
@@ -82,19 +80,25 @@ window.CalendarModule = {
     if (!titleInput || !titleInput.value.trim() || !dateInput) return;
 
     const newEvent = {
-      id: "ev-" + Date.now(),
       title: titleInput.value.trim(),
       date: dateInput.value,
       time: timeInput ? timeInput.value : "Cả ngày",
       type: typeInput ? typeInput.value : "meeting"
     };
 
+    // 1. Lưu lên Cloud Firestore
+    if (window.CloudModule && window.CloudModule.isLive) {
+      await window.CloudModule.createCalendarEvent(newEvent);
+    }
+
+    // 2. Lưu local
+    newEvent.id = "ev-" + Date.now();
     window.store.addEvent(newEvent);
     this.renderCalendar();
     window.UI.closeModal("modal-add-event");
 
     titleInput.value = "";
-    window.UI.showToast("Đã thêm sự kiện vào Lịch! 📅", newEvent.title, "success");
+    window.UI.showToast("Đã lưu sự kiện lên Cloud Firestore! 📅", newEvent.title, "success");
   },
 
   findCommonFreeTime() {
