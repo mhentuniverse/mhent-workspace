@@ -617,7 +617,23 @@
   }
 }
 
+.mobile-sidebar-toggle-btn {
+  display: none;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text-high);
+}
+
 @media (max-width: 768px) {
+  .mobile-sidebar-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
   #nav-rail {
     display: none;
   }

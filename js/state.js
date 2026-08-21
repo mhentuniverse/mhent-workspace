@@ -171,18 +171,84 @@ Ban Media đã cập nhật bản nháp kịch bản và thiết kế infographi
     }
   }
 
+  deleteTask(taskId) {
+    this.state.tasks = this.state.tasks.filter(t => t.id !== taskId);
+    this.save();
+  }
+
   addMail(mail) {
     this.state.mails.unshift(mail);
     this.save();
   }
 
+  deleteMail(mailId) {
+    this.state.mails = this.state.mails.filter(m => m.id !== mailId);
+    this.save();
+  }
+
+  toggleStarMail(mailId) {
+    const mail = this.state.mails.find(m => m.id === mailId);
+    if (mail) {
+      mail.starred = !mail.starred;
+      this.save();
+    }
+  }
+
+  addFile(file) {
+    if (!this.state.files) this.state.files = [];
+    this.state.files.unshift(file);
+    this.save();
+  }
+
+  deleteFile(fileId) {
+    if (!this.state.files) return;
+    this.state.files = this.state.files.filter(f => f.id !== fileId);
+    this.save();
+  }
+
   addEvent(event) {
+    if (!this.state.events) this.state.events = [];
     this.state.events.push(event);
     this.save();
   }
 
+  deleteEvent(eventId) {
+    if (!this.state.events) return;
+    this.state.events = this.state.events.filter(e => e.id !== eventId);
+    this.save();
+  }
+
+  saveNote(note) {
+    if (!this.state.notes) this.state.notes = [];
+    const idx = this.state.notes.findIndex(n => n.id === note.id);
+    if (idx >= 0) {
+      this.state.notes[idx] = note;
+    } else {
+      this.state.notes.unshift(note);
+    }
+    this.save();
+  }
+
+  deleteNote(noteId) {
+    if (!this.state.notes) return;
+    this.state.notes = this.state.notes.filter(n => n.id !== noteId);
+    this.save();
+  }
+
   addAisaMessage(msg) {
+    if (!this.state.aisaHistory) this.state.aisaHistory = [];
     this.state.aisaHistory.push(msg);
+    this.save();
+  }
+
+  setCurrentUser(user, isAuth = true) {
+    this.state.currentUser = user;
+    this.state.isLoggedIn = isAuth;
+    this.save();
+  }
+
+  setWorkspace(ws) {
+    this.state.workspace = ws;
     this.save();
   }
 }

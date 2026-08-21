@@ -1,5 +1,5 @@
 /**
- * MHENT WORKSPACE - TODO KANBAN MODULE (CLOUD ENABLED)
+ * MHENT WORKSPACE - TODO KANBAN MODULE (SUPABASE & FIRESTORE CLOUD ENABLED)
  */
 window.TodoModule = {
   init() {
@@ -37,9 +37,13 @@ window.TodoModule = {
     const progressTasks = tasks.filter(t => t.status === "in-progress");
     const doneTasks = tasks.filter(t => t.status === "done");
 
-    document.getElementById("count-todo").textContent = todoTasks.length;
-    document.getElementById("count-progress").textContent = progressTasks.length;
-    document.getElementById("count-done").textContent = doneTasks.length;
+    const countTodo = document.getElementById("count-todo");
+    const countProg = document.getElementById("count-progress");
+    const countDone = document.getElementById("count-done");
+
+    if (countTodo) countTodo.textContent = todoTasks.length;
+    if (countProg) countProg.textContent = progressTasks.length;
+    if (countDone) countDone.textContent = doneTasks.length;
 
     todoCol.innerHTML = todoTasks.map(t => this.renderCard(t)).join("");
     progressCol.innerHTML = progressTasks.map(t => this.renderCard(t)).join("");
@@ -68,6 +72,24 @@ window.TodoModule = {
       `;
     }
 
+    // Quick action buttons depending on status
+    let actionButtons = "";
+    if (task.status === "todo") {
+      actionButtons = `
+        <button class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 3px 8px;" onclick="window.TodoModule.moveTask('${task.id}', 'in-progress')" title="Bắt đầu làm">▶️ Làm</button>
+        <button class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 3px 8px;" onclick="window.TodoModule.moveTask('${task.id}', 'done')" title="Hoàn tất">✅ Xong</button>
+      `;
+    } else if (task.status === "in-progress") {
+      actionButtons = `
+        <button class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 3px 8px;" onclick="window.TodoModule.moveTask('${task.id}', 'todo')" title="Về Cần làm">⏪ Trả về</button>
+        <button class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 3px 8px;" onclick="window.TodoModule.moveTask('${task.id}', 'done')" title="Hoàn tất">✅ Xong</button>
+      `;
+    } else {
+      actionButtons = `
+        <button class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 3px 8px;" onclick="window.TodoModule.moveTask('${task.id}', 'todo')" title="Làm lại">🔄 Làm lại</button>
+      `;
+    }
+
     return `
       <div class="kanban-card" draggable="true" data-id="${task.id}" id="${task.id}">
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -76,9 +98,15 @@ window.TodoModule = {
         </div>
         <div class="card-desc">${task.desc || ''}</div>
         ${remarkHtml}
-        <div class="card-footer">
-          <span>👤 ${task.assignee}</span>
-          <span>📅 ${task.deadline || 'Không hạn'}</span>
+        <div class="card-footer" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: 8px; font-size: 11.5px; color: var(--text-muted);">
+            <span>👤 ${task.assignee || 'Tôi'}</span>
+            <span>📅 ${task.deadline || 'Không hạn'}</span>
+          </div>
+          <div style="display: flex; gap: 4px; align-items: center;">
+            ${actionButtons}
+            <button class="btn btn-ghost btn-sm" style="padding: 2px 6px; font-size: 12px; color: var(--text-muted);" onclick="window.TodoModule.deleteTask('${task.id}')" title="Xóa task">🗑️</button>
+          </div>
         </div>
       </div>
     `;
@@ -112,18 +140,32 @@ window.TodoModule = {
         const taskId = e.dataTransfer.getData("text/plain");
         const targetStatus = col.getAttribute("data-status");
         if (taskId && targetStatus) {
-          // 1. Cập nhật Cloud Firestore
-          if (window.CloudModule && window.CloudModule.isLive) {
-            await window.CloudModule.updateTaskStatus(taskId, targetStatus);
-          }
-
-          // 2. Cập nhật Local Store
-          window.store.updateTaskStatus(taskId, targetStatus);
-          this.renderBoard();
-          window.UI.showToast("Đã đồng bộ Task lên Cloud! ⚡", `Trạng thái: ${targetStatus.toUpperCase()}`, "info");
+          this.moveTask(taskId, targetStatus);
         }
       });
     });
+  },
+
+  async moveTask(taskId, newStatus) {
+    if (window.CloudModule) {
+      await window.CloudModule.updateTaskStatus(taskId, newStatus);
+    } else {
+      window.store.updateTaskStatus(taskId, newStatus);
+    }
+    this.renderBoard();
+    window.UI.showToast("Cập nhật trạng thái thành công! ⚡", `Trạng thái: ${newStatus.toUpperCase()}`, "info");
+  },
+
+  async deleteTask(taskId) {
+    if (confirm("Cậu có chắc muốn xóa nhiệm vụ này không?")) {
+      if (window.CloudModule) {
+        await window.CloudModule.deleteTask(taskId);
+      } else {
+        window.store.deleteTask(taskId);
+      }
+      this.renderBoard();
+      window.UI.showToast("Đã xóa nhiệm vụ!", "", "info");
+    }
   },
 
   async saveNewTask() {
@@ -136,37 +178,35 @@ window.TodoModule = {
     if (!titleInput || !titleInput.value.trim()) return;
 
     let aiRemark = "";
-    if (priorityInput.value === "urgent") {
+    if (priorityInput && priorityInput.value === "urgent") {
       aiRemark = "Echo: Nhiệm vụ khẩn cấp đấy, tập trung làm ngay đi!";
     } else {
       aiRemark = "Harmony: Chúc Master và team hoàn thành task thật tốt nha!";
     }
 
     const newTask = {
+      id: "task-" + Date.now(),
       title: titleInput.value.trim(),
-      desc: descInput.value.trim(),
+      desc: descInput ? descInput.value.trim() : "",
       status: "todo",
-      priority: priorityInput.value,
-      assignee: assigneeInput.value,
-      deadline: deadlineInput.value || "2026-08-30",
+      priority: priorityInput ? priorityInput.value : "normal",
+      assignee: assigneeInput ? assigneeInput.value : window.store.state.currentUser.name,
+      deadline: (deadlineInput && deadlineInput.value) ? deadlineInput.value : "2026-08-30",
       remark: aiRemark
     };
 
-    // 1. Gửi lên Cloud Firestore
-    let cloudDocId = null;
-    if (window.CloudModule && window.CloudModule.isLive) {
-      cloudDocId = await window.CloudModule.createTask(newTask);
+    if (window.CloudModule) {
+      await window.CloudModule.pushTask(newTask);
+    } else {
+      window.store.addTask(newTask);
     }
 
-    // 2. Lưu vào Local Store
-    newTask.id = cloudDocId || ("task-" + Date.now());
-    window.store.addTask(newTask);
     this.renderBoard();
     window.UI.closeModal("modal-add-task");
 
     titleInput.value = "";
-    descInput.value = "";
+    if (descInput) descInput.value = "";
 
-    window.UI.showToast("Đã lưu Task lên Cloud Firestore! 📋", newTask.title, "success");
+    window.UI.showToast("Đã lưu Task lên Cloud Supabase! 📋", newTask.title, "success");
   }
 };

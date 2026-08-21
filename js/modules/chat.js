@@ -1,5 +1,5 @@
 /**
- * MHENT WORKSPACE - CHAT MODULE (CLOUD ENABLED)
+ * MHENT WORKSPACE - CHAT MODULE (FIREBASE & SUPABASE CLOUD ENABLED)
  */
 window.ChatModule = {
   init() {
@@ -94,6 +94,7 @@ window.ChatModule = {
   },
 
   formatMentions(text) {
+    if (!text) return "";
     return text
       .replace(/(@AISA|@Harmony|@Echo)/gi, '<span class="chat-mention">$1</span>')
       .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color: var(--primary); font-weight: 800; text-decoration: underline;">$1</a>');
@@ -111,25 +112,23 @@ window.ChatModule = {
     const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     const currentChannel = window.store.state.activeChannel || "general";
 
-    // 1. Gửi lên Cloud Firestore
-    let sentToCloud = false;
-    if (window.CloudModule && window.CloudModule.isLive) {
-      sentToCloud = await window.CloudModule.sendChatMessage(currentChannel, text, false);
+    const newMsg = {
+      id: "msg-" + Date.now(),
+      sender: user.name,
+      avt: user.avatar || "👤",
+      time: timeStr,
+      text: text,
+      isSelf: true
+    };
+
+    // Gửi qua Cloud Engine (Supabase + Firestore)
+    if (window.CloudModule) {
+      await window.CloudModule.pushChatMessage(currentChannel, newMsg);
+    } else {
+      window.store.addChatMessage(currentChannel, newMsg);
     }
 
-    // 2. Fallback Local nếu Cloud offline
-    if (!sentToCloud) {
-      const newMsg = {
-        id: "msg-" + Date.now(),
-        sender: user.name,
-        avt: user.avatar,
-        time: timeStr,
-        text: text,
-        isSelf: true
-      };
-      window.store.addChatMessage(currentChannel, newMsg);
-      this.renderMessages();
-    }
+    this.renderMessages();
 
     // Check for AISA mentions
     if (/@(AISA|Harmony|Echo)/i.test(text)) {

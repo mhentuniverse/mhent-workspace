@@ -1,5 +1,5 @@
 /**
- * MHENT WORKSPACE - DRIVE MODULE
+ * MHENT WORKSPACE - DRIVE MODULE (SUPABASE & CLOUD ENABLED)
  */
 window.DriveModule = {
   init() {
@@ -23,21 +23,26 @@ window.DriveModule = {
 
     const files = window.store.state.files || [];
 
+    if (files.length === 0) {
+      gridEl.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted);">Kho tài nguyên trống. Bấm 'Tải Lên Tệp' để thêm mới.</div>`;
+      return;
+    }
+
     gridEl.innerHTML = files.map(f => `
       <div class="drive-file-card" onclick="window.DriveModule.previewFile('${f.id}')">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span class="file-card-icon">${f.icon}</span>
-          <span class="badge badge-primary">${f.type.toUpperCase()}</span>
+          <span class="badge badge-primary">${(f.type || 'file').toUpperCase()}</span>
         </div>
         <div class="file-card-name" title="${f.name}">${f.name}</div>
         <div class="file-card-meta">
-          <span>${f.size}</span> • <span>${f.date}</span>
+          <span>${f.size}</span> • <span>${f.date || 'Hôm nay'}</span>
         </div>
       </div>
     `).join("");
   },
 
-  handleFileUpload(e) {
+  async handleFileUpload(e) {
     const uploadedFiles = e.target.files;
     if (!uploadedFiles || uploadedFiles.length === 0) return;
 
@@ -60,10 +65,13 @@ window.DriveModule = {
       icon: icon
     };
 
-    window.store.state.files.unshift(newFile);
-    window.store.save();
-    this.renderFiles();
+    if (window.CloudModule) {
+      await window.CloudModule.pushFile(newFile);
+    } else {
+      window.store.addFile(newFile);
+    }
 
+    this.renderFiles();
     window.UI.showToast("Đã tải tệp lên MHEnt Drive! 📁", file.name, "success");
     e.target.value = "";
   },
@@ -84,6 +92,7 @@ window.DriveModule = {
           <p style="color: var(--text-muted); font-size: 13px;">Dung lượng: ${file.size} • Ngày tạo: ${file.date}</p>
           <div style="margin-top: 24px; display: flex; justify-content: center; gap: 10px;">
             <button class="btn btn-primary" onclick="window.UI.showToast('Đang tải xuống tệp...', '${file.name}', 'info')">⬇️ Tải xuống</button>
+            <button class="btn btn-danger" onclick="window.DriveModule.deleteFile('${file.id}')">🗑️ Xóa tệp</button>
             <button class="btn btn-secondary" onclick="window.UI.closeModal('modal-file-preview')">Đóng</button>
           </div>
         </div>
@@ -91,5 +100,18 @@ window.DriveModule = {
     }
 
     window.UI.openModal("modal-file-preview");
+  },
+
+  async deleteFile(fileId) {
+    if (confirm("Cậu có chắc muốn xóa tệp này khỏi Drive không?")) {
+      if (window.CloudModule) {
+        await window.CloudModule.deleteFile(fileId);
+      } else {
+        window.store.deleteFile(fileId);
+      }
+      window.UI.closeModal("modal-file-preview");
+      this.renderFiles();
+      window.UI.showToast("Đã xóa tệp khỏi Drive!", "", "info");
+    }
   }
 };

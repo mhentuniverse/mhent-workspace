@@ -11,6 +11,7 @@ const ASSETS_TO_CACHE = [
   './js/config.js',
   './js/state.js',
   './js/ui.js',
+  './js/modules/cloud.js',
   './js/modules/auth.js',
   './js/modules/chat.js',
   './js/modules/mail.js',

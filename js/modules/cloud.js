@@ -1,14 +1,36 @@
 /**
- * MHENT WORKSPACE - FIRESTORE CLOUD REALTIME SYNC ENGINE (CLOUD.JS)
- * Đồng bộ hóa thời gian thực 100% qua Firebase Cloud Firestore
+ * MHENT WORKSPACE - FIRESTORE & SUPABASE HYBRID CLOUD ENGINE (CLOUD.JS)
+ * Đồng bộ hóa dữ liệu thời gian thực theo Firebase UID & Supabase Cloud Storage
  */
 window.CloudModule = {
   db: null,
+  sb: null,
   activeListeners: [],
-  currentWsCode: null,
+  currentWsCode: "MHENT-CORE-2026",
+  currentUserId: null,
   isLive: false,
 
   init() {
+    this.initSupabase();
+    this.initFirestore();
+  },
+
+  initSupabase() {
+    if (typeof supabase !== "undefined" && window.MHENT_CONFIG && window.MHENT_CONFIG.SUPABASE_CONFIG) {
+      try {
+        this.sb = supabase.createClient(
+          window.MHENT_CONFIG.SUPABASE_CONFIG.URL,
+          window.MHENT_CONFIG.SUPABASE_CONFIG.KEY
+        );
+        window.supabaseClient = this.sb;
+        console.log("[Cloud Engine] ✅ Đã kết nối Supabase Cloud thành công!");
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi khởi tạo Supabase:", err);
+      }
+    }
+  },
+
+  initFirestore() {
     if (typeof firebase === "undefined" || !firebase.apps.length) {
       console.warn("[Cloud Engine] Firebase chưa sẵn sàng, chờ khởi tạo...");
       return;
@@ -19,7 +41,6 @@ window.CloudModule = {
       this.isLive = true;
       console.log("[Cloud Engine] ✅ Đã kết nối Firebase Cloud Firestore thành công!");
 
-      // Bắt đầu lắng nghe dữ liệu theo mã Workspace hiện tại
       const wsCode = window.store.state.workspace.code || "MHENT-CORE-2026";
       this.bindWorkspace(wsCode);
     } catch (err) {
@@ -27,7 +48,69 @@ window.CloudModule = {
     }
   },
 
-  // Hủy các listener cũ khi chuyển Workspace
+  setUser(uid, userData) {
+    this.currentUserId = uid;
+    console.log(`[Cloud Engine] 👤 Đã liên kết tài khoản Firebase UID: ${uid}`);
+    
+    // Tải dữ liệu riêng tư của User từ Supabase
+    this.loadUserDataFromSupabase(uid);
+  },
+
+  async loadUserDataFromSupabase(uid) {
+    if (!this.sb || !uid) return;
+
+    try {
+      // 1. Tải tasks riêng của user hoặc của workspace
+      const { data: tasksData, error: taskErr } = await this.sb
+        .from('workspace_tasks')
+        .select('*')
+        .or(`user_id.eq.${uid},workspace_code.eq.${this.currentWsCode}`);
+
+      if (!taskErr && tasksData && tasksData.length > 0) {
+        window.store.state.tasks = tasksData;
+        if (window.TodoModule) window.TodoModule.renderBoard();
+      }
+
+      // 2. Tải mails của user
+      const { data: mailsData, error: mailErr } = await this.sb
+        .from('workspace_mails')
+        .select('*')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false });
+
+      if (!mailErr && mailsData && mailsData.length > 0) {
+        window.store.state.mails = mailsData;
+        if (window.MailModule) window.MailModule.renderMailList();
+      }
+
+      // 3. Tải files của user
+      const { data: filesData, error: fileErr } = await this.sb
+        .from('workspace_files')
+        .select('*')
+        .or(`user_id.eq.${uid},workspace_code.eq.${this.currentWsCode}`);
+
+      if (!fileErr && filesData && filesData.length > 0) {
+        window.store.state.files = filesData;
+        if (window.DriveModule) window.DriveModule.renderFiles();
+      }
+
+      // 4. Tải notes của user
+      const { data: notesData, error: noteErr } = await this.sb
+        .from('workspace_notes')
+        .select('*')
+        .eq('user_id', uid);
+
+      if (!noteErr && notesData && notesData.length > 0) {
+        window.store.state.notes = notesData;
+        if (window.ToolsModule && typeof window.ToolsModule.renderNotes === 'function') {
+          window.ToolsModule.renderNotes();
+        }
+      }
+    } catch (e) {
+      console.warn("[Cloud Engine] Không thể tải dữ liệu Supabase (dùng cache local):", e);
+    }
+  },
+
   detachListeners() {
     this.activeListeners.forEach(unsubscribe => {
       if (typeof unsubscribe === "function") unsubscribe();
@@ -36,7 +119,7 @@ window.CloudModule = {
   },
 
   bindWorkspace(wsCode) {
-    if (!this.isLive || !this.db) return;
+    if (!this.db) return;
     this.detachListeners();
     this.currentWsCode = wsCode.toUpperCase();
 
@@ -53,7 +136,7 @@ window.CloudModule = {
     ["general", "media", "dev"].forEach(channelId => {
       const unsubChat = wsDocRef.collection("channels").doc(channelId).collection("messages")
         .orderBy("createdAt", "asc")
-        .limitToLast(50)
+        .limitToLast(60)
         .onSnapshot((snapshot) => {
           const messages = [];
           snapshot.forEach(doc => {
@@ -66,7 +149,7 @@ window.CloudModule = {
               avt: data.avt || "👤",
               time: timeStr,
               text: data.text || "",
-              isSelf: data.senderId === window.store.state.currentUser.id,
+              isSelf: data.senderId === (this.currentUserId || window.store.state.currentUser.id),
               isBot: data.isBot || false
             });
           });
@@ -82,7 +165,7 @@ window.CloudModule = {
       this.activeListeners.push(unsubChat);
     });
 
-    // 2. 📋 REALTIME TODO KANBAN (Đồng bộ mọi thiết bị)
+    // 2. 📋 REALTIME TODO KANBAN
     const unsubTasks = wsDocRef.collection("tasks")
       .onSnapshot((snapshot) => {
         const tasks = [];
@@ -96,193 +179,199 @@ window.CloudModule = {
         }
       }, (err) => console.warn("[Tasks Stream] Lỗi:", err));
     this.activeListeners.push(unsubTasks);
-
-    // 3. ✉️ REALTIME EMAILS NỘI BỘ
-    const unsubMails = wsDocRef.collection("emails")
-      .orderBy("createdAt", "desc")
-      .onSnapshot((snapshot) => {
-        const mails = [];
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          mails.push({
-            id: doc.id,
-            from: data.from,
-            fromEmail: data.fromEmail,
-            subject: data.subject,
-            time: data.time || "Vừa xong",
-            starred: data.starred || false,
-            read: data.read || true,
-            body: data.body || ""
-          });
-        });
-
-        if (mails.length > 0) {
-          window.store.state.mails = mails;
-          if (window.MailModule) {
-            window.MailModule.renderMailList();
-            window.MailModule.renderActiveMail();
-          }
-        }
-      }, (err) => console.warn("[Emails Stream] Lỗi:", err));
-    this.activeListeners.push(unsubMails);
-
-    // 4. 📅 REALTIME CALENDAR EVENTS
-    const unsubEvents = wsDocRef.collection("events")
-      .onSnapshot((snapshot) => {
-        const events = [];
-        snapshot.forEach(doc => {
-          events.push({ id: doc.id, ...doc.data() });
-        });
-
-        if (events.length > 0) {
-          window.store.state.events = events;
-          if (window.CalendarModule) window.CalendarModule.renderCalendar();
-        }
-      }, (err) => console.warn("[Events Stream] Lỗi:", err));
-    this.activeListeners.push(unsubEvents);
-
-    console.log(`[Cloud Engine] ⚡ Đã bật Radar Cloud Realtime cho Workspace: [${this.currentWsCode}]`);
   },
 
   // ==========================================
-  // CLOUD WRITE ACTIONS (GHI DỮ LIỆU LÊN CLOUD)
+  // CLOUD WRITE HELPERS (SUPABASE + FIRESTORE)
   // ==========================================
 
-  // Gửi tin nhắn Chat lên Cloud
-  async sendChatMessage(channelId, text, isBot = false, customSender = null) {
-    if (!this.isLive || !this.db) return false;
+  async pushChatMessage(channelId, msg) {
+    // 1. Lưu Local state
+    window.store.addChatMessage(channelId, msg);
 
-    const user = customSender || window.store.state.currentUser;
-    const wsCode = this.currentWsCode || "MHENT-CORE-2026";
-
-    try {
-      await this.db.collection("workspaces").doc(wsCode)
-        .collection("channels").doc(channelId)
-        .collection("messages").add({
-          sender: user.name,
-          senderId: user.id || "guest",
-          avt: user.avatar || "👤",
-          text: text,
-          isBot: isBot,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      return true;
-    } catch (err) {
-      console.error("[Cloud Chat] Lỗi gửi:", err);
-      return false;
-    }
-  },
-
-  // Tạo Task lên Cloud & Tự động đồng bộ Lịch + Bắn thông báo Chat
-  async createTask(taskData) {
-    if (!this.isLive || !this.db) return false;
-
-    const wsCode = this.currentWsCode || "MHENT-CORE-2026";
-    try {
-      // 1. Thêm Task vào Firestore
-      const docRef = await this.db.collection("workspaces").doc(wsCode)
-        .collection("tasks").add({
-          ...taskData,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-      // 2. SYNERGY: Tự động thêm sự kiện Deadline vào Calendar Cloud
-      if (taskData.deadline) {
-        await this.db.collection("workspaces").doc(wsCode)
-          .collection("events").add({
-            title: `Deadline: ${taskData.title}`,
-            date: taskData.deadline,
-            time: "23:59",
-            type: "deadline",
+    // 2. Lưu Firestore
+    if (this.db) {
+      try {
+        await this.db.collection("workspaces").doc(this.currentWsCode)
+          .collection("channels").doc(channelId).collection("messages").add({
+            sender: msg.sender,
+            senderId: this.currentUserId || window.store.state.currentUser.id,
+            avt: msg.avt,
+            text: msg.text,
+            isBot: msg.isBot || false,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi gửi chat Firestore:", err);
       }
+    }
 
-      // 3. SYNERGY: Tự động bắn thông báo vào kênh Chat #general
-      await this.sendChatMessage("general", `📋 **[Todo Bot]** ${window.store.state.currentUser.name} vừa giao việc mới: **${taskData.title}** (Phụ trách: ${taskData.assignee} • Hạn: ${taskData.deadline})`, "harmony", {
-        name: "Todo System",
-        avatar: "📋",
-        id: "bot-todo"
-      });
-
-      return docRef.id;
-    } catch (err) {
-      console.error("[Cloud Task] Lỗi tạo task:", err);
-      return false;
+    // 3. Lưu Supabase
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_messages').insert([{
+          id: msg.id,
+          user_id: this.currentUserId || window.store.state.currentUser.id,
+          workspace_code: this.currentWsCode,
+          channel: channelId,
+          sender: msg.sender,
+          avt: msg.avt,
+          text: msg.text,
+          is_bot: !!msg.isBot
+        }]);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi gửi chat Supabase:", err);
+      }
     }
   },
 
-  // Cập nhật trạng thái Task (Kéo thả Kanban) lên Cloud
+  async pushTask(task) {
+    // 1. Lưu Local
+    window.store.addTask(task);
+
+    // 2. Lưu Firestore
+    if (this.db) {
+      try {
+        await this.db.collection("workspaces").doc(this.currentWsCode)
+          .collection("tasks").doc(task.id).set({
+            ...task,
+            userId: this.currentUserId || window.store.state.currentUser.id,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi lưu task Firestore:", err);
+      }
+    }
+
+    // 3. Lưu Supabase
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_tasks').upsert([{
+          id: task.id,
+          user_id: this.currentUserId || window.store.state.currentUser.id,
+          workspace_code: this.currentWsCode,
+          title: task.title,
+          desc: task.desc || "",
+          status: task.status || "todo",
+          priority: task.priority || "normal",
+          assignee: task.assignee || "",
+          deadline: task.deadline || "",
+          remark: task.remark || ""
+        }]);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi lưu task Supabase:", err);
+      }
+    }
+  },
+
   async updateTaskStatus(taskId, newStatus) {
-    if (!this.isLive || !this.db) return false;
+    window.store.updateTaskStatus(taskId, newStatus);
 
-    const wsCode = this.currentWsCode || "MHENT-CORE-2026";
-    try {
-      await this.db.collection("workspaces").doc(wsCode)
-        .collection("tasks").doc(taskId).update({
-          status: newStatus,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      return true;
-    } catch (err) {
-      console.error("[Cloud Task Status] Lỗi cập nhật:", err);
-      return false;
+    if (this.db) {
+      try {
+        await this.db.collection("workspaces").doc(this.currentWsCode)
+          .collection("tasks").doc(taskId).set({
+            status: newStatus,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi cập nhật task Firestore:", err);
+      }
+    }
+
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_tasks').update({ status: newStatus }).eq('id', taskId);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi cập nhật task Supabase:", err);
+      }
     }
   },
 
-  // Gửi Email nội bộ lên Cloud
-  async sendEmail(mailData) {
-    if (!this.isLive || !this.db) return false;
+  async deleteTask(taskId) {
+    window.store.deleteTask(taskId);
 
-    const wsCode = this.currentWsCode || "MHENT-CORE-2026";
-    try {
-      await this.db.collection("workspaces").doc(wsCode)
-        .collection("emails").add({
-          ...mailData,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    if (this.db) {
+      try {
+        await this.db.collection("workspaces").doc(this.currentWsCode)
+          .collection("tasks").doc(taskId).delete();
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi xóa task Firestore:", err);
+      }
+    }
 
-      // SYNERGY: Thông báo có thư mới vào kênh chat #general
-      await this.sendChatMessage("general", `✉️ **[Mail Bot]** Thư mới từ **${mailData.from}**: *"${mailData.subject}"*`, "echo", {
-        name: "Mail System",
-        avatar: "✉️",
-        id: "bot-mail"
-      });
-
-      return true;
-    } catch (err) {
-      console.error("[Cloud Email] Lỗi gửi email:", err);
-      return false;
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_tasks').delete().eq('id', taskId);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi xóa task Supabase:", err);
+      }
     }
   },
 
-  // Thêm sự kiện Lịch lên Cloud
-  async createCalendarEvent(eventData) {
-    if (!this.isLive || !this.db) return false;
+  async pushMail(mail) {
+    window.store.addMail(mail);
 
-    const wsCode = this.currentWsCode || "MHENT-CORE-2026";
-    try {
-      await this.db.collection("workspaces").doc(wsCode)
-        .collection("events").add({
-          ...eventData,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      return true;
-    } catch (err) {
-      console.error("[Cloud Event] Lỗi tạo sự kiện:", err);
-      return false;
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_mails').insert([{
+          id: mail.id,
+          user_id: this.currentUserId || window.store.state.currentUser.id,
+          workspace_code: this.currentWsCode,
+          from_name: mail.from,
+          from_email: mail.fromEmail,
+          subject: mail.subject,
+          body: mail.body,
+          starred: !!mail.starred,
+          read: !!mail.read
+        }]);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi lưu mail Supabase:", err);
+      }
     }
   },
 
-  // Thông báo phòng họp Meet vào kênh chat
-  async broadcastMeeting(roomName, fullRoomUrl) {
-    if (!this.isLive || !this.db) return false;
+  async deleteMail(mailId) {
+    window.store.deleteMail(mailId);
 
-    const user = window.store.state.currentUser;
-    await this.sendChatMessage("general", `📹 **[Meet Bot]** ${user.name} vừa mở phòng họp **#${roomName}**! [Bấm vào đây để tham gia ngay](${fullRoomUrl})`, "harmony", {
-      name: "Meet System",
-      avatar: "📹",
-      id: "bot-meet"
-    });
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_mails').delete().eq('id', mailId);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi xóa mail Supabase:", err);
+      }
+    }
+  },
+
+  async pushFile(file) {
+    window.store.addFile(file);
+
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_files').insert([{
+          id: file.id,
+          user_id: this.currentUserId || window.store.state.currentUser.id,
+          workspace_code: this.currentWsCode,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          icon: file.icon
+        }]);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi lưu file Supabase:", err);
+      }
+    }
+  },
+
+  async deleteFile(fileId) {
+    window.store.deleteFile(fileId);
+
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_files').delete().eq('id', fileId);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi xóa file Supabase:", err);
+      }
+    }
   }
 };

@@ -1,10 +1,12 @@
 /**
- * MHENT WORKSPACE - SPECIAL TOOLS MODULE (QR, WIKI & MEDIA)
+ * MHENT WORKSPACE - SPECIAL TOOLS MODULE (REAL QR GENERATOR, WIKI & MEDIA)
  */
 window.ToolsModule = {
+  qrInstance: null,
+
   init() {
     this.bindEvents();
-    this.generateQrCode("MHENT-EVENT-CHECKIN-2026");
+    this.generateQrCode("https://workspace.mhentuniverse.com");
   },
 
   bindEvents() {
@@ -26,7 +28,8 @@ window.ToolsModule = {
     const qrGenBtn = document.getElementById("btn-gen-qr");
     if (qrGenBtn) {
       qrGenBtn.addEventListener("click", () => {
-        const text = document.getElementById("qr-input-text").value || "MHENT-CHECKIN";
+        const input = document.getElementById("qr-input-text");
+        const text = (input && input.value.trim()) ? input.value.trim() : "https://workspace.mhentuniverse.com";
         this.generateQrCode(text);
       });
     }
@@ -39,40 +42,74 @@ window.ToolsModule = {
 
   generateQrCode(text) {
     const qrCanvas = document.getElementById("qr-display-canvas");
-    if (!qrCanvas) return;
+    const qrContainer = qrCanvas ? qrCanvas.parentElement : null;
+    const qrResultText = document.getElementById("qr-code-content-text");
 
-    const ctx = qrCanvas.getContext("2d");
-    ctx.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+    if (qrResultText) qrResultText.textContent = text;
 
-    // Draw dark background & stylish simulated QR pattern
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
-
-    ctx.fillStyle = "#0f172a";
-    // Corners
-    ctx.fillRect(20, 20, 50, 50);
-    ctx.clearRect(30, 30, 30, 30);
-    ctx.fillRect(36, 36, 18, 18);
-
-    ctx.fillRect(170, 20, 50, 50);
-    ctx.clearRect(180, 30, 30, 30);
-    ctx.fillRect(186, 36, 18, 18);
-
-    ctx.fillRect(20, 170, 50, 50);
-    ctx.clearRect(30, 180, 30, 30);
-    ctx.fillRect(36, 186, 18, 18);
-
-    // Simulated QR dots
-    for (let x = 30; x < 210; x += 14) {
-      for (let y = 30; y < 210; y += 14) {
-        if (Math.random() > 0.45) {
-          ctx.fillRect(x, y, 10, 10);
+    // Check if QRCode library is available
+    if (typeof QRCode !== "undefined" && qrContainer) {
+      let qrDiv = document.getElementById("qrcode-rendered-holder");
+      if (!qrDiv) {
+        qrDiv = document.createElement("div");
+        qrDiv.id = "qrcode-rendered-holder";
+        qrDiv.style.display = "flex";
+        qrDiv.style.justifyContent = "center";
+        qrDiv.style.alignItems = "center";
+        qrDiv.style.padding = "10px";
+        qrDiv.style.background = "#ffffff";
+        qrDiv.style.borderRadius = "var(--radius-md)";
+        
+        if (qrCanvas) {
+          qrCanvas.style.display = "none";
+          qrContainer.insertBefore(qrDiv, qrCanvas);
         }
+      }
+
+      qrDiv.innerHTML = "";
+      try {
+        new QRCode(qrDiv, {
+          text: text,
+          width: 200,
+          height: 200,
+          colorDark: "#090D16",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        return;
+      } catch (e) {
+        console.warn("Lỗi QRCode JS, fallback canvas:", e);
       }
     }
 
-    const qrResultText = document.getElementById("qr-code-content-text");
-    if (qrResultText) qrResultText.textContent = text;
+    // Canvas Fallback
+    if (qrCanvas) {
+      qrCanvas.style.display = "block";
+      const ctx = qrCanvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(20, 20, 50, 50);
+      ctx.clearRect(30, 30, 30, 30);
+      ctx.fillRect(36, 36, 18, 18);
+
+      ctx.fillRect(170, 20, 50, 50);
+      ctx.clearRect(180, 30, 30, 30);
+      ctx.fillRect(186, 36, 18, 18);
+
+      ctx.fillRect(20, 170, 50, 50);
+      ctx.clearRect(30, 180, 30, 30);
+      ctx.fillRect(36, 186, 18, 18);
+
+      for (let x = 30; x < 210; x += 14) {
+        for (let y = 30; y < 210; y += 14) {
+          if (Math.random() > 0.4) {
+            ctx.fillRect(x, y, 10, 10);
+          }
+        }
+      }
+    }
   },
 
   simulateMediaConvert() {

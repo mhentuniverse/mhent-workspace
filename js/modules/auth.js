@@ -1,5 +1,6 @@
 /**
  * MHENT WORKSPACE - FIREBASE AUTH & ORG ACCOUNT MODULE (AUTH.JS)
+ * Quản lý phiên đăng nhập Firebase, Hồ sơ Firestore & Kích hoạt Gatekeeper
  */
 window.AuthModule = {
   auth: null,
@@ -15,6 +16,7 @@ window.AuthModule = {
   initFirebase() {
     if (typeof firebase === "undefined") {
       console.warn("Firebase SDK chưa được tải, sử dụng chế độ Local Demo.");
+      this.checkGatekeeper();
       return;
     }
 
@@ -31,11 +33,25 @@ window.AuthModule = {
         if (user) {
           this.handleFirebaseUserLogin(user);
         } else {
-          console.log("Chưa đăng nhập Firebase Auth.");
+          this.checkGatekeeper();
         }
       });
     } catch (err) {
       console.warn("Lỗi khởi tạo Firebase Auth:", err);
+      this.checkGatekeeper();
+    }
+  },
+
+  checkGatekeeper() {
+    const gatekeeper = document.getElementById("auth-gatekeeper-overlay");
+    const isAuth = (this.auth && this.auth.currentUser) || window.store.state.isLoggedIn;
+    
+    if (gatekeeper) {
+      if (!isAuth) {
+        gatekeeper.style.display = "flex";
+      } else {
+        gatekeeper.style.display = "none";
+      }
     }
   },
 
@@ -49,6 +65,12 @@ window.AuthModule = {
         const pass = document.getElementById("login-password").value;
         this.login(username, pass);
       });
+    }
+
+    // Google Login
+    const googleBtn = document.getElementById("btn-google-login");
+    if (googleBtn) {
+      googleBtn.addEventListener("click", () => this.loginWithGoogle());
     }
 
     // Form Register / Create Account
@@ -106,35 +128,48 @@ window.AuthModule = {
     if (!usernameOrEmail || !password) return;
     const fullEmail = this.formatOrgEmail(usernameOrEmail);
 
-    window.UI.showToast("Đang xác thực tài khoản...", `Email: ${fullEmail}`, "info");
+    window.UI.showToast("Đang xác thực căn cước...", `Email: ${fullEmail}`, "info");
 
     if (!this.initialized || !this.auth) {
       // Fallback Local Mock Login
-      window.store.state.currentUser = {
+      window.store.setCurrentUser({
         id: "user-" + Date.now(),
         name: usernameOrEmail.split("@")[0].toUpperCase(),
         email: fullEmail,
         role: "master",
         avatar: "👑",
         status: "online"
-      };
-      window.store.save();
-      this.updateUserUI();
+      }, true);
+      
+      this.checkGatekeeper();
       window.UI.closeModal("modal-auth");
-      window.UI.showToast("Đăng nhập thành công (Local Mode)! 🎉", `Xin chào ${window.store.state.currentUser.name}`, "success");
+      window.UI.showToast("Đăng nhập thành công (Demo Mode)! 🎉", `Xin chào ${window.store.state.currentUser.name}`, "success");
       return;
     }
 
     try {
-      const userCredential = await this.auth.signInWithEmailAndPassword(fullEmail, password);
+      await this.auth.signInWithEmailAndPassword(fullEmail, password);
       window.UI.closeModal("modal-auth");
-      window.UI.showToast("Đăng nhập Firebase thành công! 🔐", `Email tổ chức: ${fullEmail}`, "success");
+      window.UI.showToast("Đăng nhập Firebase thành công! 🔐", `Email: ${fullEmail}`, "success");
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
       let errMsg = "Vui lòng kiểm tra lại tên đăng nhập hoặc mật khẩu.";
       if (error.code === "auth/user-not-found") errMsg = "Tài khoản chưa tồn tại. Hãy bấm Tạo tài khoản mới.";
       if (error.code === "auth/wrong-password") errMsg = "Mật khẩu không chính xác.";
       window.UI.showToast("Đăng nhập thất bại!", errMsg, "error");
+    }
+  },
+
+  async loginWithGoogle() {
+    if (!this.auth) return;
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await this.auth.signInWithPopup(provider);
+      window.UI.closeModal("modal-auth");
+      window.UI.showToast("Đăng nhập Google thành công! 🚀", "Đã kết nối tài khoản", "success");
+    } catch (error) {
+      console.error("Lỗi Google Sign In:", error);
+      window.UI.showToast("Đăng nhập Google thất bại", error.message, "error");
     }
   },
 
@@ -145,16 +180,16 @@ window.AuthModule = {
     window.UI.showToast("Đang khởi tạo tài khoản tổ chức...", `Đuôi: ${fullEmail}`, "info");
 
     if (!this.initialized || !this.auth) {
-      window.store.state.currentUser = {
+      window.store.setCurrentUser({
         id: "user-" + Date.now(),
         name: fullName,
         email: fullEmail,
         role: role,
         avatar: role === "master" ? "👑" : "💻",
         status: "online"
-      };
-      window.store.save();
-      this.updateUserUI();
+      }, true);
+      
+      this.checkGatekeeper();
       window.UI.closeModal("modal-auth");
       window.UI.showToast("Tạo tài khoản thành công! 🎉", fullEmail, "success");
       return;
@@ -171,9 +206,9 @@ window.AuthModule = {
           displayName: fullName,
           email: fullEmail,
           role: role,
-          avatar: role === "master" ? "👑" : "💻",
+          avatar: role === "master" ? "👑" : (role === "admin" ? "🛡️" : "💻"),
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        }, { merge: true });
       }
 
       await user.updateProfile({
@@ -188,6 +223,25 @@ window.AuthModule = {
       if (error.code === "auth/email-already-in-use") errMsg = "Tên tài khoản này đã được sử dụng.";
       if (error.code === "auth/weak-password") errMsg = "Mật khẩu cần ít nhất 6 ký tự.";
       window.UI.showToast("Không thể tạo tài khoản!", errMsg, "error");
+    }
+  },
+
+  useDemoGuest() {
+    window.store.setCurrentUser({
+      id: "guest-" + Date.now().toString().slice(-4),
+      name: "Khách Trải Nghiệm",
+      email: "guest@mhentuniverse.internal",
+      role: "guest",
+      avatar: "👤",
+      status: "online"
+    }, true);
+    
+    this.checkGatekeeper();
+    window.UI.closeModal("modal-auth");
+    window.UI.showToast("Đã vào Chế Độ Khách! 👀", "Dữ liệu được lưu trữ tạm trên mây", "info");
+    
+    if (window.CloudModule) {
+      window.CloudModule.setUser(window.store.state.currentUser.id, window.store.state.currentUser);
     }
   },
 
@@ -209,59 +263,65 @@ window.AuthModule = {
           const d = doc.data();
           userData.name = d.displayName || userData.name;
           userData.role = d.role || "member";
-          userData.avatar = d.avatar || (userData.role === "master" ? "👑" : "💻");
+          userData.avatar = d.avatar || (userData.role.includes("admin") || userData.role.includes("master") ? "👑" : "💻");
         }
       } catch (e) {
         console.warn("Không thể tải Firestore user profile, dùng mặc định:", e);
       }
     }
 
-    window.store.state.currentUser = userData;
-    window.store.save();
+    window.store.setCurrentUser(userData, true);
     this.updateUserUI();
+    this.checkGatekeeper();
+
+    // Đồng bộ sang Supabase & Firestore Cloud theo UID của user
+    if (window.CloudModule) {
+      window.CloudModule.setUser(firebaseUser.uid, userData);
+    }
   },
 
   async logout() {
     if (this.auth) {
       await this.auth.signOut();
     }
-    window.store.state.currentUser = {
+    window.store.setCurrentUser({
       id: "guest",
       name: "Khách Vãng Lai",
       email: "guest@mhentuniverse.internal",
-      role: "member",
+      role: "guest",
       avatar: "👤",
       status: "offline"
-    };
-    window.store.save();
+    }, false);
+    
     this.updateUserUI();
-    window.UI.showToast("Đã đăng xuất!", "Bạn đang ở chế độ khách.", "info");
+    this.checkGatekeeper();
+    window.UI.showToast("Đã đăng xuất!", "Vui lòng đăng nhập lại để sử dụng workspace.", "info");
   },
 
   updateUserUI() {
-    const user = window.store.state.currentUser;
-    const ws = window.store.state.workspace;
+    const user = window.store.state.currentUser || {};
+    const ws = window.store.state.workspace || {};
 
     const nameEls = document.querySelectorAll(".user-display-name");
-    nameEls.forEach(el => el.textContent = user.name);
+    nameEls.forEach(el => el.textContent = user.name || "Master");
 
     const emailEls = document.querySelectorAll(".user-display-email");
-    emailEls.forEach(el => el.textContent = user.email);
+    emailEls.forEach(el => el.textContent = user.email || "");
 
     const roleEls = document.querySelectorAll(".user-display-role");
     roleEls.forEach(el => {
       el.textContent = (user.role || "MEMBER").toUpperCase();
-      el.className = `badge ${user.role === 'master' ? 'badge-primary' : 'badge-purple'} user-display-role`;
+      el.className = `badge ${user.role === 'master' || user.role === 'admin' ? 'badge-primary' : 'badge-purple'} user-display-role`;
     });
 
     const avtEls = document.querySelectorAll(".user-display-avatar");
     avtEls.forEach(el => el.textContent = user.avatar || "👤");
 
     const wsNameEl = document.querySelector(".workspace-name");
-    if (wsNameEl) wsNameEl.textContent = ws.name;
+    if (wsNameEl) wsNameEl.textContent = ws.name || "MHEnt Universe HQ";
 
     const wsCodeEl = document.querySelector(".workspace-code");
-    if (wsCodeEl) wsCodeEl.textContent = ws.code;
+    if (wsCodeEl) wsCodeEl.textContent = ws.code || "MHENT-CORE-2026";
   },
 
   toggleRole() {
@@ -287,11 +347,11 @@ window.AuthModule = {
     this.updateUserUI();
 
     // Re-bind Cloud Realtime Stream to new Workspace
-    if (window.CloudModule && window.CloudModule.isLive) {
+    if (window.CloudModule) {
       window.CloudModule.bindWorkspace(cleanCode);
     }
 
     window.UI.closeModal("modal-team-switcher");
-    window.UI.showToast("Gia nhập Team Cloud thành công! ⚡", `Không gian Firestore: ${cleanCode}`, "success");
+    window.UI.showToast("Gia nhập Team Cloud thành công! ⚡", `Không gian làm việc: ${cleanCode}`, "success");
   }
 };

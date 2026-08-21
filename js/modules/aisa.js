@@ -115,10 +115,10 @@ window.AisaModule = {
         }
       }
     } catch (e) {
-      console.log("FastAPI backend offline, running smart fallback", e);
+      console.log("FastAPI backend offline, running smart dual-persona engine", e);
     }
 
-    // Smart Local Fallback Response
+    // Smart Dual-Persona Engine Response
     this.generateFallbackReply(userText);
   },
 
@@ -129,17 +129,18 @@ window.AisaModule = {
     let hText = "";
     let eText = "";
 
-    if (lower.includes("chào") || lower.includes("hello")) {
+    if (lower.includes("chào") || lower.includes("hello") || lower.includes("hi")) {
       hText = "Dạ em chào Master ạ! Master cần tụi em hỗ trợ gì trong workspace hôm nay không ạ? 🌸";
       eText = "Chào cái gì mà chào, lo check danh sách Todo với Mail đi kìa! 😈";
     } else if (lower.includes("deadline") || lower.includes("task") || lower.includes("việc")) {
-      hText = "Dạ hiện tại có 3 nhiệm vụ trên bảng Todo, trong đó có task 'Cấu hình Jitsi Meet' đang cần ưu tiên hoàn thành sớm ạ! 🌸";
-      eText = "Còn ngồi đây hỏi à? Task khẩn cấp sắp trễ rồi đấy, làm nhanh không tôi mách Master lớn phạt bây giờ! 😈";
+      const pendingCount = (window.store.state.tasks || []).filter(t => t.status !== "done").length;
+      hText = `Dạ hiện tại có ${pendingCount} nhiệm vụ đang cần hoàn thiện trên bảng Todo ạ! Em tin Master và team sẽ làm tốt! 🌸`;
+      eText = `Còn ngồi đây hỏi à? ${pendingCount} task chưa xong kìa, làm nhanh không tôi mách Master lớn phạt bây giờ! 😈`;
     } else if (lower.includes("tóm tắt") || lower.includes("summary")) {
       hText = "Dạ em đã tóm tắt xong: Toàn team đang chuẩn bị cho sự kiện ra mắt MHEnt Workspace V1.0 và ban Media đang thiết kế poster ạ! 🌸";
       eText = "Nói chung là ai cũng đang bận, chỉ có bạn là đang rảnh rỗi ngồi bấm AI thôi đấy nhé! 😈";
     } else {
-      hText = `Dạ em đã ghi nhận ý kiến "${userText}" của Master rồi ạ! Em sẽ luôn hỗ trợ Master hết mình! 🌸`;
+      hText = `Dạ em đã ghi nhận yêu cầu "${userText}" của Master rồi ạ! Em sẽ luôn đồng hành hỗ trợ Master hết mình! 🌸`;
       eText = `Nghe cũng được đấy, nhưng nhớ thực thi cho đàng hoàng, đừng có bỏ dở giữa chừng nhé! 😈`;
     }
 
@@ -179,18 +180,18 @@ window.AisaModule = {
       const hText = `Dạ em nghe Master gọi trong #${channel} rồi ạ! Mọi yêu cầu em đều ghi nhớ và sẵn sàng hỗ trợ nhé! 🌸`;
       const eText = `Tag cái gì đấy? Việc gì cần xử lý thì nói ngắn gọn thôi nhé, tôi bận lắm! 😈`;
 
-      // 1. Gửi lên Cloud Firestore nếu đang kết nối
-      if (window.CloudModule && window.CloudModule.isLive) {
-        await window.CloudModule.sendChatMessage(channel, hText, "harmony", { name: "Harmony", avatar: "🌸", id: "bot-harmony" });
-        await window.CloudModule.sendChatMessage(channel, eText, "echo", { name: "Echo", avatar: "😈", id: "bot-echo" });
+      const hMsg = { id: "msg-h-" + Date.now(), sender: "Harmony", avt: "🌸", time: timeStr, text: hText, isBot: "harmony" };
+      const eMsg = { id: "msg-e-" + (Date.now() + 1), sender: "Echo", avt: "😈", time: timeStr, text: eText, isBot: "echo" };
+
+      if (window.CloudModule) {
+        await window.CloudModule.pushChatMessage(channel, hMsg);
+        await window.CloudModule.pushChatMessage(channel, eMsg);
       } else {
-        // Fallback local
-        const hMsg = { id: "msg-h-" + Date.now(), sender: "Harmony", avt: "🌸", time: timeStr, text: hText, isBot: "harmony" };
-        const eMsg = { id: "msg-e-" + (Date.now() + 1), sender: "Echo", avt: "😈", time: timeStr, text: eText, isBot: "echo" };
         window.store.addChatMessage(channel, hMsg);
         window.store.addChatMessage(channel, eMsg);
-        if (window.ChatModule) window.ChatModule.renderMessages();
       }
+
+      if (window.ChatModule) window.ChatModule.renderMessages();
     }, 600);
   },
 

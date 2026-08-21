@@ -1,5 +1,5 @@
 /**
- * MHENT WORKSPACE - UI CONTROLLER & COMMAND PALETTE (UI.JS)
+ * MHENT WORKSPACE - UI CONTROLLER, URL ROUTER & COMMAND PALETTE (UI.JS)
  */
 window.UI = {
   init() {
@@ -9,7 +9,37 @@ window.UI = {
     this.bindAisaDrawer();
     this.bindThemeToggle();
     this.updateTheme();
-    this.switchApp(window.store.state.activeApp || "chat");
+    this.initRouting();
+  },
+
+  initRouting() {
+    const path = window.location.pathname.replace(/^\/+/, '').split('/')[0];
+    const hash = window.location.hash.replace(/^#+/, '');
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryApp = urlParams.get('app');
+
+    const initialApp = queryApp || path || hash || window.store.state.activeApp || "chat";
+    const validApps = ["chat", "mail", "meet", "todo", "drive", "calendar", "tools", "aisa"];
+
+    if (validApps.includes(initialApp)) {
+      if (initialApp === "aisa") {
+        this.switchApp("chat", false);
+        window.store.setAisaOpen(true);
+        this.updateAisaDrawerState();
+      } else {
+        this.switchApp(initialApp, false);
+      }
+    } else {
+      this.switchApp("chat", false);
+    }
+
+    // Lắng nghe nút Back/Forward của trình duyệt
+    window.addEventListener("popstate", (event) => {
+      const app = (event.state && event.state.app) || window.location.pathname.replace(/^\/+/, '') || window.location.hash.replace(/^#+/, '') || "chat";
+      if (validApps.includes(app)) {
+        this.switchApp(app, false);
+      }
+    });
   },
 
   bindRailNavigation() {
@@ -17,7 +47,7 @@ window.UI = {
     railBtns.forEach(btn => {
       btn.addEventListener("click", () => {
         const appId = btn.getAttribute("data-app");
-        this.switchApp(appId);
+        this.switchApp(appId, true);
       });
     });
 
@@ -25,13 +55,34 @@ window.UI = {
     mobileBtns.forEach(btn => {
       btn.addEventListener("click", () => {
         const appId = btn.getAttribute("data-app");
-        this.switchApp(appId);
+        this.switchApp(appId, true);
       });
     });
   },
 
-  switchApp(appId) {
+  switchApp(appId, updateHistory = true) {
+    const validApps = ["chat", "mail", "meet", "todo", "drive", "calendar", "tools", "aisa"];
+    if (!validApps.includes(appId)) appId = "chat";
+
+    if (appId === "aisa") {
+      window.store.setAisaOpen(true);
+      this.updateAisaDrawerState();
+      return;
+    }
+
     window.store.setActiveApp(appId);
+
+    // URL ROUTING VIA HTML5 HISTORY API (Không làm reload trang)
+    if (updateHistory) {
+      const targetPath = `/${appId}`;
+      if (window.location.pathname !== targetPath && window.location.hash !== `#${appId}`) {
+        try {
+          history.pushState({ app: appId }, "", targetPath);
+        } catch (e) {
+          window.location.hash = `#${appId}`;
+        }
+      }
+    }
 
     // Update rail active states
     document.querySelectorAll(".rail-btn[data-app]").forEach(btn => {
@@ -189,13 +240,13 @@ window.UI = {
     if (!resultsContainer) return;
 
     const commands = [
-      { id: "chat", title: "Mở MHEnt Chat", meta: "Chuyển sang ứng dụng tin nhắn", icon: "💬", action: () => this.switchApp("chat") },
-      { id: "mail", title: "Mở MHEnt Mail", meta: "Kiểm tra hòm thư nội bộ", icon: "✉️", action: () => this.switchApp("mail") },
-      { id: "meet", title: "Tạo phòng họp Meet", meta: "Bắt đầu cuộc gọi video Jitsi", icon: "📹", action: () => this.switchApp("meet") },
-      { id: "todo", title: "Mở Bảng Todo", meta: "Xem tiến độ các công việc", icon: "📋", action: () => this.switchApp("todo") },
-      { id: "drive", title: "Mở MHEnt Drive", meta: "Duyệt kho lưu trữ tài liệu", icon: "📁", action: () => this.switchApp("drive") },
-      { id: "calendar", title: "Mở Lịch Workspace", meta: "Xem lịch trình sự kiện", icon: "📅", action: () => this.switchApp("calendar") },
-      { id: "tools", title: "Mở Quick Tools", meta: "QR Check-in, Wiki & Media Tools", icon: "🛠️", action: () => this.switchApp("tools") },
+      { id: "chat", title: "Mở MHEnt Chat", meta: "Chuyển sang ứng dụng tin nhắn (/chat)", icon: "💬", action: () => this.switchApp("chat", true) },
+      { id: "mail", title: "Mở MHEnt Mail", meta: "Kiểm tra hòm thư nội bộ (/mail)", icon: "✉️", action: () => this.switchApp("mail", true) },
+      { id: "meet", title: "Tạo phòng họp Meet", meta: "Bắt đầu cuộc gọi video Jitsi (/meet)", icon: "📹", action: () => this.switchApp("meet", true) },
+      { id: "todo", title: "Mở Bảng Todo", meta: "Xem tiến độ các công việc (/todo)", icon: "📋", action: () => this.switchApp("todo", true) },
+      { id: "drive", title: "Mở MHEnt Drive", meta: "Duyệt kho lưu trữ tài liệu (/drive)", icon: "📁", action: () => this.switchApp("drive", true) },
+      { id: "calendar", title: "Mở Lịch Workspace", meta: "Xem lịch trình sự kiện (/calendar)", icon: "📅", action: () => this.switchApp("calendar", true) },
+      { id: "tools", title: "Mở Quick Tools", meta: "QR Check-in, Wiki & Media Tools (/tools)", icon: "🛠️", action: () => this.switchApp("tools", true) },
       { id: "aisa", title: "Bật/Tắt AISA Copilot", meta: "Trợ lý AI Harmony & Echo", icon: "🌸", action: () => {
         window.store.setAisaOpen(!window.store.state.aisaOpen);
         this.updateAisaDrawerState();
@@ -263,32 +314,129 @@ window.UI = {
   },
 
   showToast(title, desc = "", type = "info") {
-    const container = document.getElementById("toast-container");
-    if (!container) return;
+    let container = document.getElementById('mhent-toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'mhent-toast-container';
+      document.body.appendChild(container);
+    }
 
-    const toast = document.createElement("div");
-    toast.className = `workspace-toast ${type}`;
+    const toast = document.createElement('div');
+    toast.className = `mhent-toast ${type}`;
 
-    let icon = "ℹ️";
-    if (type === "success") icon = "✅";
-    if (type === "error") icon = "⚠️";
-    if (type === "warning") icon = "🔔";
+    let iconSvg = `<svg viewBox="0 0 24 24" width="24" height="24" stroke="#3b82f6" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+    if (type === 'success') {
+      iconSvg = `<svg viewBox="0 0 24 24" width="24" height="24" stroke="#10b981" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+    } else if (type === 'error') {
+      iconSvg = `<svg viewBox="0 0 24 24" width="24" height="24" stroke="#ef4444" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+    } else if (type === 'warning') {
+      iconSvg = `<svg viewBox="0 0 24 24" width="24" height="24" stroke="#f59e0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+    }
 
     toast.innerHTML = `
-      <div class="toast-icon">${icon}</div>
-      <div class="toast-content">
-        <div class="toast-title">${title}</div>
-        ${desc ? `<div class="toast-desc">${desc}</div>` : ""}
+      <div class="mhent-toast-icon">${iconSvg}</div>
+      <div class="mhent-toast-content">
+        <div class="mhent-toast-title">${title}</div>
+        ${desc ? `<div class="mhent-toast-desc">${desc}</div>` : ''}
       </div>
     `;
 
     container.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.opacity = "0";
-      toast.style.transform = "translateY(-10px)";
-      toast.style.transition = "all 0.3s ease";
-      setTimeout(() => toast.remove(), 300);
-    }, 4000);
+      toast.style.animation = "toastFadeOut 0.35s forwards";
+      setTimeout(() => toast.remove(), 350);
+    }, 3800);
+  },
+
+  toggleMobileSidebar(forceState) {
+    const sidebar = document.getElementById("context-sidebar");
+    if (sidebar) {
+      if (typeof forceState === "boolean") {
+        sidebar.classList.toggle("open", forceState);
+      } else {
+        sidebar.classList.toggle("open");
+      }
+    }
   }
 };
+
+// Global shortcuts compatible with MHEnt Universe
+window.showToast = function(title, message, type = 'info') {
+  window.UI.showToast(title, message, type);
+};
+
+window.showPopup = function(message, isError = false) {
+  const existing = document.querySelectorAll('.mhent-ui-overlay');
+  existing.forEach(el => el.remove());
+
+  const overlay = document.createElement('div');
+  overlay.className = 'mhent-ui-overlay';
+  overlay.id = 'mhent-active-popup';
+
+  const svgSuccess = `<svg viewBox="0 0 24 24" width="44" height="44" stroke="#10b981" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+  const svgError = `<svg viewBox="0 0 24 24" width="44" height="44" stroke="#ef4444" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+
+  overlay.innerHTML = `
+    <div class="mhent-ui-box ${isError ? 'error' : 'success'}">
+      <div class="mhent-ui-icon">${isError ? svgError : svgSuccess}</div>
+      <h3 class="mhent-ui-title">${isError ? "Ối, Có Lỗi Xảy Ra!" : "Thông Báo"}</h3>
+      <p class="mhent-ui-msg">${message}</p>
+      <button class="mhent-ui-btn-primary" onclick="window.closePopup()">Tuyệt Vời</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.classList.add('show'), 10);
+};
+
+window.showConfirmPopup = function(title, message, onConfirm) {
+  const existing = document.querySelectorAll('.mhent-ui-overlay');
+  existing.forEach(el => el.remove());
+
+  const overlay = document.createElement('div');
+  overlay.className = 'mhent-ui-overlay';
+  overlay.id = 'mhent-active-confirm';
+
+  const svgWarning = `<svg viewBox="0 0 24 24" width="44" height="44" stroke="#f59e0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+
+  overlay.innerHTML = `
+    <div class="mhent-ui-box warning">
+      <div class="mhent-ui-icon">${svgWarning}</div>
+      <h3 class="mhent-ui-title">${title}</h3>
+      <p class="mhent-ui-msg">${message}</p>
+      <div class="mhent-ui-actions">
+        <button class="mhent-ui-btn-outline" id="mhent-cancel">Hủy bỏ</button>
+        <button class="mhent-ui-btn-primary" id="mhent-accept">Xác nhận</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.classList.add('show'), 10);
+
+  document.getElementById('mhent-cancel').onclick = () => window.closeConfirmPopup();
+  document.getElementById('mhent-accept').onclick = () => {
+    window.closeConfirmPopup();
+    if (typeof onConfirm === 'function') onConfirm();
+  };
+};
+
+window.closePopup = function() {
+  const popup = document.getElementById('mhent-active-popup');
+  if (popup) {
+    popup.classList.remove('show');
+    popup.classList.add('out');
+    setTimeout(() => popup.remove(), 350);
+  }
+};
+
+window.closeConfirmPopup = function() {
+  const confirm = document.getElementById('mhent-active-confirm');
+  if (confirm) {
+    confirm.classList.remove('show');
+    confirm.classList.add('out');
+    setTimeout(() => confirm.remove(), 350);
+  }
+};
+

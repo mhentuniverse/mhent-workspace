@@ -1,5 +1,5 @@
 /**
- * MHENT WORKSPACE - MAIL MODULE (CLOUD ENABLED)
+ * MHENT WORKSPACE - MAIL MODULE (SUPABASE & CLOUD ENABLED)
  */
 window.MailModule = {
   init() {
@@ -37,10 +37,15 @@ window.MailModule = {
     const mails = window.store.state.mails || [];
     const activeId = window.store.state.activeMailId;
 
+    if (mails.length === 0) {
+      listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">Hộp thư trống</div>`;
+      return;
+    }
+
     listEl.innerHTML = mails.map(m => `
       <div class="mail-item-row ${m.id === activeId ? 'active' : ''}" onclick="window.MailModule.selectMail('${m.id}')">
         <div class="mail-item-top">
-          <span class="mail-from">${m.from}</span>
+          <span class="mail-from">${m.starred ? '⭐ ' : ''}${m.from}</span>
           <span class="mail-time">${m.time}</span>
         </div>
         <div class="mail-subject">${m.subject}</div>
@@ -72,7 +77,7 @@ window.MailModule = {
       <div class="mail-reader-header">
         <div>
           <h2 class="mail-reader-subject">${mail.subject}</h2>
-          <div style="font-size: 13px; color: var(--text-muted); display: flex; gap: 10px; align-items: center;">
+          <div style="font-size: 13px; color: var(--text-muted); display: flex; gap: 10px; align-items: center; margin-top: 4px;">
             <span style="font-weight: 800; color: var(--text-high);">${mail.from}</span>
             <span>&lt;${mail.fromEmail}&gt;</span>
             <span>•</span>
@@ -80,11 +85,17 @@ window.MailModule = {
           </div>
         </div>
         <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary btn-icon" title="${mail.starred ? 'Bỏ gắn sao' : 'Gắn dấu sao'}" onclick="window.MailModule.toggleStar('${mail.id}')">
+            ${mail.starred ? '⭐' : '☆'}
+          </button>
           <button class="btn btn-secondary btn-icon" title="Tóm tắt bằng AISA" onclick="window.AisaModule.summarizeMail('${mail.id}')">
             ✨
           </button>
           <button class="btn btn-secondary btn-icon" title="Tạo Task từ thư này" onclick="window.MailModule.convertMailToTask('${mail.id}')">
             📋
+          </button>
+          <button class="btn btn-secondary btn-icon" title="Xóa thư" onclick="window.MailModule.deleteMail('${mail.id}')" style="color: #ef4444;">
+            🗑️
           </button>
         </div>
       </div>
@@ -92,6 +103,25 @@ window.MailModule = {
         ${(mail.body || '').replace(/\n/g, '<br>')}
       </div>
     `;
+  },
+
+  toggleStar(mailId) {
+    window.store.toggleStarMail(mailId);
+    this.renderMailList();
+    this.renderActiveMail();
+  },
+
+  async deleteMail(mailId) {
+    if (confirm("Cậu có chắc muốn xóa thư này không?")) {
+      if (window.CloudModule) {
+        await window.CloudModule.deleteMail(mailId);
+      } else {
+        window.store.deleteMail(mailId);
+      }
+      this.renderMailList();
+      this.renderActiveMail();
+      window.UI.showToast("Đã xóa thư!", "", "info");
+    }
   },
 
   generateAiDraft() {
@@ -116,8 +146,10 @@ window.MailModule = {
     if (!toInput || !subjectInput || !bodyInput) return;
 
     const newMail = {
+      id: "mail-" + Date.now(),
       from: window.store.state.currentUser.name,
       fromEmail: window.store.state.currentUser.email,
+      toEmail: toInput.value,
       subject: subjectInput.value || "(Không có chủ đề)",
       time: "Vừa xong",
       starred: false,
@@ -125,14 +157,12 @@ window.MailModule = {
       body: bodyInput.value
     };
 
-    // 1. Gửi lên Cloud Firestore
-    if (window.CloudModule && window.CloudModule.isLive) {
-      await window.CloudModule.sendEmail(newMail);
+    if (window.CloudModule) {
+      await window.CloudModule.pushMail(newMail);
+    } else {
+      window.store.addMail(newMail);
     }
 
-    // 2. Lưu local
-    newMail.id = "mail-" + Date.now();
-    window.store.addMail(newMail);
     window.store.state.activeMailId = newMail.id;
     window.store.save();
 
@@ -144,7 +174,7 @@ window.MailModule = {
     subjectInput.value = "";
     bodyInput.value = "";
 
-    window.UI.showToast("Đã gửi thư lên Cloud Firestore! ✉️", newMail.subject, "success");
+    window.UI.showToast("Đã gửi thư lên Cloud Supabase! ✉️", newMail.subject, "success");
   },
 
   convertMailToTask(mailId) {
