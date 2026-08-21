@@ -382,6 +382,7 @@ window.AuthModule = {
       const roleLabel = (ws.role || "member").toUpperCase();
       const roleBadgeClass = ws.role === "master" ? "badge-primary" : (ws.role === "admin" ? "badge-warning" : "badge-purple");
       const iconSvg = this.getWorkspaceIconSvg(ws.icon || "planet");
+      const isMasterOrOwner = ws.role === "master" || ws.isOwner;
 
       return `
         <div style="display: flex; align-items: center; justify-content: space-between; background: ${isActive ? 'rgba(99, 102, 241, 0.15)' : 'var(--bg-surface-elevated)'}; border: 1px solid ${isActive ? 'var(--primary)' : 'var(--border-subtle)'}; border-radius: var(--radius-sm); padding: 10px 12px; transition: var(--transition-fast);">
@@ -403,9 +404,11 @@ window.AuthModule = {
               <button class="btn btn-secondary btn-sm" style="padding: 4px 7px; font-size: 11px;" onclick="navigator.clipboard.writeText('${ws.code}'); window.UI.showToast('Đã copy mã!', '${ws.code}', 'success');" title="Sao chép mã">📋</button>
             ` : `
               <button class="btn btn-primary btn-sm" style="padding: 4px 10px; font-size: 11.5px;" onclick="window.AuthModule.selectWorkspace('${ws.code}')">Chuyển</button>
-              ${!ws.isDefault ? `
-                <button class="btn btn-ghost btn-sm" style="padding: 4px 6px; color: #ef4444;" onclick="window.AuthModule.handleDeleteWorkspace('${ws.code}')" title="Xóa khỏi danh sách">🗑️</button>
-              ` : ''}
+            `}
+            ${isMasterOrOwner ? `
+              <button class="btn btn-ghost btn-sm" style="padding: 4px 6px; color: #ef4444;" onclick="window.AuthModule.handleDeleteWorkspace('${ws.code}')" title="Xóa Không Gian (Quyền Master)">🗑️</button>
+            ` : `
+              <button class="btn btn-ghost btn-sm" style="padding: 4px 6px; color: #f59e0b;" onclick="window.AuthModule.handleLeaveWorkspace('${ws.code}')" title="Rời Khỏi Không Gian">🚪</button>
             `}
           </div>
         </div>
@@ -484,12 +487,35 @@ window.AuthModule = {
   },
 
   handleDeleteWorkspace(code) {
-    window.showConfirmPopup("Xóa Không Gian", `Bạn có chắc muốn xóa không gian [${code}] khỏi danh sách của bạn?`, () => {
+    const ws = window.store.getUserWorkspaces().find(w => w.code === code);
+    const wsName = ws ? ws.name : code;
+
+    window.showConfirmPopup("Xóa Không Gian (Master)", `Bạn có chắc muốn XÓA không gian [${wsName}] (${code})? Toàn bộ kênh và dữ liệu của không gian này sẽ bị gỡ bỏ khỏi danh sách.`, () => {
       const ok = window.store.deleteWorkspace(code);
       if (ok) {
         this.updateUserUI();
         this.renderWorkspacesList();
-        window.UI.showToast("Đã xóa Không Gian khỏi danh sách!", "", "info");
+        if (window.CloudModule && window.store.state.workspace) {
+          window.CloudModule.bindWorkspace(window.store.state.workspace.code);
+        }
+        window.UI.showToast("Đã xóa Không Gian thành công!", `Đã gỡ bỏ [${wsName}]`, "info");
+      }
+    });
+  },
+
+  handleLeaveWorkspace(code) {
+    const ws = window.store.getUserWorkspaces().find(w => w.code === code);
+    const wsName = ws ? ws.name : code;
+
+    window.showConfirmPopup("Rời Khỏi Không Gian", `Bạn có chắc muốn RỜI KHỎI không gian [${wsName}] (${code})?`, () => {
+      const ok = window.store.deleteWorkspace(code);
+      if (ok) {
+        this.updateUserUI();
+        this.renderWorkspacesList();
+        if (window.CloudModule && window.store.state.workspace) {
+          window.CloudModule.bindWorkspace(window.store.state.workspace.code);
+        }
+        window.UI.showToast("Đã rời Không Gian!", `Bạn đã rời [${wsName}]`, "info");
       }
     });
   },

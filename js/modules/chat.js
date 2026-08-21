@@ -63,6 +63,17 @@ window.ChatModule = {
     const currentChannel = window.store.state.activeChannel || "general";
     const messages = window.store.state.chatChannels[currentChannel] || [];
 
+    if (messages.length === 0) {
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); text-align: center; padding: 40px 20px;">
+          <div style="font-size: 40px; margin-bottom: 12px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));">💬</div>
+          <div style="font-weight: 800; font-size: 16px; color: var(--text-high); margin-bottom: 6px;">Kênh #${currentChannel} chưa có tin nhắn</div>
+          <div style="font-size: 13px; max-width: 320px; line-height: 1.5; color: var(--text-muted);">Gửi tin nhắn đầu tiên ở ô bên dưới hoặc gõ @AISA để gọi trợ lý AI! 🚀</div>
+        </div>
+      `;
+      return;
+    }
+
     container.innerHTML = messages.map(m => {
       let isBotClass = "";
       if (m.isBot === "harmony") isBotClass = "harmony";

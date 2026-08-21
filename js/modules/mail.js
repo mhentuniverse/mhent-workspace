@@ -38,14 +38,21 @@ window.MailModule = {
     const activeId = window.store.state.activeMailId;
 
     if (mails.length === 0) {
-      listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">Hộp thư trống</div>`;
+      listEl.innerHTML = `
+        <div style="padding: 36px 16px; text-align: center; color: var(--text-muted); font-size: 13px;">
+          <div style="margin-bottom: 8px;">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </div>
+          Hộp thư trống
+        </div>
+      `;
       return;
     }
 
     listEl.innerHTML = mails.map(m => `
       <div class="mail-item-row ${m.id === activeId ? 'active' : ''}" onclick="window.MailModule.selectMail('${m.id}')">
         <div class="mail-item-top">
-          <span class="mail-from">${m.starred ? '⭐ ' : ''}${m.from}</span>
+          <span class="mail-from">${m.from}</span>
           <span class="mail-time">${m.time}</span>
         </div>
         <div class="mail-subject">${m.subject}</div>
@@ -69,7 +76,15 @@ window.MailModule = {
     const mail = window.store.state.mails.find(m => m.id === activeId) || window.store.state.mails[0];
 
     if (!mail) {
-      readerEl.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">Không có thư nào được chọn</div>`;
+      readerEl.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); text-align: center; padding: 40px;">
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--bg-surface); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; border: 1px solid var(--border-subtle);">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </div>
+          <div style="font-weight: 800; font-size: 15px; color: var(--text-high); margin-bottom: 4px;">Chưa chọn thư nào</div>
+          <div style="font-size: 13px; max-width: 280px; line-height: 1.5;">Chọn một email từ danh sách bên trái hoặc bấm "Soạn Thư Mới" để gửi email nội bộ.</div>
+        </div>
+      `;
       return;
     }
 
@@ -86,16 +101,16 @@ window.MailModule = {
         </div>
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-secondary btn-icon" title="${mail.starred ? 'Bỏ gắn sao' : 'Gắn dấu sao'}" onclick="window.MailModule.toggleStar('${mail.id}')">
-            ${mail.starred ? '⭐' : '☆'}
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="${mail.starred ? '#f59e0b' : 'none'}" stroke="${mail.starred ? '#f59e0b' : 'currentColor'}" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </button>
           <button class="btn btn-secondary btn-icon" title="Tóm tắt bằng AISA" onclick="window.AisaModule.summarizeMail('${mail.id}')">
-            ✨
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#f472b6" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
           </button>
           <button class="btn btn-secondary btn-icon" title="Tạo Task từ thư này" onclick="window.MailModule.convertMailToTask('${mail.id}')">
-            📋
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           </button>
           <button class="btn btn-secondary btn-icon" title="Xóa thư" onclick="window.MailModule.deleteMail('${mail.id}')" style="color: #ef4444;">
-            🗑️
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
           </button>
         </div>
       </div>

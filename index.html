@@ -37,7 +37,7 @@
     <nav id="nav-rail" aria-label="Main Navigation">
       <div class="rail-top">
         <div class="rail-brand" title="MHEnt Universe HQ" id="btn-switch-team">
-          🪐
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8"/></svg>
         </div>
         <div class="rail-divider"></div>
 
@@ -47,7 +47,6 @@
 
         <button class="rail-btn" data-app="mail" title="MHEnt Mail (Hộp thư nội bộ)" id="nav-btn-mail">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-          <span class="rail-badge">2</span>
         </button>
 
         <button class="rail-btn" data-app="meet" title="MHEnt Meet (Họp video bảo mật)" id="nav-btn-meet">
@@ -73,10 +72,10 @@
 
       <div class="rail-bottom">
         <button class="rail-btn" id="btn-toggle-theme" title="Chuyển đổi Chế độ Sáng/Tối">
-          <span id="theme-icon-text">🌙</span>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
         <div class="rail-avatar" id="btn-open-auth-modal" title="Bấm để Đăng nhập / Cấp tài khoản Firebase">
-          <span class="user-display-avatar">👑</span>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <div class="rail-avatar-status"></div>
         </div>
       </div>
@@ -101,39 +100,29 @@
         <div class="sidebar-app-section" id="sidebar-sec-chat">
           <div class="sidebar-section-title">
             <span>Kênh Hội Thoại</span>
-            <button class="add-btn" title="Tạo kênh mới" onclick="window.UI.showToast('Tính năng đang mở rộng', 'Kênh mới sẽ được đồng bộ Firestore', 'info')">➕</button>
+            <button class="add-btn" title="Tạo kênh mới" onclick="window.UI.showToast('Tính năng đang mở rộng', 'Kênh mới sẽ được đồng bộ Firestore', 'info')">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
           </div>
           <ul class="sidebar-nav-list" id="chat-channel-list"></ul>
 
           <div class="sidebar-section-title" style="margin-top: 18px;">
-            <span>Tin Nhắn Riêng (DMs)</span>
+            <span>Trợ Lý AI & Thành Viên</span>
           </div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item">
+            <li class="sidebar-nav-item" onclick="window.AisaModule.setPersona('harmony')">
               <div class="item-left">
-                <span class="item-icon">🌸</span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#f472b6" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span>
                 <span>Harmony (AI)</span>
               </div>
               <span class="badge badge-success">Online</span>
             </li>
-            <li class="sidebar-nav-item">
+            <li class="sidebar-nav-item" onclick="window.AisaModule.setPersona('echo')">
               <div class="item-left">
-                <span class="item-icon">😈</span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a855f7" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
                 <span>Echo (AI)</span>
               </div>
               <span class="badge badge-purple">Online</span>
-            </li>
-            <li class="sidebar-nav-item">
-              <div class="item-left">
-                <span class="item-icon">💻</span>
-                <span>Kaelen (Dev Lead)</span>
-              </div>
-            </li>
-            <li class="sidebar-nav-item">
-              <div class="item-left">
-                <span class="item-icon">🎨</span>
-                <span>Sara (Media Dir)</span>
-              </div>
             </li>
           </ul>
         </div>
@@ -141,14 +130,15 @@
         <!-- 2. MAIL SIDEBAR SECTION -->
         <div class="sidebar-app-section" id="sidebar-sec-mail" style="display: none;">
           <button class="btn btn-primary" id="btn-compose-mail" style="width: 100%; margin-bottom: 16px;">
-            ✏️ Soạn Thư Mới
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            <span>Soạn Thư Mới</span>
           </button>
           <div class="sidebar-section-title"><span>Hộp Thư</span></div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">📥</span><span>Hộp Thư Đến</span></div><span class="item-badge">2</span></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">⭐</span><span>Đã Gắn Dấu Sao</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">📤</span><span>Đã Gửi</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">📝</span><span>Bản Nháp</span></div></li>
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span><span>Hộp Thư Đến</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span><span>Đã Gắn Dấu Sao</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span><span>Đã Gửi</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span>Bản Nháp</span></div></li>
           </ul>
         </div>
 
@@ -156,49 +146,46 @@
         <div class="sidebar-app-section" id="sidebar-sec-meet" style="display: none;">
           <div class="sidebar-section-title"><span>Phòng Họp Team</span></div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">📹</span><span># HQ Conference</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">🎨</span><span># Media Room</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">💻</span><span># Dev Daily Standup</span></div></li>
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg></span><span># HQ Conference</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect width="15" height="14" x="1" y="5" rx="2" ry="2"/></svg></span><span># Media Room</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span><span># Dev Standup</span></div></li>
           </ul>
         </div>
 
         <!-- 4. TODO SIDEBAR SECTION -->
         <div class="sidebar-app-section" id="sidebar-sec-todo" style="display: none;">
           <button class="btn btn-primary" id="btn-add-task" style="width: 100%; margin-bottom: 16px;">
-            ➕ Tạo Task Mới
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Tạo Task Mới</span>
           </button>
           <div class="sidebar-section-title"><span>Dự Án Trọng Tâm</span></div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">🚀</span><span>Workspace V1.0</span></div><span class="item-badge">3</span></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">🎬</span><span>Sự Kiện Tháng 9</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">🤖</span><span>AISA 2.0 Integration</span></div></li>
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span>Tất Cả Nhiệm Vụ</span></div></li>
           </ul>
         </div>
 
         <!-- 5. DRIVE SIDEBAR SECTION -->
         <div class="sidebar-app-section" id="sidebar-sec-drive" style="display: none;">
           <button class="btn btn-primary" id="btn-upload-file" style="width: 100%; margin-bottom: 16px;">
-            📁 Tải Tệp Lên
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            <span>Tải Tệp Lên</span>
           </button>
           <input type="file" id="file-upload-input" style="display: none;">
           <div class="sidebar-section-title"><span>Thư Mục</span></div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">📂</span><span>Tất Cả Tệp</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">🎨</span><span>Media Assets</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">📝</span><span>Tài Liệu & Kịch Bản</span></div></li>
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg></span><span>Tất Cả Tệp</span></div></li>
           </ul>
         </div>
 
         <!-- 6. CALENDAR SIDEBAR SECTION -->
         <div class="sidebar-app-section" id="sidebar-sec-calendar" style="display: none;">
           <button class="btn btn-primary" id="btn-add-event" style="width: 100%; margin-bottom: 16px;">
-            📅 Thêm Sự Kiện
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Thêm Sự Kiện</span>
           </button>
           <div class="sidebar-section-title"><span>Bộ Lọc Lịch</span></div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">🟣</span><span>Cuộc Họp (Meetings)</span></div></li>
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">🔴</span><span>Hạn Chót (Deadlines)</span></div></li>
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">🟢</span><span>Ra Mắt (Launches)</span></div></li>
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></span><span>Tất Cả Lịch Trình</span></div></li>
           </ul>
         </div>
 
@@ -206,13 +193,15 @@
         <div class="sidebar-app-section" id="sidebar-sec-tools" style="display: none;">
           <div class="sidebar-section-title"><span>Trạm Công Cụ</span></div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon">📱</span><span>QR Check-in & Điểm Danh</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">📖</span><span>Wiki & Noticeboard</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon">⚡</span><span>Quick Media Converter</span></div></li>
+            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/></svg></span><span>QR Check-in & Điểm Danh</span></div></li>
+            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><span>Wiki & Noticeboard</span></div></li>
           </ul>
         </div>
       </div>
     </aside>
+
+    <!-- Sidebar Resizer -->
+    <div class="panel-resizer" id="resizer-sidebar" title="Kéo để điều chỉnh độ rộng Sidebar"></div>
 
     <!-- ==========================================
          3. MAIN WORKSPACE STAGE (FLEX-1)
@@ -236,7 +225,7 @@
           </button>
 
           <button class="aisa-toggle-btn active" id="btn-toggle-aisa">
-            <span>🌸</span>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
             <span>AISA Copilot</span>
           </button>
         </div>
@@ -249,7 +238,9 @@
         <div class="app-stage-view chat-app-view" id="view-chat">
           <div class="chat-messages-container" id="chat-messages-wrap"></div>
           <form class="chat-input-bar" id="chat-form">
-            <button type="button" class="btn btn-secondary btn-icon" title="Đính kèm tệp">📎</button>
+            <button type="button" class="btn btn-secondary btn-icon" title="Đính kèm tệp">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
             <input type="text" class="chat-input-field" id="chat-input-text" placeholder="Nhập tin nhắn... (Gõ @AISA để gọi Harmony & Echo hỗ trợ)">
             <button type="submit" class="btn btn-primary" style="background: var(--app-chat); border-color: var(--app-chat);">Gửi 🚀</button>
           </form>
@@ -257,13 +248,16 @@
 
         <!-- 2. MAIL APP VIEW -->
         <div class="app-stage-view mail-app-view" id="view-mail" style="display: none;">
-          <div class="mail-list-pane">
+          <div class="mail-list-pane" id="mail-list-pane">
             <div class="mail-list-header">
               <span style="font-weight: 800; font-size: 14px;">Hộp Thư Đến</span>
-              <span class="badge badge-primary">2 Thư</span>
             </div>
             <div class="mail-items-container" id="mail-items-list"></div>
           </div>
+          
+          <!-- Mail Resizer Splitter -->
+          <div class="panel-resizer" id="resizer-mail" title="Kéo để chỉnh độ rộng Hộp thư"></div>
+
           <div class="mail-reader-pane" id="mail-reader-content"></div>
         </div>
 
@@ -446,31 +440,54 @@
       </div>
     </main>
 
+    <!-- AISA Resizer Splitter -->
+    <div class="panel-resizer" id="resizer-aisa" title="Kéo để điều chỉnh độ rộng AISA Copilot"></div>
+
     <!-- ==========================================
          4. AISA COPILOT DRAWER (RIGHT - 340px)
          ========================================== -->
     <aside id="aisa-drawer">
       <div class="aisa-drawer-header">
         <div class="aisa-header-info">
-          <div class="aisa-logo-badge">🌸</div>
+          <div class="aisa-logo-badge">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f472b6" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+          </div>
           <div>
             <div class="aisa-title-text">AISA Copilot</div>
-            <div class="aisa-subtitle-text">Harmony 🌸 & Echo 😈</div>
+            <div class="aisa-subtitle-text">Harmony & Echo</div>
           </div>
         </div>
         <button class="modal-close-btn" id="btn-close-aisa-drawer">✕</button>
       </div>
 
       <div class="persona-switch">
-        <button class="persona-btn active both" data-persona="both">🌸😈 Cả Hai</button>
-        <button class="persona-btn harmony" data-persona="harmony">🌸 Harmony</button>
-        <button class="persona-btn echo" data-persona="echo">😈 Echo</button>
+        <button class="persona-btn active both" data-persona="both">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+          <span>Cả Hai</span>
+        </button>
+        <button class="persona-btn harmony" data-persona="harmony">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#f472b6" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <span>Harmony</span>
+        </button>
+        <button class="persona-btn echo" data-persona="echo">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a855f7" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Echo</span>
+        </button>
       </div>
 
       <div class="aisa-quick-chips">
-        <button class="quick-chip" data-action="summary">✨ Tóm tắt kênh</button>
-        <button class="quick-chip" data-action="deadline">🔔 Kiểm tra deadline</button>
-        <button class="quick-chip" data-action="brainstorm">💡 Ý tưởng kịch bản</button>
+        <button class="quick-chip" data-action="summary">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+          <span>Tóm tắt</span>
+        </button>
+        <button class="quick-chip" data-action="deadline">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Deadline</span>
+        </button>
+        <button class="quick-chip" data-action="brainstorm">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
+          <span>Ý tưởng</span>
+        </button>
       </div>
 
       <div class="aisa-messages-box" id="aisa-messages-list"></div>
@@ -478,7 +495,9 @@
       <div class="aisa-input-wrapper">
         <div class="aisa-input-box">
           <input type="text" class="aisa-input-field" id="aisa-input-text" placeholder="Hỏi Harmony & Echo bất cứ điều gì...">
-          <button class="aisa-send-btn" id="aisa-send-btn" title="Gửi">➤</button>
+          <button class="aisa-send-btn" id="aisa-send-btn" title="Gửi">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </div>
       </div>
     </aside>
@@ -488,73 +507,6 @@
   <!-- ==========================================
        5. MODAL DIALOGS
        ========================================== -->
-  <!-- Modal: Firebase Auth & Org Account -->
-  <div class="modal-overlay" id="modal-auth">
-    <div class="modal-card" style="max-width: 440px;">
-      <div class="modal-header">
-        <h3 class="modal-title">🔐 Cổng Xác Thực MHEnt Org</h3>
-        <button class="modal-close-btn">✕</button>
-      </div>
-      <div style="display: flex; background: var(--bg-surface-elevated); margin: 16px 22px 0 22px; border-radius: var(--radius-full); padding: 3px; border: 1px solid var(--border-subtle);">
-        <button type="button" class="auth-tab-btn active" data-mode="login" style="flex: 1; padding: 7px; border-radius: var(--radius-full); border: none; background: var(--primary); color: white; font-size: 13px; font-weight: 800; cursor: pointer;">Đăng Nhập</button>
-        <button type="button" class="auth-tab-btn" data-mode="register" style="flex: 1; padding: 7px; border-radius: var(--radius-full); border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 800; cursor: pointer;">Cấp Account Mới</button>
-      </div>
-
-      <!-- Pane: Login -->
-      <div id="auth-pane-login" class="modal-body">
-        <form id="form-firebase-login">
-          <div class="form-group">
-            <label class="form-label">Tên Định Danh / Email Tổ Chức</label>
-            <div style="position: relative;">
-              <input type="text" class="input-text" id="login-username" placeholder="yurika (hoặc yurika@mhentuniverse.internal)" style="width: 100%;" required>
-            </div>
-            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Tự động gắn đuôi <strong>@mhentuniverse.internal</strong> nếu chỉ gõ tên.</span>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mật Khẩu</label>
-            <input type="password" class="input-text" id="login-password" placeholder="••••••••" required>
-          </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">
-            🚀 Đăng Nhập Firebase
-          </button>
-        </form>
-      </div>
-
-      <!-- Pane: Register -->
-      <div id="auth-pane-register" class="modal-body" style="display: none;">
-        <form id="form-firebase-register">
-          <div class="form-group">
-            <label class="form-label">Tên Đăng Nhập (Username)</label>
-            <input type="text" class="input-text" id="reg-username" placeholder="VD: sara hoặc kaelen" required>
-            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Sẽ tạo email: <strong>username@mhentuniverse.internal</strong></span>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Họ & Tên Hiển Thị</label>
-            <input type="text" class="input-text" id="reg-fullname" placeholder="VD: Sara (Media Dir)" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mật Khẩu Khởi Tạo</label>
-            <input type="password" class="input-text" id="reg-password" placeholder="Ít nhất 6 ký tự" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Phân Quyền Ban Đầu</label>
-            <select class="input-select" id="reg-role">
-              <option value="member">Member (Thành viên tổ chức)</option>
-              <option value="master">Master (Chủ quản quyền cao)</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px; background: var(--app-drive);">
-            ✨ Cấp Tài Khoản Mới Ngay
-          </button>
-        </form>
-      </div>
-
-      <div class="modal-footer" style="justify-content: space-between;">
-        <span style="font-size: 12px; color: var(--text-muted);">Firebase Project: <strong>mhentuniverse</strong></span>
-        <button type="button" class="btn btn-secondary modal-close-btn">Đóng</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Modal: Compose Mail -->
   <div class="modal-overlay" id="modal-compose-mail">

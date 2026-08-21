@@ -8,6 +8,7 @@ window.UI = {
     this.bindModals();
     this.bindAisaDrawer();
     this.bindThemeToggle();
+    this.bindResizers();
     this.updateTheme();
     this.initRouting();
   },
@@ -358,6 +359,100 @@ window.UI = {
         sidebar.classList.toggle("open");
       }
     }
+  },
+
+  bindResizers() {
+    // 1. Sidebar Resizer
+    const sidebarResizer = document.getElementById("resizer-sidebar");
+    const sidebar = document.getElementById("context-sidebar");
+    if (sidebarResizer && sidebar) {
+      this.createDraggableResizer(sidebarResizer, (deltaX) => {
+        const currentWidth = sidebar.getBoundingClientRect().width;
+        const newWidth = Math.max(180, Math.min(480, currentWidth + deltaX));
+        sidebar.style.width = `${newWidth}px`;
+      });
+    }
+
+    // 2. Mail Split Resizer
+    const mailResizer = document.getElementById("resizer-mail");
+    const mailPane = document.getElementById("mail-list-pane");
+    if (mailResizer && mailPane) {
+      this.createDraggableResizer(mailResizer, (deltaX) => {
+        const currentWidth = mailPane.getBoundingClientRect().width;
+        const newWidth = Math.max(220, Math.min(650, currentWidth + deltaX));
+        mailPane.style.width = `${newWidth}px`;
+      });
+    }
+
+    // 3. AISA Drawer Resizer
+    const aisaResizer = document.getElementById("resizer-aisa");
+    const aisaDrawer = document.getElementById("aisa-drawer");
+    if (aisaResizer && aisaDrawer) {
+      this.createDraggableResizer(aisaResizer, (deltaX) => {
+        const currentWidth = aisaDrawer.getBoundingClientRect().width;
+        const newWidth = Math.max(260, Math.min(750, currentWidth - deltaX));
+        aisaDrawer.style.width = `${newWidth}px`;
+      });
+    }
+  },
+
+  createDraggableResizer(resizerEl, onMoveCallback) {
+    let isDragging = false;
+    let startX = 0;
+
+    const onMouseDown = (e) => {
+      e.preventDefault();
+      isDragging = true;
+      startX = e.clientX;
+      resizerEl.classList.add("resizing");
+      document.body.classList.add("is-resizing");
+
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    };
+
+    const onMouseMove = (e) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - startX;
+      startX = e.clientX;
+      onMoveCallback(deltaX);
+    };
+
+    const onMouseUp = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      resizerEl.classList.remove("resizing");
+      document.body.classList.remove("is-resizing");
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    resizerEl.addEventListener("mousedown", onMouseDown);
+
+    // Support touch devices / tablets
+    resizerEl.addEventListener("touchstart", (e) => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        resizerEl.classList.add("resizing");
+        document.body.classList.add("is-resizing");
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchmove", (e) => {
+      if (!isDragging || e.touches.length !== 1) return;
+      const deltaX = e.touches[0].clientX - startX;
+      startX = e.touches[0].clientX;
+      onMoveCallback(deltaX);
+    }, { passive: true });
+
+    window.addEventListener("touchend", () => {
+      if (isDragging) {
+        isDragging = false;
+        resizerEl.classList.remove("resizing");
+        document.body.classList.remove("is-resizing");
+      }
+    });
   }
 };
 
