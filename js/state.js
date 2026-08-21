@@ -251,6 +251,105 @@ Ban Media đã cập nhật bản nháp kịch bản và thiết kế infographi
     this.state.workspace = ws;
     this.save();
   }
+
+  getUserWorkspaces() {
+    if (!this.state.userWorkspaces || !Array.isArray(this.state.userWorkspaces)) {
+      this.state.userWorkspaces = [
+        { code: "MHENT-CORE-2026", name: "MHEnt Universe HQ", role: "master", isDefault: true, icon: "🪐" }
+      ];
+      this.save();
+    }
+    return this.state.userWorkspaces;
+  }
+
+  createWorkspace(name, icon = "🏢", customCode = "") {
+    if (!name || !name.trim()) return null;
+    const workspaces = this.getUserWorkspaces();
+
+    let cleanCode = customCode ? customCode.trim().toUpperCase() : "";
+    if (!cleanCode) {
+      const slug = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6) || "TEAM";
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      cleanCode = `MHENT-${slug}-${rand}`;
+    }
+
+    // Kiểm tra xem đã tồn tại chưa
+    const existing = workspaces.find(w => w.code === cleanCode);
+    if (existing) {
+      this.switchWorkspace(cleanCode);
+      return existing;
+    }
+
+    const newWs = {
+      code: cleanCode,
+      name: name.trim(),
+      icon: icon || "🏢",
+      role: "master",
+      isOwner: true,
+      createdAt: new Date().toISOString()
+    };
+
+    workspaces.push(newWs);
+    this.state.userWorkspaces = workspaces;
+    this.switchWorkspace(cleanCode);
+    return newWs;
+  }
+
+  joinWorkspace(code, name = "") {
+    if (!code || !code.trim()) return null;
+    const cleanCode = code.trim().toUpperCase();
+    const workspaces = this.getUserWorkspaces();
+
+    let ws = workspaces.find(w => w.code === cleanCode);
+    if (!ws) {
+      ws = {
+        code: cleanCode,
+        name: name || `Workspace [${cleanCode}]`,
+        icon: "⚡",
+        role: "member",
+        isOwner: false,
+        createdAt: new Date().toISOString()
+      };
+      workspaces.push(ws);
+      this.state.userWorkspaces = workspaces;
+    }
+
+    this.switchWorkspace(cleanCode);
+    return ws;
+  }
+
+  switchWorkspace(code) {
+    const workspaces = this.getUserWorkspaces();
+    const targetWs = workspaces.find(w => w.code === code) || {
+      code: code,
+      name: `Workspace [${code}]`,
+      role: "member",
+      icon: "🏢"
+    };
+
+    this.state.workspace = targetWs;
+    if (this.state.currentUser) {
+      this.state.currentUser.role = targetWs.role || "member";
+      if (targetWs.role === "master") this.state.currentUser.avatar = "👑";
+      else if (targetWs.role === "admin") this.state.currentUser.avatar = "🛡️";
+      else this.state.currentUser.avatar = "💻";
+    }
+    this.save();
+  }
+
+  deleteWorkspace(code) {
+    let workspaces = this.getUserWorkspaces();
+    if (workspaces.length <= 1) return false; // Giữ ít nhất 1 workspace
+    workspaces = workspaces.filter(w => w.code !== code);
+    this.state.userWorkspaces = workspaces;
+
+    if (this.state.workspace && this.state.workspace.code === code) {
+      this.switchWorkspace(workspaces[0].code);
+    } else {
+      this.save();
+    }
+    return true;
+  }
 }
 
 window.store = new WorkspaceStore();

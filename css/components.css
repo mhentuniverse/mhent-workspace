@@ -227,7 +227,7 @@
   inset: 0;
   background: rgba(7, 9, 14, 0.7);
   backdrop-filter: blur(10px);
-  z-index: 900;
+  z-index: 100000;
   display: flex;
   align-items: center;
   justify-content: center;
