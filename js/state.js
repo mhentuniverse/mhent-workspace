@@ -198,16 +198,16 @@ class WorkspaceStore {
   }
 
   getUserWorkspaces() {
-    if (!this.state.userWorkspaces || !Array.isArray(this.state.userWorkspaces)) {
+    if (!this.state.userWorkspaces || !Array.isArray(this.state.userWorkspaces) || this.state.userWorkspaces.length === 0) {
       this.state.userWorkspaces = [
-        { code: "MHENT-CORE-2026", name: "MHEnt Universe HQ", role: "master", isDefault: true, icon: "🪐" }
+        { code: "MHENT-CORE-2026", name: "MHEnt Universe HQ", role: "master", isDefault: true, icon: "planet" }
       ];
       this.save();
     }
     return this.state.userWorkspaces;
   }
 
-  createWorkspace(name, icon = "🏢", customCode = "") {
+  createWorkspace(name, icon = "planet", customCode = "") {
     if (!name || !name.trim()) return null;
     const workspaces = this.getUserWorkspaces();
 
@@ -228,7 +228,7 @@ class WorkspaceStore {
     const newWs = {
       code: cleanCode,
       name: name.trim(),
-      icon: icon || "🏢",
+      icon: icon || "planet",
       role: "master",
       isOwner: true,
       createdAt: new Date().toISOString()
@@ -236,6 +236,7 @@ class WorkspaceStore {
 
     workspaces.push(newWs);
     this.state.userWorkspaces = workspaces;
+    this.save();
     this.switchWorkspace(cleanCode);
     return newWs;
   }
@@ -250,13 +251,14 @@ class WorkspaceStore {
       ws = {
         code: cleanCode,
         name: name || `Workspace [${cleanCode}]`,
-        icon: "⚡",
+        icon: "rocket",
         role: "member",
         isOwner: false,
         createdAt: new Date().toISOString()
       };
       workspaces.push(ws);
       this.state.userWorkspaces = workspaces;
+      this.save();
     }
 
     this.switchWorkspace(cleanCode);

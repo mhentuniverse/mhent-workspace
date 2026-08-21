@@ -52,7 +52,8 @@ window.CloudModule = {
     this.currentUserId = uid;
     console.log(`[Cloud Engine] 👤 Đã liên kết tài khoản Firebase UID: ${uid}`);
     
-    // Tải dữ liệu riêng tư của User từ Supabase
+    // Tải danh sách Workspace & Dữ liệu riêng tư của User từ Supabase
+    this.loadUserWorkspacesFromSupabase(uid);
     this.loadUserDataFromSupabase(uid);
   },
 
@@ -372,6 +373,104 @@ window.CloudModule = {
       } catch (err) {
         console.warn("[Cloud Engine] Lỗi xóa file Supabase:", err);
       }
+    }
+  },
+
+  // ==========================================
+  // WORKSPACE CLOUD PERSISTENCE (SUPABASE)
+  // ==========================================
+
+  async saveWorkspaceToSupabase(ws) {
+    if (!this.sb || !ws) return;
+    const uid = this.currentUserId || (window.store.state.currentUser ? window.store.state.currentUser.id : "guest");
+    try {
+      await this.sb.from('workspaces').upsert([{
+        code: ws.code,
+        name: ws.name,
+        icon: ws.icon || 'planet',
+        owner_id: uid,
+        updated_at: new Date().toISOString()
+      }]);
+
+      await this.sb.from('workspace_members').upsert([{
+        workspace_code: ws.code,
+        user_id: uid,
+        role: ws.role || 'master',
+        joined_at: new Date().toISOString()
+      }], { onConflict: 'workspace_code,user_id' });
+
+      console.log(`[Cloud Engine] 🪐 Đã đồng bộ Không Gian [${ws.name}] (${ws.code}) lên Supabase!`);
+    } catch (err) {
+      console.warn("[Cloud Engine] Lỗi lưu workspace Supabase:", err);
+    }
+  },
+
+  async loadUserWorkspacesFromSupabase(uid) {
+    if (!this.sb || !uid) return;
+    try {
+      // 1. Lấy danh sách workspace do User làm chủ
+      const { data: ownedWs, error: err1 } = await this.sb
+        .from('workspaces')
+        .select('*')
+        .eq('owner_id', uid);
+
+      // 2. Lấy danh sách workspace do User tham gia
+      const { data: memberWs, error: err2 } = await this.sb
+        .from('workspace_members')
+        .select('workspace_code, role, workspaces(*)')
+        .eq('user_id', uid);
+
+      const currentList = window.store.getUserWorkspaces();
+      const map = new Map();
+
+      currentList.forEach(w => map.set(w.code, w));
+
+      if (ownedWs && ownedWs.length > 0) {
+        ownedWs.forEach(w => {
+          map.set(w.code, {
+            code: w.code,
+            name: w.name,
+            icon: w.icon || 'planet',
+            role: 'master',
+            isDefault: w.code === 'MHENT-CORE-2026'
+          });
+        });
+      }
+
+      if (memberWs && memberWs.length > 0) {
+        memberWs.forEach(m => {
+          const wInfo = m.workspaces;
+          if (wInfo) {
+            map.set(m.workspace_code, {
+              code: m.workspace_code,
+              name: wInfo.name || m.workspace_code,
+              icon: wInfo.icon || 'planet',
+              role: m.role || 'member',
+              isDefault: false
+            });
+          }
+        });
+      }
+
+      window.store.state.userWorkspaces = Array.from(map.values());
+      window.store.save();
+
+      if (window.AuthModule && typeof window.AuthModule.renderWorkspacesList === 'function') {
+        window.AuthModule.renderWorkspacesList();
+      }
+    } catch (e) {
+      console.warn("[Cloud Engine] Không thể tải danh sách workspace từ Supabase:", e);
+    }
+  },
+
+  async deleteWorkspaceFromSupabase(code) {
+    if (!this.sb || !code) return;
+    try {
+      await this.sb.from('workspaces').delete().eq('code', code);
+      await this.sb.from('workspace_members').delete().eq('workspace_code', code);
+      console.log(`[Cloud Engine] 🗑️ Đã xóa Không Gian [${code}] trên Supabase!`);
+    } catch (e) {
+      console.warn("[Cloud Engine] Lỗi xóa workspace Supabase:", e);
     }
   }
 };

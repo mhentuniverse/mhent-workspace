@@ -466,6 +466,7 @@ window.AuthModule = {
       this.renderWorkspacesList();
 
       if (window.CloudModule) {
+        window.CloudModule.saveWorkspaceToSupabase(newWs);
         window.CloudModule.bindWorkspace(newWs.code);
       }
 
@@ -493,6 +494,9 @@ window.AuthModule = {
     window.showConfirmPopup("Xóa Không Gian (Master)", `Bạn có chắc muốn XÓA không gian [${wsName}] (${code})? Toàn bộ kênh và dữ liệu của không gian này sẽ bị gỡ bỏ khỏi danh sách.`, () => {
       const ok = window.store.deleteWorkspace(code);
       if (ok) {
+        if (window.CloudModule) {
+          window.CloudModule.deleteWorkspaceFromSupabase(code);
+        }
         this.updateUserUI();
         this.renderWorkspacesList();
         if (window.CloudModule && window.store.state.workspace) {
@@ -510,6 +514,9 @@ window.AuthModule = {
     window.showConfirmPopup("Rời Khỏi Không Gian", `Bạn có chắc muốn RỜI KHỎI không gian [${wsName}] (${code})?`, () => {
       const ok = window.store.deleteWorkspace(code);
       if (ok) {
+        if (window.CloudModule) {
+          window.CloudModule.deleteWorkspaceFromSupabase(code);
+        }
         this.updateUserUI();
         this.renderWorkspacesList();
         if (window.CloudModule && window.store.state.workspace) {
