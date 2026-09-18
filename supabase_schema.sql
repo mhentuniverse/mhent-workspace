@@ -19,10 +19,19 @@ CREATE TABLE IF NOT EXISTS public.workspace_members (
     id BIGSERIAL PRIMARY KEY,
     workspace_code TEXT REFERENCES public.workspaces(code) ON DELETE CASCADE,
     user_id TEXT NOT NULL,
+    user_name TEXT DEFAULT '',
+    user_email TEXT DEFAULT '',
+    avatar TEXT DEFAULT '👤',
+    status TEXT DEFAULT 'offline',
     role TEXT DEFAULT 'member' CHECK (role IN ('member', 'admin', 'master')),
     joined_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(workspace_code, user_id)
 );
+
+ALTER TABLE public.workspace_members ADD COLUMN IF NOT EXISTS user_name TEXT DEFAULT '';
+ALTER TABLE public.workspace_members ADD COLUMN IF NOT EXISTS user_email TEXT DEFAULT '';
+ALTER TABLE public.workspace_members ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT '👤';
+ALTER TABLE public.workspace_members ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'offline';
 
 -- 3. BẢNG NHIỆM VỤ KANBAN (Tasks)
 CREATE TABLE IF NOT EXISTS public.workspace_tasks (

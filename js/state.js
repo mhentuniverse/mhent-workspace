@@ -7,12 +7,30 @@ class WorkspaceStore {
     this.listeners = [];
   }
 
+  getDefaultMembers() {
+    const tm = (window.MHENT_CONFIG && window.MHENT_CONFIG.TEAM_MEMBERS) || [
+      { id: "user-master-01", name: "Master Yurika", email: "yurika@mhentuniverse.internal", role: "master", avatar: "👑", status: "online" },
+      { id: "user-dev-02", name: "Kaelen (Dev Lead)", email: "kaelen@mhentuniverse.internal", role: "member", avatar: "💻", status: "online" },
+      { id: "user-media-03", name: "Sara (Media Dir)", email: "sara@mhentuniverse.internal", role: "member", avatar: "🎨", status: "away" },
+      { id: "user-event-04", name: "Ray (Logistics)", email: "ray@mhentuniverse.internal", role: "member", avatar: "⚡", status: "busy" }
+    ];
+    return tm.map(m => ({
+      ...m,
+      workspaceCode: m.workspaceCode || "MHENT-CORE-2026",
+      joinedAt: m.joinedAt || "2026-01-01T00:00:00.000Z"
+    }));
+  }
+
   loadInitialState() {
     const STORAGE_KEY = "mhent_workspace_v3_clean";
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (!parsed.members || !Array.isArray(parsed.members) || parsed.members.length === 0) {
+          parsed.members = this.getDefaultMembers();
+        }
+        return parsed;
       } catch (e) {
         console.warn("Error parsing stored state, resetting to clean defaults", e);
       }
@@ -32,7 +50,7 @@ class WorkspaceStore {
       userWorkspaces: [
         { code: "MHENT-CORE-2026", name: "MHEnt Universe HQ", role: "master", isDefault: true, icon: "planet" }
       ],
-      members: [],
+      members: this.getDefaultMembers(),
 
       // 1. Chat Messages (Trống để người dùng tự tạo)
       chatChannels: {
@@ -236,6 +254,21 @@ class WorkspaceStore {
 
     workspaces.push(newWs);
     this.state.userWorkspaces = workspaces;
+
+    // Đăng ký Creator là Master của Workspace mới trong state.members
+    if (this.state.currentUser) {
+      this.addMemberToWorkspace({
+        id: this.state.currentUser.id || "user-master-01",
+        name: this.state.currentUser.name || "Master Yurika",
+        email: this.state.currentUser.email || "yurika@mhentuniverse.internal",
+        role: "master",
+        avatar: "👑",
+        status: "online",
+        workspaceCode: cleanCode,
+        joinedAt: new Date().toISOString()
+      }, cleanCode);
+    }
+
     this.save();
     this.switchWorkspace(cleanCode);
     return newWs;
@@ -258,9 +291,23 @@ class WorkspaceStore {
       };
       workspaces.push(ws);
       this.state.userWorkspaces = workspaces;
-      this.save();
     }
 
+    // Ghi nhận thành viên vào Workspace nếu chưa có
+    if (this.state.currentUser) {
+      this.addMemberToWorkspace({
+        id: this.state.currentUser.id || ("user-" + Date.now()),
+        name: this.state.currentUser.name || "Thành Viên",
+        email: this.state.currentUser.email || "member@mhentuniverse.internal",
+        role: ws.role || "member",
+        avatar: this.state.currentUser.avatar || "💻",
+        status: "online",
+        workspaceCode: cleanCode,
+        joinedAt: new Date().toISOString()
+      }, cleanCode);
+    }
+
+    this.save();
     this.switchWorkspace(cleanCode);
     return ws;
   }
@@ -290,12 +337,100 @@ class WorkspaceStore {
     workspaces = workspaces.filter(w => w.code !== code);
     this.state.userWorkspaces = workspaces;
 
+    // Đồng thời gỡ các thành viên gắn với workspace đó
+    if (this.state.members) {
+      this.state.members = this.state.members.filter(m => m.workspaceCode !== code);
+    }
+
     if (this.state.workspace && this.state.workspace.code === code) {
       this.switchWorkspace(workspaces[0].code);
     } else {
       this.save();
     }
     return true;
+  }
+
+  // ==========================================
+  // WORKSPACE MEMBERS MANAGEMENT (MASTER FEATURE)
+  // ==========================================
+
+  getWorkspaceMembers(wsCode) {
+    const targetCode = wsCode || (this.state.workspace ? this.state.workspace.code : "MHENT-CORE-2026");
+    if (!this.state.members || !Array.isArray(this.state.members)) {
+      this.state.members = this.getDefaultMembers();
+      this.save();
+    }
+    return this.state.members.filter(m => (m.workspaceCode || "MHENT-CORE-2026") === targetCode);
+  }
+
+  setWorkspaceMembers(wsCode, membersList) {
+    const targetCode = wsCode || (this.state.workspace ? this.state.workspace.code : "MHENT-CORE-2026");
+    if (!this.state.members || !Array.isArray(this.state.members)) {
+      this.state.members = [];
+    }
+    // Giữ lại các thành viên thuộc workspace khác
+    const otherMembers = this.state.members.filter(m => (m.workspaceCode || "MHENT-CORE-2026") !== targetCode);
+    const normalizedNew = membersList.map(m => ({
+      ...m,
+      workspaceCode: targetCode
+    }));
+    this.state.members = [...otherMembers, ...normalizedNew];
+    this.save();
+  }
+
+  addMemberToWorkspace(member, wsCode) {
+    const targetCode = wsCode || (this.state.workspace ? this.state.workspace.code : "MHENT-CORE-2026");
+    if (!this.state.members) this.state.members = [];
+    const idx = this.state.members.findIndex(m => m.id === member.id && (m.workspaceCode || "MHENT-CORE-2026") === targetCode);
+    const item = {
+      ...member,
+      workspaceCode: targetCode,
+      status: member.status || "online",
+      joinedAt: member.joinedAt || new Date().toISOString()
+    };
+    if (idx >= 0) {
+      this.state.members[idx] = { ...this.state.members[idx], ...item };
+    } else {
+      this.state.members.push(item);
+    }
+    this.save();
+  }
+
+  updateMemberRole(userId, newRole, wsCode) {
+    const targetCode = wsCode || (this.state.workspace ? this.state.workspace.code : "MHENT-CORE-2026");
+    if (!this.state.members) return false;
+    const member = this.state.members.find(m => m.id === userId && (m.workspaceCode || "MHENT-CORE-2026") === targetCode);
+    if (member) {
+      member.role = newRole;
+      if (newRole === "master") member.avatar = "👑";
+      else if (newRole === "admin") member.avatar = "🛡️";
+      else if (newRole === "guest") member.avatar = "👤";
+      else member.avatar = "💻";
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  removeMemberFromWorkspace(userId, wsCode) {
+    const targetCode = wsCode || (this.state.workspace ? this.state.workspace.code : "MHENT-CORE-2026");
+    if (!this.state.members) return false;
+    this.state.members = this.state.members.filter(m => !(m.id === userId && (m.workspaceCode || "MHENT-CORE-2026") === targetCode));
+    this.save();
+    return true;
+  }
+
+  // ==========================================
+  // OPTIMISTIC CHAT STATUS (MESSENGER RETRY STYLE)
+  // ==========================================
+
+  updateChatMessageStatus(channel, msgId, status) {
+    if (!this.state.chatChannels || !this.state.chatChannels[channel]) return;
+    const msg = this.state.chatChannels[channel].find(m => m.id === msgId);
+    if (msg) {
+      msg.status = status; // 'sending' | 'sent' | 'failed'
+      this.save();
+    }
   }
 }
 

@@ -55,6 +55,9 @@ window.AuthModule = {
     }
   },
 
+  activeRoleFilter: "all",
+  memberSearchQuery: "",
+
   switchProfileTab(tabName) {
     const tabBtns = document.querySelectorAll(".profile-tab-btn");
     tabBtns.forEach(btn => {
@@ -63,9 +66,20 @@ window.AuthModule = {
 
     const infoPane = document.getElementById("profile-pane-info");
     const createPane = document.getElementById("profile-pane-create");
-    if (infoPane && createPane) {
-      infoPane.style.display = tabName === "info" ? "block" : "none";
-      createPane.style.display = tabName === "create" ? "block" : "none";
+    const membersPane = document.getElementById("profile-pane-members");
+
+    if (infoPane) infoPane.style.display = tabName === "info" ? "block" : "none";
+    if (createPane) createPane.style.display = tabName === "create" ? "block" : "none";
+    if (membersPane) {
+      membersPane.style.display = tabName === "members" ? "block" : "none";
+      if (tabName === "members") {
+        this.renderWorkspaceMembers();
+        if (window.CloudModule) {
+          window.CloudModule.fetchWorkspaceMembers().then(() => {
+            this.renderWorkspaceMembers();
+          }).catch(() => {});
+        }
+      }
     }
   },
 
@@ -180,6 +194,8 @@ window.AuthModule = {
     const fullEmail = this.formatOrgEmail(username);
     window.UI.showToast("Đang khởi tạo tài khoản nhân sự...", `Email: ${fullEmail}`, "info");
 
+    const currentWsCode = (window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026").toUpperCase();
+
     if (!this.initialized || !this.auth) {
       // Local Mode
       const newMember = {
@@ -187,15 +203,23 @@ window.AuthModule = {
         name: fullName,
         email: fullEmail,
         role: role,
-        avatar: role === "admin" ? "🛡️" : (role === "master" ? "👑" : "💻"),
-        status: "offline"
+        avatar: role === "admin" ? "🛡️" : (role === "master" ? "👑" : (role === "guest" ? "👤" : "💻")),
+        status: "online",
+        workspaceCode: currentWsCode,
+        joinedAt: new Date().toISOString()
       };
-      if (!window.store.state.members) window.store.state.members = [];
-      window.store.state.members.push(newMember);
-      window.store.save();
+      window.store.addMemberToWorkspace(newMember, currentWsCode);
+
+      if (window.CloudModule) {
+        window.CloudModule.pushMemberToWorkspaceCloud(currentWsCode, newMember).catch(() => {});
+      }
 
       window.UI.showToast("Đã cấp tài khoản thành công! 🎉", `${fullName} (${role.toUpperCase()})`, "success");
-      this.switchProfileTab("info");
+      const form = document.getElementById("form-master-create-member");
+      if (form) form.reset();
+      this.updateMembersBadge();
+      this.renderSidebarMembers();
+      this.switchProfileTab("members");
       return;
     }
 
@@ -206,30 +230,48 @@ window.AuthModule = {
 
       const userCred = await tempApp.auth().createUserWithEmailAndPassword(fullEmail, password);
       const newUid = userCred.user.uid;
+      const newMemberData = {
+        id: newUid,
+        name: fullName,
+        email: fullEmail,
+        role: role,
+        avatar: role === "admin" ? "🛡️" : (role === "master" ? "👑" : (role === "guest" ? "👤" : "💻")),
+        status: "online",
+        workspaceCode: currentWsCode,
+        joinedAt: new Date().toISOString()
+      };
 
-      // Lưu thông tin vào Firestore
+      // Lưu thông tin vào Firestore & Supabase qua CloudModule
       if (this.db) {
         await this.db.collection("users").doc(newUid).set({
           uid: newUid,
           displayName: fullName,
           email: fullEmail,
           role: role,
-          avatar: role === "admin" ? "🛡️" : (role === "master" ? "👑" : "💻"),
-          workspaceCode: window.store.state.workspace.code || "MHENT-CORE-2026",
+          avatar: newMemberData.avatar,
+          workspaceCode: currentWsCode,
           createdBy: currentUser.id,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
       }
+
+      if (window.CloudModule) {
+        await window.CloudModule.pushMemberToWorkspaceCloud(currentWsCode, newMemberData);
+      }
+
+      window.store.addMemberToWorkspace(newMemberData, currentWsCode);
 
       await userCred.user.updateProfile({ displayName: fullName });
       await tempApp.delete(); // Dọn dẹp app phụ
 
       window.UI.showToast("Cấp tài khoản nhân sự thành công! 🚀", `Thành viên: ${fullName} (${fullEmail})`, "success");
       
-      // Reset form & chuyển về tab info
+      // Reset form & chuyển về tab xem thành viên
       const form = document.getElementById("form-master-create-member");
       if (form) form.reset();
-      this.switchProfileTab("info");
+      this.updateMembersBadge();
+      this.renderSidebarMembers();
+      this.switchProfileTab("members");
     } catch (error) {
       console.error("Lỗi cấp tài khoản:", error);
       let errMsg = error.message;
@@ -321,12 +363,27 @@ window.AuthModule = {
       else el.textContent = ws.code || "MHENT-CORE-2026";
     });
 
-    // Quyền cấp tài khoản: Chỉ hiển thị Tab cấp tài khoản nếu là Master hoặc Admin
+    // Quyền cấp tài khoản & Quyền xem thành viên (Dành riêng cho Master)
+    const isMaster = (user.role === "master");
+    const isMasterOrAdmin = (user.role === "master" || user.role === "admin");
+
     const masterTabBtn = document.getElementById("tab-btn-master-create-acc");
     if (masterTabBtn) {
-      const isMasterOrAdmin = (user.role === "master" || user.role === "admin");
       masterTabBtn.style.display = isMasterOrAdmin ? "block" : "none";
     }
+
+    const masterMembersTab = document.getElementById("tab-btn-master-members");
+    if (masterMembersTab) {
+      masterMembersTab.style.display = isMaster ? "block" : "none";
+    }
+
+    const sidebarToolbar = document.getElementById("sidebar-master-toolbar");
+    if (sidebarToolbar) {
+      sidebarToolbar.style.display = isMaster ? "block" : "none";
+    }
+
+    this.updateMembersBadge();
+    this.renderSidebarMembers();
   },
 
   toggleRole() {
@@ -376,13 +433,14 @@ window.AuthModule = {
 
     const workspaces = window.store.getUserWorkspaces();
     const currentCode = window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026";
+    const currentUser = window.store.state.currentUser || {};
 
     listEl.innerHTML = workspaces.map(ws => {
       const isActive = ws.code === currentCode;
       const roleLabel = (ws.role || "member").toUpperCase();
       const roleBadgeClass = ws.role === "master" ? "badge-primary" : (ws.role === "admin" ? "badge-warning" : "badge-purple");
       const iconSvg = this.getWorkspaceIconSvg(ws.icon || "planet");
-      const isMasterOrOwner = ws.role === "master" || ws.isOwner;
+      const isMasterOrOwner = ws.role === "master" || ws.isOwner || currentUser.role === "master";
 
       return `
         <div style="display: flex; align-items: center; justify-content: space-between; background: ${isActive ? 'rgba(99, 102, 241, 0.15)' : 'var(--bg-surface-elevated)'}; border: 1px solid ${isActive ? 'var(--primary)' : 'var(--border-subtle)'}; border-radius: var(--radius-sm); padding: 10px 12px; transition: var(--transition-fast);">
@@ -406,6 +464,7 @@ window.AuthModule = {
               <button class="btn btn-primary btn-sm" style="padding: 4px 10px; font-size: 11.5px;" onclick="window.AuthModule.selectWorkspace('${ws.code}')">Chuyển</button>
             `}
             ${isMasterOrOwner ? `
+              <button class="btn btn-secondary btn-sm" style="padding: 4px 7px; font-size: 11px;" onclick="window.AuthModule.openMembersModalFor('${ws.code}')" title="Xem người dùng trong Không Gian này (Master 👑)">👥</button>
               <button class="btn btn-ghost btn-sm" style="padding: 4px 6px; color: #ef4444;" onclick="window.AuthModule.handleDeleteWorkspace('${ws.code}')" title="Xóa Không Gian (Quyền Master)">🗑️</button>
             ` : `
               <button class="btn btn-ghost btn-sm" style="padding: 4px 6px; color: #f59e0b;" onclick="window.AuthModule.handleLeaveWorkspace('${ws.code}')" title="Rời Khỏi Không Gian">🚪</button>
@@ -478,6 +537,7 @@ window.AuthModule = {
     window.store.switchWorkspace(code);
     this.updateUserUI();
     this.renderWorkspacesList();
+    this.renderWorkspaceMembers();
 
     if (window.CloudModule) {
       window.CloudModule.bindWorkspace(code);
@@ -548,6 +608,280 @@ window.AuthModule = {
       }
 
       window.UI.showToast("Gia nhập Không Gian thành công! ⚡", `Không gian làm việc: ${ws.code}`, "success");
+    }
+  },
+
+  // ==========================================
+  // WORKSPACE MEMBERS MANAGEMENT (MASTER FEATURE)
+  // ==========================================
+
+  openMembersModal() {
+    this.switchProfileTab("members");
+    this.renderWorkspacesList();
+    window.UI.openModal("modal-team-switcher");
+  },
+
+  openMembersModalFor(wsCode) {
+    if (wsCode && wsCode !== (window.store.state.workspace ? window.store.state.workspace.code : "")) {
+      this.selectWorkspace(wsCode);
+    }
+    this.openMembersModal();
+  },
+
+  updateMembersBadge() {
+    const members = window.store.getWorkspaceMembers();
+    const count = members.length;
+
+    const badgeModal = document.getElementById("modal-members-count");
+    if (badgeModal) badgeModal.textContent = count;
+
+    const countAll = document.getElementById("count-all-members");
+    if (countAll) countAll.textContent = count;
+
+    const badgeSidebar = document.getElementById("sidebar-master-member-count");
+    if (badgeSidebar) badgeSidebar.textContent = count;
+
+    const pillSidebar = document.getElementById("sidebar-members-count-pill");
+    if (pillSidebar) pillSidebar.textContent = `${count} người`;
+  },
+
+  renderSidebarMembers() {
+    const container = document.getElementById("sidebar-members-list");
+    if (!container) return;
+
+    const members = window.store.getWorkspaceMembers();
+    const aiBotsHtml = `
+      <li class="sidebar-nav-item" onclick="window.AisaModule.setPersona('harmony')">
+        <div class="item-left">
+          <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#f472b6" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span>
+          <span>Harmony (AI)</span>
+        </div>
+        <span class="badge badge-success">Online</span>
+      </li>
+      <li class="sidebar-nav-item" onclick="window.AisaModule.setPersona('echo')">
+        <div class="item-left">
+          <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a855f7" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+          <span>Echo (AI)</span>
+        </div>
+        <span class="badge badge-purple">Online</span>
+      </li>
+    `;
+
+    const membersHtml = members.map(m => {
+      const statusClass = m.status === 'online' ? 'badge-success' : (m.status === 'away' ? 'badge-warning' : 'badge-secondary');
+      const statusText = m.status === 'online' ? 'Online' : (m.status === 'away' ? 'Vắng' : 'Offline');
+      const roleIcon = m.role === 'master' ? '👑' : (m.role === 'admin' ? '🛡️' : (m.role === 'guest' ? '👤' : '💻'));
+
+      return `
+        <li class="sidebar-nav-item" onclick="window.AuthModule.openMembersModal()" title="${m.name} (${m.role.toUpperCase()})">
+          <div class="item-left">
+            <span class="item-icon" style="font-size: 15px;">${m.avatar || roleIcon}</span>
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">${m.name}</span>
+          </div>
+          <span class="badge ${statusClass}" style="font-size: 9px; padding: 1px 5px;">${statusText}</span>
+        </li>
+      `;
+    }).join("");
+
+    container.innerHTML = aiBotsHtml + membersHtml;
+  },
+
+  renderWorkspaceMembers(filterQuery = null, roleFilter = null) {
+    const listEl = document.getElementById("workspace-members-list");
+    if (!listEl) return;
+
+    if (filterQuery !== null) this.memberSearchQuery = filterQuery.toLowerCase().trim();
+    if (roleFilter !== null) this.activeRoleFilter = roleFilter;
+
+    const currentUser = window.store.state.currentUser || {};
+    const currentWs = window.store.state.workspace || {};
+    const members = window.store.getWorkspaceMembers(currentWs.code);
+
+    this.updateMembersBadge();
+
+    let filtered = members;
+    if (this.activeRoleFilter && this.activeRoleFilter !== "all") {
+      filtered = filtered.filter(m => (m.role || "member") === this.activeRoleFilter);
+    }
+
+    if (this.memberSearchQuery) {
+      filtered = filtered.filter(m => 
+        (m.name && m.name.toLowerCase().includes(this.memberSearchQuery)) ||
+        (m.email && m.email.toLowerCase().includes(this.memberSearchQuery)) ||
+        (m.role && m.role.toLowerCase().includes(this.memberSearchQuery))
+      );
+    }
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align: center; padding: 32px 16px; color: var(--text-muted); background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border: 1px dashed var(--border-subtle);">
+          <div style="font-size: 28px; margin-bottom: 8px;">🔍</div>
+          <div style="font-weight: 700; font-size: 13px; color: var(--text-high);">Không tìm thấy người dùng phù hợp</div>
+          <div style="font-size: 11.5px; margin-top: 4px;">Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc</div>
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(m => {
+      const isSelf = m.id === currentUser.id;
+      const roleLabel = (m.role || "member").toUpperCase();
+      const roleBadgeClass = m.role === "master" ? "badge-primary" : (m.role === "admin" ? "badge-warning" : (m.role === "guest" ? "badge-secondary" : "badge-purple"));
+      const statusDotColor = m.status === 'online' ? 'var(--status-online, #10b981)' : (m.status === 'away' ? '#f59e0b' : '#64748b');
+      const isMasterUser = currentUser.role === "master" || (currentWs.role === "master");
+      const isSyncFailed = m.syncFailed === true;
+
+      return `
+        <div class="member-item-card ${isSyncFailed ? 'member-sync-failed' : ''}" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface-elevated); border: 1px solid ${isSyncFailed ? '#ef4444' : 'var(--border-subtle)'}; border-radius: var(--radius-sm); padding: 10px 12px; gap: 10px; transition: var(--transition-fast);">
+          <div style="display: flex; align-items: center; gap: 11px; flex: 1; min-width: 0;">
+            <div style="position: relative; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+              ${m.avatar || '👤'}
+              <span style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-radius: 50%; background: ${statusDotColor}; border: 2px solid var(--bg-surface-elevated);"></span>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-weight: 800; font-size: 13.5px; color: var(--text-high); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${m.name} ${isSelf ? '<span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">(Bạn)</span>' : ''}
+                </span>
+                <span class="badge ${roleBadgeClass}" style="font-size: 9.5px; padding: 1px 5px;">${roleLabel}</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+                ${m.email || 'internal@mhentuniverse.internal'}
+              </div>
+              ${isSyncFailed ? `
+                <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+                  <span style="font-size: 10.5px; color: #ef4444; font-weight: 700;">⚠️ Chưa lưu lên máy chủ</span>
+                  <button type="button" class="btn btn-ghost btn-sm" style="font-size: 10.5px; padding: 1px 6px; color: var(--primary); text-decoration: underline; font-weight: 700;" onclick="window.AuthModule.retryMemberSync('${m.id}')">🔄 Thử lại</button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Actions for Master -->
+          <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+            ${isMasterUser ? `
+              <select class="input-select" style="padding: 3px 6px; font-size: 11px; height: 28px; width: 92px; border-radius: 4px;" onchange="window.AuthModule.handleChangeMemberRole('${m.id}', this.value, '${m.role}')" ${isSelf ? 'title="Bạn là Master chủ không gian"' : ''}>
+                <option value="master" ${m.role === 'master' ? 'selected' : ''}>👑 Master</option>
+                <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>🛡️ Admin</option>
+                <option value="member" ${m.role === 'member' ? 'selected' : ''}>💻 Member</option>
+                <option value="guest" ${m.role === 'guest' ? 'selected' : ''}>👤 Guest</option>
+              </select>
+
+              ${!isSelf ? `
+                <button type="button" class="btn btn-ghost btn-sm" style="padding: 4px 6px; color: #ef4444;" onclick="window.AuthModule.handleRemoveMember('${m.id}', '${m.name.replace(/'/g, "\\'")}')" title="Gỡ thành viên khỏi Workspace">
+                  🗑️
+                </button>
+              ` : `
+                <span style="font-size: 13px; padding: 4px;" title="Chủ Không Gian">👑</span>
+              `}
+            ` : `
+              <span class="badge ${roleBadgeClass}" style="font-size: 10px;">${roleLabel}</span>
+            `}
+
+            <button type="button" class="btn btn-ghost btn-sm" style="padding: 4px 6px; color: var(--text-muted);" onclick="navigator.clipboard.writeText('${m.email}'); window.UI.showToast('Đã sao chép email!', '${m.email}', 'info');" title="Sao chép email">
+              📋
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  },
+
+  filterMembers(query) {
+    this.renderWorkspaceMembers(query, null);
+  },
+
+  setMemberRoleFilter(role, btn) {
+    const pills = document.querySelectorAll("#member-role-filter-pills .btn");
+    pills.forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    this.renderWorkspaceMembers(null, role);
+  },
+
+  async handleChangeMemberRole(userId, newRole, oldRole) {
+    const currentWsCode = (window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026").toUpperCase();
+    
+    // 1. Optimistic Local update
+    window.store.updateMemberRole(userId, newRole, currentWsCode);
+    this.renderWorkspaceMembers();
+    this.renderSidebarMembers();
+
+    // 2. Gửi Cloud
+    try {
+      if (window.CloudModule) {
+        await window.CloudModule.updateMemberRoleInCloud(currentWsCode, userId, newRole);
+      }
+      // Xóa cờ lỗi nếu có
+      const mem = window.store.getWorkspaceMembers(currentWsCode).find(m => m.id === userId);
+      if (mem) delete mem.syncFailed;
+      this.renderWorkspaceMembers();
+      window.UI.showToast("Cập nhật phân quyền thành công! ✨", `Vai trò mới: ${newRole.toUpperCase()}`, "success");
+    } catch (err) {
+      console.warn("Lỗi cập nhật role Cloud:", err);
+      // Gắn cờ syncFailed và hiện nút thử lại
+      const mem = window.store.getWorkspaceMembers(currentWsCode).find(m => m.id === userId);
+      if (mem) mem.syncFailed = true;
+      this.renderWorkspaceMembers();
+      window.UI.showToast("Không thể gửi yêu cầu lên máy chủ!", "Đã lưu tạm ở máy bạn. Bấm 'Thử lại' trên thẻ thành viên để gửi lại.", "error");
+    }
+  },
+
+  async handleRemoveMember(userId, memberName) {
+    const currentWsCode = (window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026").toUpperCase();
+
+    window.showConfirmPopup("Gỡ Thành Viên", `Bạn có chắc muốn gỡ [${memberName}] khỏi Không Gian này? Thành viên sẽ không thể truy cập các kênh của Không Gian này nữa.`, async () => {
+      try {
+        if (window.CloudModule) {
+          await window.CloudModule.removeMemberFromWorkspaceInCloud(currentWsCode, userId);
+        }
+        window.store.removeMemberFromWorkspace(userId, currentWsCode);
+        this.renderWorkspaceMembers();
+        this.renderSidebarMembers();
+        this.updateMembersBadge();
+        window.UI.showToast("Đã gỡ thành viên!", `Đã gỡ [${memberName}] khỏi Workspace`, "info");
+      } catch (err) {
+        window.UI.showToast("Không thể gỡ thành viên!", "Lỗi máy chủ đám mây: " + err.message, "error");
+      }
+    });
+  },
+
+  async retryMemberSync(userId) {
+    const currentWsCode = (window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026").toUpperCase();
+    const mem = window.store.getWorkspaceMembers(currentWsCode).find(m => m.id === userId);
+    if (!mem) return;
+
+    window.UI.showToast("Đang thử gửi lại lên máy chủ...", "", "info");
+    try {
+      if (window.CloudModule) {
+        await window.CloudModule.updateMemberRoleInCloud(currentWsCode, userId, mem.role);
+      }
+      delete mem.syncFailed;
+      this.renderWorkspaceMembers();
+      window.UI.showToast("Đồng bộ thành công! 🚀", `Thành viên [${mem.name}] đã được lưu trên Cloud`, "success");
+    } catch (err) {
+      window.UI.showToast("Vẫn không thể gửi!", "Vui lòng kiểm tra kết nối mạng và thử lại.", "error");
+    }
+  },
+
+  copyWorkspaceCode() {
+    const code = window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026";
+    navigator.clipboard.writeText(code);
+    window.UI.showToast("Đã sao chép mã Không Gian! 📋", code, "success");
+  },
+
+  async refreshMembersFromCloud() {
+    const currentWsCode = (window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026").toUpperCase();
+    window.UI.showToast("Đang đồng bộ từ máy chủ đám mây...", "", "info");
+    try {
+      if (window.CloudModule) {
+        await window.CloudModule.fetchWorkspaceMembers(currentWsCode);
+      }
+      this.renderWorkspaceMembers();
+      this.renderSidebarMembers();
+      this.updateMembersBadge();
+      window.UI.showToast("Đã cập nhật danh sách thành viên mới nhất! ⚡", "", "success");
+    } catch (e) {
+      window.UI.showToast("Lỗi đồng bộ Cloud!", e.message, "error");
     }
   }
 };

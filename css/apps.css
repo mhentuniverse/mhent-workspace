@@ -101,6 +101,55 @@
   border-radius: 4px;
 }
 
+/* Messenger-style Optimistic Chat & Retry Styles */
+.chat-status-indicator {
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+}
+.chat-status-indicator.sending {
+  animation: pulse 1s infinite alternate;
+  opacity: 0.85;
+}
+.chat-status-indicator.failed {
+  color: #ef4444;
+}
+
+.chat-message-row.msg-failed .chat-bubble {
+  border: 1px solid #ef4444 !important;
+  opacity: 0.9;
+}
+
+.chat-retry-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+}
+.chat-message-row.self .chat-retry-bar {
+  justify-content: flex-end;
+}
+.chat-failed-label {
+  font-size: 11px;
+  color: #ef4444;
+  font-weight: 700;
+}
+.btn-chat-resend {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.btn-chat-resend:hover {
+  background: #ef4444;
+  color: white;
+}
+
 .chat-input-bar {
   padding: 14px 20px;
   background: var(--bg-surface);

@@ -85,17 +85,32 @@ window.ChatModule = {
 
       const formattedText = this.formatMentions(m.text);
 
+      const statusIcon = m.status === 'sending'
+        ? '<span class="chat-status-indicator sending" title="Đang gửi lên máy chủ...">⏳</span>'
+        : (m.status === 'failed' ? '<span class="chat-status-indicator failed" title="Chưa gửi được lên máy chủ">⚠️</span>' : '');
+
+      const retryControl = m.status === 'failed' ? `
+        <div class="chat-retry-bar">
+          <span class="chat-failed-label">Chưa gửi được</span>
+          <button type="button" class="btn-chat-resend" onclick="window.ChatModule.resendMessage('${currentChannel}', '${m.id}')">
+            🔄 Gửi lại
+          </button>
+        </div>
+      ` : '';
+
       return `
-        <div class="chat-message-row ${m.isSelf ? 'self' : ''}">
+        <div class="chat-message-row ${m.isSelf ? 'self' : ''} ${m.status === 'failed' ? 'msg-failed' : ''}">
           <div class="chat-avt ${isBotClass}">${m.avt || '👤'}</div>
           <div class="chat-bubble-wrap">
             <div class="chat-meta">
               <span class="chat-sender-name">${m.sender}</span>
               <span class="chat-time">${m.time}</span>
+              ${statusIcon}
             </div>
             <div class="chat-bubble ${bubbleBotClass}">
               ${formattedText}
             </div>
+            ${retryControl}
           </div>
         </div>
       `;
@@ -129,23 +144,56 @@ window.ChatModule = {
       avt: user.avatar || "👤",
       time: timeStr,
       text: text,
-      isSelf: true
+      isSelf: true,
+      status: "sending"
     };
 
-    // Gửi qua Cloud Engine (Supabase + Firestore)
-    if (window.CloudModule) {
-      await window.CloudModule.pushChatMessage(currentChannel, newMsg);
-    } else {
-      window.store.addChatMessage(currentChannel, newMsg);
-    }
-
+    // 1. Optimistic Local Render: Hiện ngay trên màn hình như Messenger
     this.renderMessages();
+
+    // 2. Gửi qua Cloud Engine (Supabase + Firestore)
+    try {
+      if (window.CloudModule) {
+        await window.CloudModule.pushChatMessage(currentChannel, newMsg);
+      } else {
+        window.store.addChatMessage(currentChannel, newMsg);
+      }
+      window.store.updateChatMessageStatus(currentChannel, newMsg.id, "sent");
+      this.renderMessages();
+    } catch (err) {
+      console.warn("Lỗi gửi tin nhắn Cloud, chuyển sang trạng thái chờ gửi lại:", err);
+      window.store.updateChatMessageStatus(currentChannel, newMsg.id, "failed");
+      this.renderMessages();
+      window.UI.showToast("Không thể gửi tin nhắn!", "Tin nhắn đang lưu tạm ở máy bạn. Bấm 'Gửi lại' để thử lại.", "error");
+    }
 
     // Check for AISA mentions
     if (/@(AISA|Harmony|Echo)/i.test(text)) {
       if (window.AisaModule) {
         window.AisaModule.handleChatMention(text, currentChannel);
       }
+    }
+  },
+
+  async resendMessage(channel, msgId) {
+    const channelMsgs = window.store.state.chatChannels[channel] || [];
+    const msg = channelMsgs.find(m => m.id === msgId);
+    if (!msg) return;
+
+    msg.status = "sending";
+    this.renderMessages();
+
+    try {
+      if (window.CloudModule) {
+        await window.CloudModule.pushChatMessage(channel, msg);
+      }
+      window.store.updateChatMessageStatus(channel, msgId, "sent");
+      this.renderMessages();
+      window.UI.showToast("Đã gửi tin nhắn thành công! 🚀", "", "success");
+    } catch (err) {
+      window.store.updateChatMessageStatus(channel, msgId, "failed");
+      this.renderMessages();
+      window.UI.showToast("Vẫn không thể gửi!", "Vui lòng kiểm tra kết nối mạng rồi thử lại.", "error");
     }
   }
 };

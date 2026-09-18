@@ -392,3 +392,19 @@
 .badge-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 .badge-danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 .badge-purple { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+
+/* ==========================================
+   7. WORKSPACE MEMBERS MANAGEMENT CARDS
+   ========================================== */
+.member-item-card {
+  transition: all var(--transition-fast);
+}
+.member-item-card:hover {
+  border-color: var(--primary) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+.member-item-card.member-sync-failed {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.06) !important;
+}
