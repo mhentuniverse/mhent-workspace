@@ -57,6 +57,8 @@ window.AuthModule = {
 
   activeRoleFilter: "all",
   memberSearchQuery: "",
+  currentManageWsCode: "MHENT-CORE-2026",
+  manageSearchQuery: "",
 
   switchProfileTab(tabName) {
     const tabBtns = document.querySelectorAll(".profile-tab-btn");
@@ -66,21 +68,11 @@ window.AuthModule = {
 
     const infoPane = document.getElementById("profile-pane-info");
     const createPane = document.getElementById("profile-pane-create");
-    const membersPane = document.getElementById("profile-pane-members");
+    const wsManagePane = document.getElementById("profile-pane-ws-manage");
 
     if (infoPane) infoPane.style.display = tabName === "info" ? "block" : "none";
     if (createPane) createPane.style.display = tabName === "create" ? "block" : "none";
-    if (membersPane) {
-      membersPane.style.display = tabName === "members" ? "block" : "none";
-      if (tabName === "members") {
-        this.renderWorkspaceMembers();
-        if (window.CloudModule) {
-          window.CloudModule.fetchWorkspaceMembers().then(() => {
-            this.renderWorkspaceMembers();
-          }).catch(() => {});
-        }
-      }
-    }
+    if (wsManagePane) wsManagePane.style.display = tabName === "ws-manage" ? "block" : "none";
   },
 
   bindEvents() {
@@ -194,7 +186,7 @@ window.AuthModule = {
     const fullEmail = this.formatOrgEmail(username);
     window.UI.showToast("Đang khởi tạo tài khoản nhân sự...", `Email: ${fullEmail}`, "info");
 
-    const currentWsCode = (window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026").toUpperCase();
+    const currentWsCode = (this.currentManageWsCode || (window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026")).toUpperCase();
 
     if (!this.initialized || !this.auth) {
       // Local Mode
@@ -214,12 +206,12 @@ window.AuthModule = {
         window.CloudModule.pushMemberToWorkspaceCloud(currentWsCode, newMember).catch(() => {});
       }
 
-      window.UI.showToast("Đã cấp tài khoản thành công! 🎉", `${fullName} (${role.toUpperCase()})`, "success");
+      window.UI.showToast("Cấp tài khoản nhân sự thành công! 🎉", `Email: ${fullEmail} - Đã gán vào Không Gian [${currentWsCode}]`, "success");
       const form = document.getElementById("form-master-create-member");
       if (form) form.reset();
       this.updateMembersBadge();
       this.renderSidebarMembers();
-      this.switchProfileTab("members");
+      this.openWorkspaceManage(currentWsCode);
       return;
     }
 
@@ -335,6 +327,11 @@ window.AuthModule = {
     window.UI.showToast("Đã đăng xuất!", "Vui lòng đăng nhập lại để sử dụng workspace.", "info");
   },
 
+  getWorkspaceEmoji(icon) {
+    const map = { planet: "🪐", code: "💻", media: "🎬", game: "🎮", art: "🎨", rocket: "🚀", building: "🏢" };
+    return map[icon] || "🪐";
+  },
+
   updateUserUI() {
     const user = window.store.state.currentUser || {};
     const ws = window.store.state.workspace || {};
@@ -354,8 +351,8 @@ window.AuthModule = {
     const avtEls = document.querySelectorAll(".user-display-avatar");
     avtEls.forEach(el => el.textContent = user.avatar || "👤");
 
-    const wsNameEl = document.querySelector(".workspace-name");
-    if (wsNameEl) wsNameEl.textContent = ws.name || "MHEnt Universe HQ";
+    const wsNameEls = document.querySelectorAll(".workspace-name");
+    wsNameEls.forEach(el => el.textContent = ws.name || "MHEnt Universe HQ");
 
     const wsCodeEls = document.querySelectorAll(".workspace-code");
     wsCodeEls.forEach(el => {
@@ -363,18 +360,17 @@ window.AuthModule = {
       else el.textContent = ws.code || "MHENT-CORE-2026";
     });
 
-    // Quyền cấp tài khoản & Quyền xem thành viên (Dành riêng cho Master)
+    const wsIconEmoji = this.getWorkspaceEmoji(ws.icon || "planet");
+    const wsIconEls = document.querySelectorAll(".workspace-icon");
+    wsIconEls.forEach(el => el.textContent = wsIconEmoji);
+
+    // Quyền cấp tài khoản & Quyền quản trị (Dành riêng cho Master/Admin)
     const isMaster = (user.role === "master");
     const isMasterOrAdmin = (user.role === "master" || user.role === "admin");
 
     const masterTabBtn = document.getElementById("tab-btn-master-create-acc");
     if (masterTabBtn) {
       masterTabBtn.style.display = isMasterOrAdmin ? "block" : "none";
-    }
-
-    const masterMembersTab = document.getElementById("tab-btn-master-members");
-    if (masterMembersTab) {
-      masterMembersTab.style.display = isMaster ? "block" : "none";
     }
 
     const sidebarToolbar = document.getElementById("sidebar-master-toolbar");
@@ -439,36 +435,37 @@ window.AuthModule = {
       const isActive = ws.code === currentCode;
       const roleLabel = (ws.role || "member").toUpperCase();
       const roleBadgeClass = ws.role === "master" ? "badge-primary" : (ws.role === "admin" ? "badge-warning" : "badge-purple");
-      const iconSvg = this.getWorkspaceIconSvg(ws.icon || "planet");
-      const isMasterOrOwner = ws.role === "master" || ws.isOwner || currentUser.role === "master";
+      const iconEmoji = this.getWorkspaceEmoji(ws.icon || "planet");
 
       return `
         <div style="display: flex; align-items: center; justify-content: space-between; background: ${isActive ? 'rgba(99, 102, 241, 0.15)' : 'var(--bg-surface-elevated)'}; border: 1px solid ${isActive ? 'var(--primary)' : 'var(--border-subtle)'}; border-radius: var(--radius-sm); padding: 10px 12px; transition: var(--transition-fast);">
-          <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
-            <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              ${iconSvg}
+          <!-- Nhấp vào thẻ để mở ngay giao diện Chỉnh Sửa & Cấp Quyền của Không Gian đó -->
+          <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; cursor: pointer;" onclick="window.AuthModule.openWorkspaceManage('${ws.code}')" title="Bấm để Chỉnh Sửa & Cấp Quyền Không Gian này 👑">
+            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+              ${iconEmoji}
             </div>
             <div style="flex: 1; min-width: 0;">
-              <div style="font-weight: 800; font-size: 13.5px; color: var(--text-high); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ws.name}</div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-weight: 800; font-size: 13.5px; color: var(--text-high); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ws.name}</span>
+                <span style="font-size: 11px; opacity: 0.7;">✏️</span>
+              </div>
               <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
                 <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted);">${ws.code}</span>
                 <span class="badge ${roleBadgeClass}" style="font-size: 9.5px; padding: 1px 5px;">${roleLabel}</span>
               </div>
             </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px; margin-left: 8px;">
+
+          <!-- Các nút thao tác bên phải -->
+          <div style="display: flex; align-items: center; gap: 6px; margin-left: 8px; flex-shrink: 0;">
             ${isActive ? `
               <span style="font-size: 11px; font-weight: 700; color: var(--status-online); display: flex; align-items: center; gap: 4px;">🟢 Đang dùng</span>
-              <button class="btn btn-secondary btn-sm" style="padding: 4px 7px; font-size: 11px;" onclick="navigator.clipboard.writeText('${ws.code}'); window.UI.showToast('Đã copy mã!', '${ws.code}', 'success');" title="Sao chép mã">📋</button>
             ` : `
-              <button class="btn btn-primary btn-sm" style="padding: 4px 10px; font-size: 11.5px;" onclick="window.AuthModule.selectWorkspace('${ws.code}')">Chuyển</button>
+              <button type="button" class="btn btn-primary btn-sm" style="padding: 4px 10px; font-size: 11.5px;" onclick="window.AuthModule.selectWorkspace('${ws.code}')" title="Chuyển sang làm việc tại Không Gian này">Chuyển</button>
             `}
-            ${isMasterOrOwner ? `
-              <button class="btn btn-secondary btn-sm" style="padding: 4px 7px; font-size: 11px;" onclick="window.AuthModule.openMembersModalFor('${ws.code}')" title="Xem người dùng trong Không Gian này (Master 👑)">👥</button>
-              <button class="btn btn-ghost btn-sm" style="padding: 4px 6px; color: #ef4444;" onclick="window.AuthModule.handleDeleteWorkspace('${ws.code}')" title="Xóa Không Gian (Quyền Master)">🗑️</button>
-            ` : `
-              <button class="btn btn-ghost btn-sm" style="padding: 4px 6px; color: #f59e0b;" onclick="window.AuthModule.handleLeaveWorkspace('${ws.code}')" title="Rời Khỏi Không Gian">🚪</button>
-            `}
+            <button type="button" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="window.AuthModule.openWorkspaceManage('${ws.code}')" title="Chỉnh Sửa & Cấp Quyền Không Gian này">
+              ⚙️ Quản Lý
+            </button>
           </div>
         </div>
       `;
@@ -534,17 +531,34 @@ window.AuthModule = {
   },
 
   selectWorkspace(code) {
-    window.store.switchWorkspace(code);
+    const ws = window.store.switchWorkspace(code);
     this.updateUserUI();
     this.renderWorkspacesList();
-    this.renderWorkspaceMembers();
+
+    // Nếu đang ở màn hình quản trị workspace, cập nhật lại trạng thái nút kích hoạt
+    if (this.currentManageWsCode) {
+      this.openWorkspaceManage(this.currentManageWsCode);
+    }
+
+    // Refresh toàn bộ các mô-đun ứng dụng theo Không Gian mới
+    if (window.ChatModule && typeof window.ChatModule.renderMessages === "function") {
+      window.ChatModule.renderMessages();
+    }
+    if (window.TodoModule && typeof window.TodoModule.renderBoard === "function") {
+      window.TodoModule.renderBoard();
+    }
+    if (window.DriveModule && typeof window.DriveModule.renderFiles === "function") {
+      window.DriveModule.renderFiles();
+    }
+    if (window.CalendarModule && typeof window.CalendarModule.renderCalendar === "function") {
+      window.CalendarModule.renderCalendar();
+    }
 
     if (window.CloudModule) {
       window.CloudModule.bindWorkspace(code);
     }
 
-    const ws = window.store.state.workspace;
-    window.UI.showToast("Đã chuyển Không Gian! ⚡", `${ws.name} [${ws.code}] - Quyền: ${ws.role.toUpperCase()}`, "success");
+    window.UI.showToast("Đã chuyển Không Gian! ⚡", `${ws.name} [${ws.code}] - Quyền: ${(ws.role || "MEMBER").toUpperCase()}`, "success");
   },
 
   handleDeleteWorkspace(code) {
@@ -612,20 +626,257 @@ window.AuthModule = {
   },
 
   // ==========================================
-  // WORKSPACE MEMBERS MANAGEMENT (MASTER FEATURE)
+  // WORKSPACE DRILL-DOWN: EDIT & MEMBERS MANAGEMENT
   // ==========================================
 
   openMembersModal() {
-    this.switchProfileTab("members");
-    this.renderWorkspacesList();
-    window.UI.openModal("modal-team-switcher");
+    const code = window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026";
+    this.openWorkspaceManage(code);
   },
 
   openMembersModalFor(wsCode) {
-    if (wsCode && wsCode !== (window.store.state.workspace ? window.store.state.workspace.code : "")) {
-      this.selectWorkspace(wsCode);
+    this.openWorkspaceManage(wsCode);
+  },
+
+  openWorkspaceManage(wsCode) {
+    const code = (wsCode || (window.store.state.workspace ? window.store.state.workspace.code : "MHENT-CORE-2026")).toUpperCase();
+    this.currentManageWsCode = code;
+
+    const workspaces = window.store.getUserWorkspaces();
+    const targetWs = workspaces.find(w => w.code === code) || {
+      code: code,
+      name: `Workspace [${code}]`,
+      icon: "planet",
+      role: "member"
+    };
+
+    // Đổ dữ liệu vào form Chỉnh Sửa Không Gian
+    const nameInput = document.getElementById("ws-manage-name-input");
+    if (nameInput) nameInput.value = targetWs.name;
+
+    const iconSelect = document.getElementById("ws-manage-icon-select");
+    if (iconSelect) iconSelect.value = targetWs.icon || "planet";
+
+    const codeInput = document.getElementById("ws-manage-code-input");
+    if (codeInput) codeInput.value = targetWs.code;
+
+    const codeBadge = document.getElementById("ws-manage-code-badge");
+    if (codeBadge) codeBadge.textContent = targetWs.code;
+
+    const iconDisplay = document.getElementById("ws-manage-icon-display");
+    if (iconDisplay) iconDisplay.textContent = this.getWorkspaceEmoji(targetWs.icon || "planet");
+
+    // Hiển thị trạng thái kích hoạt
+    const activeWs = window.store.state.workspace || {};
+    const isActive = activeWs.code === targetWs.code;
+    const activeStatusEl = document.getElementById("ws-manage-active-status");
+    if (activeStatusEl) {
+      if (isActive) {
+        activeStatusEl.innerHTML = `<span class="badge badge-success" style="font-size: 11px; padding: 4px 9px; font-weight: 700;">🟢 Đang Làm Việc Tại Đây</span>`;
+      } else {
+        activeStatusEl.innerHTML = `<button type="button" class="btn btn-primary btn-sm" onclick="window.AuthModule.selectWorkspace('${targetWs.code}')" style="font-size: 11px; padding: 4px 10px; font-weight: 700;">⚡ Chọn Làm Việc Tại Đây</button>`;
+      }
     }
-    this.openMembersModal();
+
+    // Hiển thị nút Xóa / Rời Không Gian
+    const currentUser = window.store.state.currentUser || {};
+    const isMaster = targetWs.role === "master" || targetWs.isOwner || currentUser.role === "master";
+    const deleteBtn = document.getElementById("btn-ws-manage-delete");
+    if (deleteBtn) {
+      if (isMaster) {
+        deleteBtn.textContent = "🗑️ Xóa WS";
+        deleteBtn.onclick = () => window.AuthModule.handleDeleteWorkspace(targetWs.code);
+        deleteBtn.style.display = workspaces.length > 1 ? "block" : "none";
+      } else {
+        deleteBtn.textContent = "🚪 Rời WS";
+        deleteBtn.onclick = () => window.AuthModule.handleLeaveWorkspace(targetWs.code);
+        deleteBtn.style.display = "block";
+      }
+    }
+
+    // Render danh sách thành viên của đúng Không Gian này
+    this.renderManageWorkspaceMembers(code);
+
+    // Mở pane và hiển thị Modal
+    this.switchProfileTab("ws-manage");
+    window.UI.openModal("modal-team-switcher");
+
+    // Đồng bộ thêm dữ liệu mới từ Cloud
+    if (window.CloudModule) {
+      window.CloudModule.fetchWorkspaceMembers(code).then(() => {
+        this.renderManageWorkspaceMembers(code);
+      }).catch(() => {});
+    }
+  },
+
+  backToWorkspacesList() {
+    this.switchProfileTab("info");
+    this.renderWorkspacesList();
+  },
+
+  handleSaveWorkspaceInfo() {
+    const nameInput = document.getElementById("ws-manage-name-input");
+    const iconSelect = document.getElementById("ws-manage-icon-select");
+    if (!nameInput || !nameInput.value.trim()) {
+      window.UI.showToast("Tên Không Gian không được để trống!", "", "warning");
+      return;
+    }
+
+    const newName = nameInput.value.trim();
+    const newIcon = iconSelect ? iconSelect.value : "planet";
+    const code = this.currentManageWsCode;
+
+    const updated = window.store.updateWorkspace(code, { name: newName, icon: newIcon });
+    if (updated) {
+      this.updateUserUI();
+      this.renderWorkspacesList();
+
+      const iconDisplay = document.getElementById("ws-manage-icon-display");
+      if (iconDisplay) iconDisplay.textContent = this.getWorkspaceEmoji(newIcon);
+
+      if (window.CloudModule) {
+        window.CloudModule.saveWorkspaceToSupabase(updated);
+      }
+
+      window.UI.showToast("Đã lưu thay đổi Không Gian! ✨", `Tên mới: ${updated.name}`, "success");
+    }
+  },
+
+  renderManageWorkspaceMembers(wsCode, filterQuery = null) {
+    const listEl = document.getElementById("ws-manage-members-list");
+    if (!listEl) return;
+
+    const targetCode = (wsCode || this.currentManageWsCode || "MHENT-CORE-2026").toUpperCase();
+    const currentUser = window.store.state.currentUser || {};
+    const workspaces = window.store.getUserWorkspaces();
+    const targetWs = workspaces.find(w => w.code === targetCode) || {};
+    const isMasterUser = currentUser.role === "master" || targetWs.role === "master" || targetWs.isOwner;
+
+    if (filterQuery !== null) {
+      this.manageSearchQuery = filterQuery.toLowerCase().trim();
+    }
+
+    const members = window.store.getWorkspaceMembers(targetCode);
+
+    const countEl = document.getElementById("ws-manage-members-count");
+    if (countEl) countEl.textContent = members.length;
+
+    let filtered = members;
+    if (this.manageSearchQuery) {
+      filtered = filtered.filter(m =>
+        (m.name && m.name.toLowerCase().includes(this.manageSearchQuery)) ||
+        (m.email && m.email.toLowerCase().includes(this.manageSearchQuery)) ||
+        (m.role && m.role.toLowerCase().includes(this.manageSearchQuery))
+      );
+    }
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align: center; padding: 20px 10px; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px dashed var(--border-subtle); font-size: 12px;">
+          Chưa có thành viên nào khác trong Không Gian này.
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(m => {
+      const isSelf = m.id === currentUser.id;
+      const roleLabel = (m.role || "member").toUpperCase();
+      const roleBadgeClass = m.role === "master" ? "badge-primary" : (m.role === "admin" ? "badge-warning" : (m.role === "guest" ? "badge-secondary" : "badge-purple"));
+      const statusDotColor = m.status === 'online' ? 'var(--status-online, #10b981)' : (m.status === 'away' ? '#f59e0b' : '#64748b');
+
+      return `
+        <div class="member-item-card" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 10px; gap: 8px; transition: var(--transition-fast);">
+          <div style="display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0;">
+            <div style="position: relative; flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 17px;">
+              ${m.avatar || '👤'}
+              <span style="position: absolute; bottom: 0; right: 0; width: 9px; height: 9px; border-radius: 50%; background: ${statusDotColor}; border: 2px solid var(--bg-surface-elevated);"></span>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 5px;">
+                <span style="font-weight: 800; font-size: 12.5px; color: var(--text-high); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${m.name} ${isSelf ? '<span style="font-size: 10.5px; color: var(--text-muted); font-weight: 600;">(Bạn)</span>' : ''}
+                </span>
+                <span class="badge ${roleBadgeClass}" style="font-size: 9px; padding: 1px 4px;">${roleLabel}</span>
+              </div>
+              <div style="font-size: 10.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">
+                ${m.email || 'internal@mhentuniverse.internal'}
+              </div>
+            </div>
+          </div>
+
+          <!-- Phân quyền & Quản lý cho Master/Admin -->
+          <div style="display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
+            ${isMasterUser ? `
+              <select class="input-select" style="padding: 2px 4px; font-size: 10.5px; height: 26px; width: 88px; border-radius: 4px;" onchange="window.AuthModule.handleChangeMemberRoleInWs('${m.id}', this.value, '${targetCode}')" ${isSelf ? 'title="Bạn là Master chủ không gian"' : ''}>
+                <option value="master" ${m.role === 'master' ? 'selected' : ''}>👑 Master</option>
+                <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>🛡️ Admin</option>
+                <option value="member" ${m.role === 'member' ? 'selected' : ''}>💻 Member</option>
+                <option value="guest" ${m.role === 'guest' ? 'selected' : ''}>👤 Guest</option>
+              </select>
+
+              ${!isSelf ? `
+                <button type="button" class="btn btn-ghost btn-sm" style="padding: 3px 5px; color: #ef4444; font-size: 12px;" onclick="window.AuthModule.handleRemoveMemberFromWs('${m.id}', '${m.name.replace(/'/g, "\\'")}', '${targetCode}')" title="Gỡ thành viên">
+                  🗑️
+                </button>
+              ` : `
+                <span style="font-size: 12px; padding: 2px;" title="Chủ Không Gian">👑</span>
+              `}
+            ` : `
+              <span class="badge ${roleBadgeClass}" style="font-size: 9.5px;">${roleLabel}</span>
+            `}
+
+            <button type="button" class="btn btn-ghost btn-sm" style="padding: 3px 5px; color: var(--text-muted); font-size: 12px;" onclick="navigator.clipboard.writeText('${m.email}'); window.UI.showToast('Đã sao chép email!', '${m.email}', 'info');" title="Sao chép email">
+              📋
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  },
+
+  filterManageMembers(query) {
+    this.renderManageWorkspaceMembers(this.currentManageWsCode, query);
+  },
+
+  async handleChangeMemberRoleInWs(userId, newRole, wsCode) {
+    const targetCode = (wsCode || this.currentManageWsCode || "MHENT-CORE-2026").toUpperCase();
+    window.store.updateMemberRole(userId, newRole, targetCode);
+    this.renderManageWorkspaceMembers(targetCode);
+    this.renderSidebarMembers();
+
+    try {
+      if (window.CloudModule) {
+        await window.CloudModule.updateMemberRoleInCloud(targetCode, userId, newRole);
+      }
+      window.UI.showToast("Cập nhật phân quyền thành công! ✨", `Vai trò mới: ${newRole.toUpperCase()}`, "success");
+    } catch (err) {
+      console.warn("Lỗi cập nhật role Cloud:", err);
+      window.UI.showToast("Không thể gửi yêu cầu lên máy chủ!", "Đã lưu tạm ở máy bạn.", "error");
+    }
+  },
+
+  async handleRemoveMemberFromWs(userId, memberName, wsCode) {
+    const targetCode = (wsCode || this.currentManageWsCode || "MHENT-CORE-2026").toUpperCase();
+
+    window.showConfirmPopup("Gỡ Thành Viên", `Bạn có chắc muốn gỡ [${memberName}] khỏi Không Gian này?`, async () => {
+      try {
+        if (window.CloudModule) {
+          await window.CloudModule.removeMemberFromWorkspaceInCloud(targetCode, userId);
+        }
+        window.store.removeMemberFromWorkspace(userId, targetCode);
+        this.renderManageWorkspaceMembers(targetCode);
+        this.renderSidebarMembers();
+        this.updateMembersBadge();
+        window.UI.showToast("Đã gỡ thành viên!", `Đã gỡ [${memberName}] khỏi Không Gian`, "info");
+      } catch (err) {
+        window.UI.showToast("Không thể gỡ thành viên!", err.message, "error");
+      }
+    });
+  },
+
+  openCreateAccountForCurrentWorkspace() {
+    this.switchProfileTab("create");
   },
 
   updateMembersBadge() {

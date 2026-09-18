@@ -30,6 +30,11 @@ class WorkspaceStore {
         if (!parsed.members || !Array.isArray(parsed.members) || parsed.members.length === 0) {
           parsed.members = this.getDefaultMembers();
         }
+        if (!parsed.chatChannelsByWorkspace) {
+          parsed.chatChannelsByWorkspace = {
+            "MHENT-CORE-2026": parsed.chatChannels || { general: [], media: [], dev: [] }
+          };
+        }
         return parsed;
       } catch (e) {
         console.warn("Error parsing stored state, resetting to clean defaults", e);
@@ -52,7 +57,14 @@ class WorkspaceStore {
       ],
       members: this.getDefaultMembers(),
 
-      // 1. Chat Messages (Trống để người dùng tự tạo)
+      // 1. Chat Messages (Lưu riêng biệt theo từng Workspace Code)
+      chatChannelsByWorkspace: {
+        "MHENT-CORE-2026": {
+          general: [],
+          media: [],
+          dev: []
+        }
+      },
       chatChannels: {
         general: [],
         media: [],
@@ -114,10 +126,18 @@ class WorkspaceStore {
   }
 
   addChatMessage(channel, msg) {
-    if (!this.state.chatChannels[channel]) {
-      this.state.chatChannels[channel] = [];
+    const wsCode = (this.state.workspace ? this.state.workspace.code : "MHENT-CORE-2026").toUpperCase();
+    if (!this.state.chatChannelsByWorkspace) {
+      this.state.chatChannelsByWorkspace = {};
     }
-    this.state.chatChannels[channel].push(msg);
+    if (!this.state.chatChannelsByWorkspace[wsCode]) {
+      this.state.chatChannelsByWorkspace[wsCode] = { general: [], media: [], dev: [] };
+    }
+    if (!this.state.chatChannelsByWorkspace[wsCode][channel]) {
+      this.state.chatChannelsByWorkspace[wsCode][channel] = [];
+    }
+    this.state.chatChannelsByWorkspace[wsCode][channel].push(msg);
+    this.state.chatChannels = this.state.chatChannelsByWorkspace[wsCode];
     this.save();
   }
 
@@ -313,12 +333,13 @@ class WorkspaceStore {
   }
 
   switchWorkspace(code) {
+    const cleanCode = (code || "MHENT-CORE-2026").toUpperCase();
     const workspaces = this.getUserWorkspaces();
-    const targetWs = workspaces.find(w => w.code === code) || {
-      code: code,
-      name: `Workspace [${code}]`,
+    const targetWs = workspaces.find(w => w.code === cleanCode) || {
+      code: cleanCode,
+      name: `Workspace [${cleanCode}]`,
       role: "member",
-      icon: "🏢"
+      icon: "planet"
     };
 
     this.state.workspace = targetWs;
@@ -328,7 +349,44 @@ class WorkspaceStore {
       else if (targetWs.role === "admin") this.state.currentUser.avatar = "🛡️";
       else this.state.currentUser.avatar = "💻";
     }
+
+    // Tách biệt tin nhắn chat theo Workspace
+    if (!this.state.chatChannelsByWorkspace) {
+      this.state.chatChannelsByWorkspace = {};
+    }
+    if (!this.state.chatChannelsByWorkspace[cleanCode]) {
+      this.state.chatChannelsByWorkspace[cleanCode] = {
+        general: [],
+        media: [],
+        dev: []
+      };
+    }
+    this.state.chatChannels = this.state.chatChannelsByWorkspace[cleanCode];
+
     this.save();
+    return targetWs;
+  }
+
+  updateWorkspace(code, updates = {}) {
+    const cleanCode = (code || "").toUpperCase();
+    const workspaces = this.getUserWorkspaces();
+    const idx = workspaces.findIndex(w => w.code === cleanCode);
+    if (idx >= 0) {
+      if (updates.name && updates.name.trim()) {
+        workspaces[idx].name = updates.name.trim();
+      }
+      if (updates.icon) {
+        workspaces[idx].icon = updates.icon;
+      }
+      this.state.userWorkspaces = workspaces;
+
+      if (this.state.workspace && this.state.workspace.code === cleanCode) {
+        this.state.workspace = { ...this.state.workspace, ...workspaces[idx] };
+      }
+      this.save();
+      return workspaces[idx];
+    }
+    return null;
   }
 
   deleteWorkspace(code) {
@@ -425,12 +483,16 @@ class WorkspaceStore {
   // ==========================================
 
   updateChatMessageStatus(channel, msgId, status) {
-    if (!this.state.chatChannels || !this.state.chatChannels[channel]) return;
-    const msg = this.state.chatChannels[channel].find(m => m.id === msgId);
-    if (msg) {
-      msg.status = status; // 'sending' | 'sent' | 'failed'
-      this.save();
+    const wsCode = (this.state.workspace ? this.state.workspace.code : "MHENT-CORE-2026").toUpperCase();
+    if (this.state.chatChannels && this.state.chatChannels[channel]) {
+      const msg = this.state.chatChannels[channel].find(m => m.id === msgId);
+      if (msg) msg.status = status;
     }
+    if (this.state.chatChannelsByWorkspace && this.state.chatChannelsByWorkspace[wsCode] && this.state.chatChannelsByWorkspace[wsCode][channel]) {
+      const msg2 = this.state.chatChannelsByWorkspace[wsCode][channel].find(m => m.id === msgId);
+      if (msg2) msg2.status = status;
+    }
+    this.save();
   }
 }
 

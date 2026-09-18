@@ -86,21 +86,22 @@
          ========================================== -->
     <aside id="context-sidebar">
       <div class="sidebar-header">
-        <div class="workspace-badge" onclick="window.AuthModule.openTeamModal()">
-          <div>
-            <div class="workspace-name">MHEnt Universe HQ</div>
+        <div class="workspace-badge" onclick="window.AuthModule.openTeamModal()" style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; min-width: 0;" title="Bấm để mở Hồ Sơ & Quản Trị Không Gian">
+          <div class="workspace-icon" style="font-size: 20px; width: 34px; height: 34px; border-radius: var(--radius-sm); background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🪐</div>
+          <div style="flex: 1; min-width: 0;">
+            <div class="workspace-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">MHEnt Universe HQ</div>
             <span class="workspace-code">MHENT-CORE-2026</span>
           </div>
         </div>
-        <span class="badge badge-primary user-display-role">MASTER</span>
+        <span class="badge badge-primary user-display-role" style="margin-left: 8px;">MASTER</span>
       </div>
 
-      <!-- Quick Action Toolbar for Master: View Workspace Members -->
+      <!-- Quick Action Toolbar for Master: Edit & Permissions for Current Workspace -->
       <div id="sidebar-master-toolbar" style="padding: 8px 16px 10px 16px; border-bottom: 1px solid var(--border-subtle); display: none;">
-        <button type="button" id="sidebar-btn-view-members" class="btn btn-ghost btn-sm" onclick="window.AuthModule.openMembersModal()" style="width: 100%; font-size: 11.5px; padding: 7px 10px; background: rgba(99, 102, 241, 0.1); border: 1px dashed rgba(99, 102, 241, 0.35); border-radius: var(--radius-sm); color: var(--primary-light); display: flex; align-items: center; justify-content: space-between; transition: var(--transition-fast);">
+        <button type="button" id="sidebar-btn-view-members" class="btn btn-ghost btn-sm" onclick="window.AuthModule.openWorkspaceManage(window.store.state.workspace ? window.store.state.workspace.code : 'MHENT-CORE-2026')" style="width: 100%; font-size: 11.5px; padding: 7px 10px; background: rgba(99, 102, 241, 0.1); border: 1px dashed rgba(99, 102, 241, 0.35); border-radius: var(--radius-sm); color: var(--primary-light); display: flex; align-items: center; justify-content: space-between; transition: var(--transition-fast);">
           <span style="display: flex; align-items: center; gap: 6px;">
             <span>👑</span>
-            <span style="font-weight: 700;">Người dùng trong Không Gian</span>
+            <span style="font-weight: 700;">Chỉnh Sửa & Cấp Quyền WS</span>
           </span>
           <span class="badge badge-primary" id="sidebar-master-member-count" style="font-size: 10px; padding: 2px 6px;">4</span>
         </button>
@@ -663,8 +664,7 @@
       <div class="modal-body">
         <!-- Tabs in Profile Modal -->
         <div style="display: flex; gap: 8px; margin-bottom: 20px; background: var(--bg-surface-elevated); padding: 4px; border-radius: var(--radius-sm);">
-          <button type="button" class="btn profile-tab-btn active" data-tab="info" onclick="window.AuthModule.switchProfileTab('info')" style="flex: 1; padding: 8px; font-size: 13px;">👤 Hồ Sơ & Mã Team</button>
-          <button type="button" class="btn profile-tab-btn" id="tab-btn-master-members" data-tab="members" onclick="window.AuthModule.switchProfileTab('members')" style="flex: 1; padding: 8px; font-size: 13px; display: none;">👑 Thành Viên WS (<span id="modal-members-count">4</span>)</button>
+          <button type="button" class="btn profile-tab-btn active" data-tab="info" onclick="window.AuthModule.switchProfileTab('info')" style="flex: 1; padding: 8px; font-size: 13px;">👤 Hồ Sơ & Không Gian</button>
           <button type="button" class="btn profile-tab-btn" id="tab-btn-master-create-acc" data-tab="create" onclick="window.AuthModule.switchProfileTab('create')" style="flex: 1; padding: 8px; font-size: 13px; display: none;">➕ Cấp Tài Khoản</button>
         </div>
 
@@ -689,7 +689,10 @@
           <!-- Danh sách Không Gian Của Tôi -->
           <div class="form-group" style="margin-top: 18px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <label class="form-label" style="margin-bottom: 0;">Không Gian Làm Việc Của Tôi</label>
+              <div>
+                <label class="form-label" style="margin-bottom: 0; display: inline-block;">Không Gian Làm Việc Của Tôi</label>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">(Nhấp vào Không Gian để Chỉnh Sửa & Cấp Quyền 👑)</div>
+              </div>
               <div style="display: flex; gap: 6px;">
                 <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.toggleCreateWorkspaceBox()" style="font-size: 11.5px; padding: 4px 8px;">➕ Tạo Mới</button>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.toggleJoinWorkspaceBox()" style="font-size: 11.5px; padding: 4px 8px;">🔗 Nhập Mã</button>
@@ -785,52 +788,95 @@
           </form>
         </div>
 
-        <!-- Pane 3: Master Workspace Members View & Management (Only for Master) -->
-        <div id="profile-pane-members" style="display: none;">
-          <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <div style="font-weight: 800; font-size: 13.5px; color: var(--text-high); display: flex; align-items: center; gap: 6px;">
-                <span>🪐</span>
-                <span class="workspace-name">MHEnt Universe HQ</span>
-                <span class="badge badge-primary workspace-code" style="font-family: var(--font-mono); font-size: 10px;">MHENT-CORE-2026</span>
+        <!-- Pane 3: Workspace Drill-down: Edit Workspace & Manage Members / Permissions -->
+        <div id="profile-pane-ws-manage" style="display: none;">
+          <!-- Navigation & Header Bar -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.backToWorkspacesList()" style="font-size: 12px; display: flex; align-items: center; gap: 5px;">
+              ← Quay Lại
+            </button>
+            <div id="ws-manage-active-status">
+              <!-- Rendered: e.g. <span class="badge badge-success">🟢 Đang Làm Việc</span> or switch button -->
+            </div>
+          </div>
+
+          <!-- Section 1: ⚙️ Chỉnh Sửa Thông Tin Không Gian -->
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;">
+            <div style="font-weight: 800; font-size: 13.5px; margin-bottom: 10px; color: var(--text-high); display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 6px;">
+                <span id="ws-manage-icon-display" style="font-size: 18px;">🪐</span>
+                <span>Chỉnh Sửa Không Gian</span>
+              </span>
+              <span class="badge badge-primary" id="ws-manage-code-badge" style="font-family: var(--font-mono); font-size: 10.5px;">MHENT-CORE-2026</span>
+            </div>
+
+            <form id="form-edit-workspace-info" onsubmit="event.preventDefault(); window.AuthModule.handleSaveWorkspaceInfo();">
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div>
+                  <label class="form-label" style="font-size: 11.5px; margin-bottom: 4px;">Tên Không Gian Làm Việc</label>
+                  <input type="text" class="input-text" id="ws-manage-name-input" placeholder="Tên không gian..." required>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  <div style="flex: 1;">
+                    <label class="form-label" style="font-size: 11.5px; margin-bottom: 4px;">Biểu Tượng</label>
+                    <select class="input-select" id="ws-manage-icon-select" style="height: 38px;">
+                      <option value="planet">🪐 Planet</option>
+                      <option value="code">💻 Dev</option>
+                      <option value="media">🎬 Media</option>
+                      <option value="game">🎮 Game</option>
+                      <option value="art">🎨 Studio</option>
+                      <option value="rocket">🚀 Launch</option>
+                      <option value="building">🏢 Office</option>
+                    </select>
+                  </div>
+                  <div style="flex: 1;">
+                    <label class="form-label" style="font-size: 11.5px; margin-bottom: 4px;">Mã Định Danh (Code)</label>
+                    <div style="display: flex; gap: 4px;">
+                      <input type="text" class="input-text" id="ws-manage-code-input" readonly style="font-family: var(--font-mono); background: rgba(0,0,0,0.2); font-size: 11px;">
+                      <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.copyWorkspaceCode(document.getElementById('ws-manage-code-input').value)" title="Sao chép mã mời">📋</button>
+                    </div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 4px;">
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-save-ws-info" style="flex: 1; padding: 8px;">
+                    💾 Lưu Thay Đổi Không Gian
+                  </button>
+                </div>
               </div>
-              <span class="badge badge-success" id="badge-cloud-sync-status" style="font-size: 10px;">🟢 Cloud Synced</span>
-            </div>
-            <div style="font-size: 12px; color: var(--text-medium); line-height: 1.5;">
-              👑 <strong>Quyền Hạn Master:</strong> Danh sách toàn bộ người dùng đang tham gia Không Gian làm việc này. Bạn có thể thay đổi phân quyền hoặc gỡ thành viên khỏi Không Gian.
-            </div>
+            </form>
           </div>
 
-          <!-- Search & Filter Controls -->
-          <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
-            <div>
-              <input type="text" class="input-text" id="member-search-input" placeholder="🔍 Tìm kiếm thành viên theo tên, email, vai trò..." style="width: 100%; font-size: 13px;" oninput="window.AuthModule.filterMembers(this.value)">
+          <!-- Section 2: 👑 Cấp Quyền & Quản Lý Thành Viên -->
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div style="font-weight: 800; font-size: 13.5px; color: var(--text-high); display: flex; align-items: center; gap: 6px;">
+                <span>👥</span>
+                <span>Thành Viên & Cấp Quyền (<span id="ws-manage-members-count">4</span>)</span>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.refreshMembersFromCloud(window.AuthModule.currentManageWsCode)" style="font-size: 11px; padding: 3px 8px;" title="Đồng bộ lại từ Cloud">
+                🔄 Tải Lại
+              </button>
             </div>
-            <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px;" id="member-role-filter-pills">
-              <button type="button" class="btn btn-secondary btn-sm active" data-role="all" onclick="window.AuthModule.setMemberRoleFilter('all', this)" style="font-size: 11px; padding: 4px 9px;">Tất cả (<span id="count-all-members">4</span>)</button>
-              <button type="button" class="btn btn-secondary btn-sm" data-role="master" onclick="window.AuthModule.setMemberRoleFilter('master', this)" style="font-size: 11px; padding: 4px 9px;">👑 Master</button>
-              <button type="button" class="btn btn-secondary btn-sm" data-role="admin" onclick="window.AuthModule.setMemberRoleFilter('admin', this)" style="font-size: 11px; padding: 4px 9px;">🛡️ Admin</button>
-              <button type="button" class="btn btn-secondary btn-sm" data-role="member" onclick="window.AuthModule.setMemberRoleFilter('member', this)" style="font-size: 11px; padding: 4px 9px;">💻 Member</button>
-              <button type="button" class="btn btn-secondary btn-sm" data-role="guest" onclick="window.AuthModule.setMemberRoleFilter('guest', this)" style="font-size: 11px; padding: 4px 9px;">👤 Guest</button>
+
+            <!-- Search bar -->
+            <div style="margin-bottom: 10px;">
+              <input type="text" class="input-text" id="ws-manage-member-search" placeholder="🔍 Tìm thành viên theo tên, email..." style="width: 100%; font-size: 12px; padding: 7px 10px;" oninput="window.AuthModule.filterManageMembers(this.value)">
             </div>
-          </div>
 
-          <!-- Member Cards List Container -->
-          <div id="workspace-members-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 2px;">
-            <!-- Rendered dynamically by AuthModule.renderWorkspaceMembers() -->
-          </div>
+            <!-- Members list container -->
+            <div id="ws-manage-members-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 2px;">
+              <!-- Rendered dynamically -->
+            </div>
 
-          <!-- Bottom Action Bar -->
-          <div style="display: flex; gap: 8px; margin-top: 16px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
-            <button type="button" class="btn btn-primary btn-sm" onclick="window.AuthModule.switchProfileTab('create')" style="flex: 1; font-size: 12px;">
-              ➕ Cấp Thêm Tài Khoản
-            </button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.copyWorkspaceCode()" style="font-size: 12px;" title="Sao chép mã Không Gian">
-              📋 Mã Mời
-            </button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.refreshMembersFromCloud()" style="font-size: 12px;" title="Đồng bộ lại danh sách mới nhất từ Cloud">
-              🔄 Tải Lại
-            </button>
+            <!-- Action buttons bottom -->
+            <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+              <button type="button" class="btn btn-primary btn-sm" onclick="window.AuthModule.openCreateAccountForCurrentWorkspace()" style="flex: 1; font-size: 11.5px; padding: 6px;">
+                ➕ Cấp Tài Khoản Cho Không Gian Này
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" id="btn-ws-manage-delete" onclick="window.AuthModule.handleDeleteWorkspace(window.AuthModule.currentManageWsCode)" style="font-size: 11.5px; padding: 6px 10px;">
+                🗑️ Xóa WS
+              </button>
+            </div>
           </div>
         </div>
       </div>

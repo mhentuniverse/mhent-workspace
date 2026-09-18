@@ -161,6 +161,13 @@ window.CloudModule = {
 
           if (messages.length > 0) {
             window.store.state.chatChannels[channelId] = messages;
+            if (!window.store.state.chatChannelsByWorkspace) {
+              window.store.state.chatChannelsByWorkspace = {};
+            }
+            if (!window.store.state.chatChannelsByWorkspace[this.currentWsCode]) {
+              window.store.state.chatChannelsByWorkspace[this.currentWsCode] = { general: [], media: [], dev: [] };
+            }
+            window.store.state.chatChannelsByWorkspace[this.currentWsCode][channelId] = messages;
             if (window.store.state.activeChannel === channelId && window.ChatModule) {
               window.ChatModule.renderMessages();
             }
@@ -206,7 +213,7 @@ window.CloudModule = {
           if (cloudMembers.length > 0) {
             window.store.setWorkspaceMembers(this.currentWsCode, cloudMembers);
             if (window.AuthModule) {
-              window.AuthModule.renderWorkspaceMembers();
+              window.AuthModule.renderManageWorkspaceMembers(this.currentWsCode);
               window.AuthModule.renderSidebarMembers();
             }
           }
