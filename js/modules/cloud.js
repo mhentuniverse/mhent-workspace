@@ -6,14 +6,23 @@ window.CloudModule = {
   db: null,
   sb: null,
   activeListeners: [],
-  currentWsCode: "MHENT-CORE-2026",
+  currentWsCode: "MHENTUNIVERSE",
   currentUserId: null,
   isLive: false,
+
+  getWorkspaceCode() {
+    return (
+      (window.store && window.store.state && window.store.state.workspace && window.store.state.workspace.code) ||
+      this.currentWsCode ||
+      "MHENTUNIVERSE"
+    ).toUpperCase();
+  },
 
   init() {
     this.initSupabase();
     this.initFirestore();
-    const wsCode = (window.store && window.store.state && window.store.state.workspace ? window.store.state.workspace.code : null) || "MHENT-CORE-2026";
+    const wsCode = this.getWorkspaceCode();
+    this.currentWsCode = wsCode;
     this.loadWorkspaceDataFromSupabase(wsCode);
     this.initSupabaseRealtime(wsCode);
   },
@@ -807,7 +816,8 @@ window.CloudModule = {
 
   async loadWorkspaceDataFromSupabase(wsCode) {
     if (!this.sb) return;
-    const targetCode = (wsCode || this.currentWsCode || "MHENT-CORE-2026").toUpperCase();
+    const targetCode = (wsCode || this.getWorkspaceCode()).toUpperCase();
+    this.currentWsCode = targetCode;
     console.log(`[Cloud Engine] ⚡ Đang đồng bộ toàn bộ dữ liệu Không Gian [${targetCode}] từ Supabase...`);
 
     try {
@@ -828,14 +838,35 @@ window.CloudModule = {
       const { data: events, error: eErr } = await this.sb
         .from('workspace_events')
         .select('*')
-        .eq('workspace_code', targetCode);
-      if (!eErr && events) {
-        window.store.state.events = events.map(e => ({
-          ...e,
-          isRecurring: e.is_recurring !== undefined ? !!e.is_recurring : (e.isRecurring || false),
-          recurrencePattern: e.recurrence_pattern || e.recurrencePattern || 'none',
-          recurrenceEnd: e.recurrence_end || e.recurrenceEnd || ''
-        }));
+        .or(`workspace_code.eq.${targetCode},workspace_code.eq.MHENTUNIVERSE,workspace_code.eq.MHENT-CORE-2026`);
+      if (eErr) {
+        console.warn("[Cloud Engine] Lỗi tải workspace_events từ Supabase:", eErr);
+      } else if (events) {
+        window.store.state.events = events.map(e => {
+          let isRecur = (e.is_recurring !== undefined && e.is_recurring !== null) ? !!e.is_recurring : false;
+          let pattern = e.recurrence_pattern || 'none';
+          let end = e.recurrence_end || '';
+          let cleanLoc = e.location || '';
+
+          // Parse embedded recurrence info if saved in location fallback
+          if (!isRecur && cleanLoc.includes('[RECUR:')) {
+            const match = cleanLoc.match(/\[RECUR:([^:]+):([^\]]*)\]/);
+            if (match) {
+              isRecur = true;
+              pattern = match[1] || 'weekly';
+              end = match[2] || '';
+              cleanLoc = cleanLoc.replace(/\s*\|?\s*\[RECUR:[^\]]+\]/, '').trim();
+            }
+          }
+
+          return {
+            ...e,
+            location: cleanLoc,
+            isRecurring: isRecur,
+            recurrencePattern: pattern,
+            recurrenceEnd: end
+          };
+        });
         if (window.CalendarModule && typeof window.CalendarModule.renderCalendar === 'function') {
           window.CalendarModule.renderCalendar();
         }
@@ -975,14 +1006,15 @@ window.CloudModule = {
   async createCalendarEvent(event) {
     const evId = event.id || ("ev-" + Date.now());
     const uid = this.currentUserId || (window.store && window.store.state && window.store.state.currentUser ? window.store.state.currentUser.id : "guest");
+    const wsCode = this.getWorkspaceCode();
 
     // 1. Supabase (Primary Cloud Storage)
     if (this.sb) {
       try {
-        await this.sb.from('workspace_events').upsert([{
+        const fullPayload = {
           id: evId,
           user_id: uid,
-          workspace_code: this.currentWsCode,
+          workspace_code: wsCode,
           title: event.title,
           date: event.date,
           time: event.time || 'Cả ngày',
@@ -993,21 +1025,58 @@ window.CloudModule = {
           recurrence_pattern: event.recurrencePattern || 'none',
           recurrence_end: event.recurrenceEnd || '',
           updated_at: new Date().toISOString()
-        }]);
-        console.log(`[Cloud Engine] 📅 Đã lưu sự kiện [${event.title}] lên Supabase!`);
+        };
+
+        let { error } = await this.sb.from('workspace_events').upsert([fullPayload]);
+
+        // Fallback: Nếu bảng workspace_events chưa được chạy SQL thêm cột is_recurring (PGRST204)
+        if (error && (error.code === 'PGRST204' || String(error.message || '').includes('is_recurring') || String(error.message || '').includes('column'))) {
+          console.warn("[Cloud Engine] Supabase chưa có cột is_recurring, kích hoạt fallback sang cấu trúc bảng chuẩn:", error.message);
+
+          let locWithRecur = event.location || '';
+          if (event.isRecurring) {
+            locWithRecur = (locWithRecur ? locWithRecur + " | " : "") + `[RECUR:${event.recurrencePattern || 'weekly'}:${event.recurrenceEnd || ''}]`;
+          }
+
+          const basePayload = {
+            id: evId,
+            user_id: uid,
+            workspace_code: wsCode,
+            title: event.title,
+            date: event.date,
+            time: event.time || 'Cả ngày',
+            type: event.type || 'meeting',
+            color: event.color || '#8b5cf6',
+            location: locWithRecur,
+            updated_at: new Date().toISOString()
+          };
+
+          const fallbackRes = await this.sb.from('workspace_events').upsert([basePayload]);
+          error = fallbackRes.error;
+        }
+
+        if (error) {
+          console.error("[Cloud Engine] ❌ Lỗi lưu sự kiện Calendar Supabase:", error);
+          if (window.UI) {
+            window.UI.showToast("Cảnh báo Supabase ⚠️", "Chưa thể lưu vào Supabase: " + (error.message || "Lỗi schema"), "warning");
+          }
+        } else {
+          console.log(`[Cloud Engine] 📅 Đã lưu sự kiện [${event.title}] lên Supabase thành công!`);
+        }
       } catch (err) {
-        console.warn("[Cloud Engine] Lỗi lưu sự kiện Calendar Supabase:", err);
+        console.warn("[Cloud Engine] Exception lưu sự kiện Calendar Supabase:", err);
       }
     }
 
     // 2. Firestore
     if (this.db) {
       try {
-        await this.db.collection("workspaces").doc(this.currentWsCode)
+        await this.db.collection("workspaces").doc(wsCode)
           .collection("events").doc(evId).set({
             ...event,
             id: evId,
             userId: uid,
+            workspaceCode: wsCode,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
       } catch (e) {
@@ -1018,12 +1087,17 @@ window.CloudModule = {
 
   async deleteCalendarEvent(eventId) {
     if (!eventId) return;
+    const wsCode = this.getWorkspaceCode();
 
     // 1. Supabase
     if (this.sb) {
       try {
-        await this.sb.from('workspace_events').delete().eq('id', eventId);
-        console.log(`[Cloud Engine] 🗑️ Đã xóa sự kiện [${eventId}] trên Supabase!`);
+        const { error } = await this.sb.from('workspace_events').delete().eq('id', eventId);
+        if (error) {
+          console.error("[Cloud Engine] ❌ Lỗi xóa sự kiện Calendar Supabase:", error);
+        } else {
+          console.log(`[Cloud Engine] 🗑️ Đã xóa sự kiện [${eventId}] trên Supabase thành công!`);
+        }
       } catch (err) {
         console.warn("[Cloud Engine] Lỗi xóa sự kiện Calendar Supabase:", err);
       }
@@ -1032,7 +1106,7 @@ window.CloudModule = {
     // 2. Firestore
     if (this.db) {
       try {
-        await this.db.collection("workspaces").doc(this.currentWsCode)
+        await this.db.collection("workspaces").doc(wsCode)
           .collection("events").doc(eventId).delete();
       } catch (e) {
         console.warn("[Cloud Engine] Lỗi xóa sự kiện Calendar Firestore:", e);
