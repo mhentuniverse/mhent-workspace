@@ -120,7 +120,12 @@ window.CloudModule = {
         .or(`user_id.eq.${uid},workspace_code.eq.${this.currentWsCode}`);
 
       if (!eventErr && eventsData && eventsData.length > 0) {
-        window.store.state.events = eventsData;
+        window.store.state.events = eventsData.map(e => ({
+          ...e,
+          isRecurring: e.is_recurring !== undefined ? !!e.is_recurring : (e.isRecurring || false),
+          recurrencePattern: e.recurrence_pattern || e.recurrencePattern || 'none',
+          recurrenceEnd: e.recurrence_end || e.recurrenceEnd || ''
+        }));
         if (window.CalendarModule && typeof window.CalendarModule.renderCalendar === 'function') {
           window.CalendarModule.renderCalendar();
         }
@@ -825,7 +830,12 @@ window.CloudModule = {
         .select('*')
         .eq('workspace_code', targetCode);
       if (!eErr && events) {
-        window.store.state.events = events;
+        window.store.state.events = events.map(e => ({
+          ...e,
+          isRecurring: e.is_recurring !== undefined ? !!e.is_recurring : (e.isRecurring || false),
+          recurrencePattern: e.recurrence_pattern || e.recurrencePattern || 'none',
+          recurrenceEnd: e.recurrence_end || e.recurrenceEnd || ''
+        }));
         if (window.CalendarModule && typeof window.CalendarModule.renderCalendar === 'function') {
           window.CalendarModule.renderCalendar();
         }
@@ -979,6 +989,9 @@ window.CloudModule = {
           type: event.type || 'meeting',
           color: event.color || '#8b5cf6',
           location: event.location || '',
+          is_recurring: !!event.isRecurring,
+          recurrence_pattern: event.recurrencePattern || 'none',
+          recurrence_end: event.recurrenceEnd || '',
           updated_at: new Date().toISOString()
         }]);
         console.log(`[Cloud Engine] 📅 Đã lưu sự kiện [${event.title}] lên Supabase!`);

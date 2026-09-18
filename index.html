@@ -663,12 +663,39 @@
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div class="form-group">
-              <label class="form-label">Ngày Diễn Ra <span style="color: #ef4444;">*</span></label>
+              <label class="form-label">Ngày Bắt Đầu <span style="color: #ef4444;">*</span></label>
               <input type="date" class="input-text" id="event-date" required>
             </div>
             <div class="form-group">
-              <label class="form-label">Khung Giờ (Sắp xếp theo thứ tự)</label>
-              <input type="text" class="input-text" id="event-time" placeholder="VD: 09:00 - 10:30 hoặc Cả ngày" value="09:00 - 10:30">
+              <label class="form-label">Khung Giờ</label>
+              <input type="text" class="input-text" id="event-time" placeholder="VD: 07:00 - 17:00 hoặc Cả ngày" value="09:00 - 10:30">
+            </div>
+          </div>
+
+          <!-- Tính Năng Lịch Lặp Lại Cố Định (Recurring) -->
+          <div style="margin-top: 8px; margin-bottom: 14px; padding: 12px; border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <label style="font-size: 13px; font-weight: 700; color: var(--text-high); display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="event-is-recurring" onchange="window.CalendarModule.toggleRecurringFields(this.checked)" style="width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;">
+                <span>🔁 Lặp lại sự kiện (Lịch đi làm / cố định)</span>
+              </label>
+            </div>
+
+            <div id="event-recurring-fields" style="display: none; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Tần Suất Lặp Lại</label>
+                <select class="input-select" id="event-recurrence-pattern">
+                  <option value="weekly">Hàng tuần vào thứ này (VD: Thứ 2)</option>
+                  <option value="daily">Hàng ngày (Mỗi ngày)</option>
+                  <option value="weekdays">Thứ 2 đến Thứ 6 (Ngày làm việc)</option>
+                  <option value="monthly">Hàng tháng vào ngày này</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Lặp Đến Ngày (Giới hạn)</label>
+                <input type="date" class="input-text" id="event-recurrence-end" placeholder="VD: 2026-10-15">
+                <span style="font-size: 10.5px; color: var(--text-muted); margin-top: 3px; display: block;">VD: Đến 15/10 thì dừng lặp</span>
+              </div>
             </div>
           </div>
           <div class="form-group">

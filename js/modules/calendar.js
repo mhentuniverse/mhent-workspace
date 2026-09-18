@@ -27,6 +27,13 @@ window.CalendarModule = {
     this.renderCalendar();
   },
 
+  toggleRecurringFields(show) {
+    const fields = document.getElementById("event-recurring-fields");
+    if (fields) {
+      fields.style.display = show ? "grid" : "none";
+    }
+  },
+
   bindEvents() {
     // Navigation: Prev, Next, Today
     const prevBtn = document.getElementById("btn-calendar-prev");
@@ -116,6 +123,65 @@ window.CalendarModule = {
     }
 
     return 9999; // Put unparseable times at the bottom
+  },
+
+  /**
+   * Expand recurring events for a specific date
+   * Supports: daily, weekly (e.g. every Monday), weekdays (Mon-Fri), monthly
+   * Enforces recurrenceEnd limit (e.g. until 15/10)
+   */
+  getEventsForDate(targetDateStr) {
+    const allEvents = (window.store.state.events || []).filter(e => !String(e.id).startsWith("ev-demo-"));
+    const result = [];
+    const targetDate = new Date(targetDateStr + "T00:00:00");
+    const targetDayOfWeek = targetDate.getDay(); // 0 = Sunday, 1 = Monday, ...
+
+    for (const ev of allEvents) {
+      // 1. Single day event (not recurring)
+      if (!ev.isRecurring || ev.recurrencePattern === "none") {
+        if (ev.date === targetDateStr) {
+          result.push(ev);
+        }
+        continue;
+      }
+
+      // 2. Recurring event evaluation
+      const startDate = new Date(ev.date + "T00:00:00");
+      if (targetDate < startDate) continue;
+
+      // Check recurrence end limit (e.g. until 15/10/2026)
+      if (ev.recurrenceEnd) {
+        const endDate = new Date(ev.recurrenceEnd + "T23:59:59");
+        if (targetDate > endDate) continue;
+      }
+
+      let matches = false;
+      const pattern = ev.recurrencePattern || "weekly";
+
+      if (pattern === "daily") {
+        matches = true;
+      } else if (pattern === "weekly") {
+        // Matches if same day of the week as start date (e.g., Monday = 1)
+        matches = (targetDayOfWeek === startDate.getDay());
+      } else if (pattern === "weekdays") {
+        // Monday (1) to Friday (5)
+        matches = (targetDayOfWeek >= 1 && targetDayOfWeek <= 5);
+      } else if (pattern === "monthly") {
+        // Matches if same date of the month (e.g. 15th of every month)
+        matches = (targetDate.getDate() === startDate.getDate());
+      }
+
+      if (matches) {
+        result.push({
+          ...ev,
+          isInstance: true,
+          originalId: ev.id,
+          instanceDate: targetDateStr
+        });
+      }
+    }
+
+    return result;
   },
 
   /**
@@ -232,7 +298,7 @@ window.CalendarModule = {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const isToday = (dateStr === todayStr);
 
-      let dayEvents = events.filter(e => e.date === dateStr);
+      let dayEvents = this.getEventsForDate(dateStr);
       if (this.selectedFilter && this.selectedFilter !== 'all') {
         dayEvents = dayEvents.filter(e => e.type === this.selectedFilter);
       }
@@ -260,10 +326,11 @@ window.CalendarModule = {
       const pillsHtml = visiblePills.map(ev => {
         const color = ev.color || this.getColorForType(ev.type);
         const timeBadge = ev.time ? ev.time.split('-')[0].trim() : '';
+        const recurIcon = ev.isRecurring ? '🔁 ' : '';
         return `
-          <div class="event-pill" style="background: ${this.hexToRgba(color, 0.28)}; border-left: 3px solid ${color}; color: #ffffff;" title="${this.escapeHtml(ev.title)} (${ev.time || 'Cả ngày'})" onclick="event.stopPropagation(); window.CalendarModule.showEventDetail('${ev.id}')">
+          <div class="event-pill" style="background: ${this.hexToRgba(color, 0.28)}; border-left: 3px solid ${color}; color: #ffffff;" title="${ev.isRecurring ? '[Lặp lại] ' : ''}${this.escapeHtml(ev.title)} (${ev.time || 'Cả ngày'})" onclick="event.stopPropagation(); window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')">
             ${timeBadge ? `<span class="pill-time">${timeBadge}</span>` : ''}
-            <span class="pill-title">${this.escapeHtml(ev.title)}</span>
+            <span class="pill-title">${recurIcon}${this.escapeHtml(ev.title)}</span>
           </div>
         `;
       }).join("");
@@ -362,7 +429,7 @@ window.CalendarModule = {
         const dateStr = this.formatDateStr(currDate);
         const isToday = (dateStr === todayStr);
 
-        let dayEvents = events.filter(e => e.date === dateStr);
+        let dayEvents = this.getEventsForDate(dateStr);
         if (this.selectedFilter && this.selectedFilter !== 'all') {
           dayEvents = dayEvents.filter(e => e.type === this.selectedFilter);
         }
@@ -371,14 +438,16 @@ window.CalendarModule = {
 
         const eventsCardsHtml = dayEvents.length > 0 ? dayEvents.map(ev => {
           const color = ev.color || this.getColorForType(ev.type);
+          const recurBadge = ev.isRecurring ? '<span style="font-size: 9px; opacity: 0.85; margin-left: 4px;">🔁 Lặp lại</span>' : '';
           return `
-            <div class="week-event-card" style="border-left-color: ${color}; background: ${this.hexToRgba(color, 0.12)};" onclick="window.CalendarModule.showEventDetail('${ev.id}')">
-              <button class="week-event-del" onclick="event.stopPropagation(); window.CalendarModule.deleteEvent('${ev.id}')" title="Xóa sự kiện">✕</button>
+            <div class="week-event-card" style="border-left-color: ${color}; background: ${this.hexToRgba(color, 0.12)};" onclick="window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')">
+              <button class="week-event-del" onclick="event.stopPropagation(); window.CalendarModule.deleteEvent('${ev.originalId || ev.id}')" title="Xóa sự kiện">✕</button>
               <div class="week-event-time">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span>${ev.time || 'Cả ngày'}</span>
+                ${recurBadge}
               </div>
-              <div class="week-event-title">${this.escapeHtml(ev.title)}</div>
+              <div class="week-event-title">${ev.isRecurring ? '🔁 ' : ''}${this.escapeHtml(ev.title)}</div>
               ${ev.location ? `<div class="week-event-loc">📍 ${this.escapeHtml(ev.location)}</div>` : ''}
               <div class="week-event-badge" style="color: ${color};">${this.getTypeLabel(ev.type)}</div>
             </div>
@@ -606,6 +675,15 @@ window.CalendarModule = {
       selectedColor = this.getColorForType(typeInput.value);
     }
 
+    // Recurring event fields
+    const isRecurringInput = document.getElementById("event-is-recurring");
+    const patternInput = document.getElementById("event-recurrence-pattern");
+    const endInput = document.getElementById("event-recurrence-end");
+
+    const isRecurring = isRecurringInput ? isRecurringInput.checked : false;
+    const recurrencePattern = (isRecurring && patternInput) ? patternInput.value : "none";
+    const recurrenceEnd = (isRecurring && endInput && endInput.value) ? endInput.value.trim() : "";
+
     const newEvent = {
       id: "ev-" + Date.now(),
       title: titleInput.value.trim(),
@@ -614,14 +692,17 @@ window.CalendarModule = {
       type: typeInput ? typeInput.value : "meeting",
       color: selectedColor,
       location: locInput ? locInput.value.trim() : "",
+      isRecurring: isRecurring,
+      recurrencePattern: recurrencePattern,
+      recurrenceEnd: recurrenceEnd,
       createdAt: new Date().toISOString()
     };
 
     // 1. Lưu local store
     window.store.addEvent(newEvent);
 
-    // 2. Lưu Cloud Firestore
-    if (window.CloudModule && window.CloudModule.isLive) {
+    // 2. Lưu Cloud Firestore & Supabase
+    if (window.CloudModule) {
       await window.CloudModule.createCalendarEvent(newEvent);
     }
 
@@ -631,6 +712,11 @@ window.CalendarModule = {
     // Reset inputs
     titleInput.value = "";
     if (locInput) locInput.value = "";
+    if (isRecurringInput) {
+      isRecurringInput.checked = false;
+      this.toggleRecurringFields(false);
+    }
+    if (endInput) endInput.value = "";
     window.UI.showToast("Đã lưu sự kiện thành công! 📅", newEvent.title, "success");
   },
 
@@ -639,13 +725,21 @@ window.CalendarModule = {
    */
   async deleteEvent(eventId) {
     if (!eventId) return;
-    if (!confirm("Bạn có chắc chắn muốn xóa sự kiện này?")) return;
+    const allEvents = window.store.state.events || [];
+    const ev = allEvents.find(e => e.id === eventId);
+    const isRecur = ev && ev.isRecurring;
+
+    const confirmMsg = isRecur 
+      ? `Đây là sự kiện lặp lại [${ev.title}]. Bạn có muốn xóa toàn bộ chuỗi lịch lặp này?`
+      : "Bạn có chắc chắn muốn xóa sự kiện này?";
+
+    if (!confirm(confirmMsg)) return;
 
     // 1. Local Store
     window.store.deleteEvent(eventId);
 
-    // 2. Cloud Firestore
-    if (window.CloudModule && window.CloudModule.isLive) {
+    // 2. Cloud Firestore & Supabase
+    if (window.CloudModule) {
       await window.CloudModule.deleteCalendarEvent(eventId);
     }
 
@@ -658,12 +752,28 @@ window.CalendarModule = {
    */
   showEventDetail(eventId) {
     const events = window.store.state.events || [];
-    const ev = events.find(e => e.id === eventId);
+    let ev = events.find(e => e.id === eventId);
+    if (!ev) {
+      for (const d of [this.formatDateStr(this.viewDate), this.getTodayStr()]) {
+        const found = this.getEventsForDate(d).find(e => e.id === eventId || e.originalId === eventId);
+        if (found) { ev = found; break; }
+      }
+    }
     if (!ev) return;
+
+    let recurInfo = "";
+    if (ev.isRecurring) {
+      let pat = "Hàng tuần";
+      if (ev.recurrencePattern === "daily") pat = "Hàng ngày";
+      else if (ev.recurrencePattern === "weekdays") pat = "Thứ 2 đến Thứ 6";
+      else if (ev.recurrencePattern === "monthly") pat = "Hàng tháng";
+
+      recurInfo = ` | 🔁 Lặp: ${pat} ${ev.recurrenceEnd ? `(đến ${ev.recurrenceEnd})` : '(vô hạn)'}`;
+    }
 
     window.UI.showToast(
       `📅 ${ev.title}`,
-      `⏰ ${ev.time || 'Cả ngày'} | 📍 ${ev.location || 'Chưa định vị'} | Phân loại: ${this.getTypeLabel(ev.type)}`,
+      `⏰ ${ev.time || 'Cả ngày'} | 📍 ${ev.location || 'Chưa định vị'}${recurInfo} | Phân loại: ${this.getTypeLabel(ev.type)}`,
       "info"
     );
   },

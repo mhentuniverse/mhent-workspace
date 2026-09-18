@@ -110,9 +110,16 @@ CREATE TABLE IF NOT EXISTS public.workspace_events (
     type TEXT DEFAULT 'meeting',
     color TEXT DEFAULT '#8b5cf6',
     location TEXT DEFAULT '',
+    is_recurring BOOLEAN DEFAULT FALSE,
+    recurrence_pattern TEXT DEFAULT 'none',
+    recurrence_end TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE public.workspace_events ADD COLUMN IF NOT EXISTS is_recurring BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.workspace_events ADD COLUMN IF NOT EXISTS recurrence_pattern TEXT DEFAULT 'none';
+ALTER TABLE public.workspace_events ADD COLUMN IF NOT EXISTS recurrence_end TEXT DEFAULT '';
 
 -- ==============================================================================
 -- BẬT ROW LEVEL SECURITY (RLS) & CẤP QUYỀN ĐỌC / GHI TỰ DO CHO CÁC BẢNG
