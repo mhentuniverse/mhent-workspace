@@ -221,6 +221,24 @@ window.CloudModule = {
       }, (err) => console.warn("[Members Stream] Lỗi:", err));
     this.activeListeners.push(unsubMembers);
 
+    // 4. 📅 REALTIME CALENDAR EVENTS STREAM
+    const unsubEvents = wsDocRef.collection("events")
+      .onSnapshot((snapshot) => {
+        if (!snapshot) return;
+        const cloudEvents = [];
+        snapshot.forEach(doc => {
+          cloudEvents.push({ id: doc.id, ...doc.data() });
+        });
+        if (cloudEvents.length > 0) {
+          window.store.state.events = cloudEvents;
+          window.store.save();
+          if (window.CalendarModule && typeof window.CalendarModule.renderCalendar === 'function') {
+            window.CalendarModule.renderCalendar();
+          }
+        }
+      }, (err) => console.warn("[Events Stream] Lỗi:", err));
+    this.activeListeners.push(unsubEvents);
+
     // Tự động kéo dữ liệu thành viên mới nhất từ Supabase & Firestore
     this.fetchWorkspaceMembers(this.currentWsCode).catch(() => {});
   },
@@ -771,6 +789,17 @@ window.CloudModule = {
           }, { merge: true });
       } catch (e) {
         console.warn("[Cloud Engine] Lỗi lưu sự kiện Calendar Firestore:", e);
+      }
+    }
+  },
+
+  async deleteCalendarEvent(eventId) {
+    if (this.db && eventId) {
+      try {
+        await this.db.collection("workspaces").doc(this.currentWsCode)
+          .collection("events").doc(eventId).delete();
+      } catch (e) {
+        console.warn("[Cloud Engine] Lỗi xóa sự kiện Calendar Firestore:", e);
       }
     }
   }

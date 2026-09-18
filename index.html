@@ -197,8 +197,13 @@
             <span>Thêm Sự Kiện</span>
           </button>
           <div class="sidebar-section-title"><span>Bộ Lọc Lịch</span></div>
-          <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></span><span>Tất Cả Lịch Trình</span></div></li>
+          <ul class="sidebar-nav-list" id="calendar-filter-list">
+            <li class="sidebar-nav-item active" onclick="window.CalendarModule.setFilter('all', this)"><div class="item-left"><span class="item-icon">🗓️</span><span>Tất Cả Lịch Trình</span></div></li>
+            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('meeting', this)"><div class="item-left"><span class="item-icon" style="color: #8b5cf6;">🟣</span><span>Cuộc Họp (Meeting)</span></div></li>
+            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('deadline', this)"><div class="item-left"><span class="item-icon" style="color: #ef4444;">🔴</span><span>Hạn Chót (Deadline)</span></div></li>
+            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('launch', this)"><div class="item-left"><span class="item-icon" style="color: #10b981;">🟢</span><span>Ra Mắt (Launch)</span></div></li>
+            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('media', this)"><div class="item-left"><span class="item-icon" style="color: #f59e0b;">🟡</span><span>Truyền Thông (Media)</span></div></li>
+            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('personal', this)"><div class="item-left"><span class="item-icon" style="color: #3b82f6;">🔵</span><span>Dự Án / Nội Bộ</span></div></li>
           </ul>
         </div>
 
@@ -356,22 +361,65 @@
 
         <!-- 6. CALENDAR APP VIEW -->
         <div class="app-stage-view calendar-app-view" id="view-calendar" style="display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h2 style="font-size: 18px; font-weight: 800;">Tháng 8, 2026</h2>
-            <div style="display: flex; gap: 8px;">
-              <button class="btn btn-secondary" id="btn-find-free-time">✨ Tìm Giờ Rảnh Chung (AISA)</button>
-              <button class="btn btn-primary" id="btn-calendar-add-event" onclick="window.UI.openModal('modal-add-event')" style="background: var(--app-calendar);">➕ Thêm Sự Kiện</button>
+          <!-- Top Calendar Header / Toolbar -->
+          <div class="calendar-header-bar">
+            <div class="calendar-nav-controls">
+              <div class="calendar-btn-group">
+                <button class="btn btn-secondary cal-icon-btn" id="btn-calendar-prev" title="Tháng / Tuần Trước">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <button class="btn btn-secondary" id="btn-calendar-today" title="Quay về ngày hôm nay">
+                  Hôm Nay
+                </button>
+                <button class="btn btn-secondary cal-icon-btn" id="btn-calendar-next" title="Tháng / Tuần Sau">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+              <h2 class="calendar-title" id="calendar-current-title">Tháng 9, 2026</h2>
+            </div>
+
+            <div class="calendar-actions-bar">
+              <!-- View Switcher: Tháng vs Tuần -->
+              <div class="calendar-view-switcher">
+                <button class="cal-view-btn active" id="btn-view-month" onclick="window.CalendarModule.switchView('month')" title="Xem dạng bảng tháng">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                  <span>Tháng</span>
+                </button>
+                <button class="cal-view-btn" id="btn-view-week" onclick="window.CalendarModule.switchView('week')" title="Xem dạng theo tuần">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="3" x2="21" y1="10" y2="10"/><line x1="9" x2="9" y1="10" y2="22"/><line x1="15" x2="15" y1="10" y2="22"/></svg>
+                  <span>Tuần</span>
+                </button>
+              </div>
+
+              <!-- Week Layout Toggle: 7 Cột vs 7 Dòng (chỉ hiện khi xem Tuần) -->
+              <button class="btn btn-secondary" id="btn-toggle-week-layout" onclick="window.CalendarModule.toggleWeekLayout()" style="display: none;" title="Chuyển đổi giao diện hiển thị tuần: 7 Cột hoặc 7 Dòng">
+                <span id="week-layout-icon">📊</span> <span id="week-layout-text">7 Cột</span>
+              </button>
+
+              <button class="btn btn-secondary" id="btn-find-free-time">✨ AISA Giờ Rảnh</button>
+              <button class="btn btn-primary" id="btn-calendar-add-event" onclick="window.CalendarModule.openAddModal()" style="background: var(--app-calendar); box-shadow: 0 4px 14px var(--app-calendar-glow);">➕ Thêm Sự Kiện</button>
             </div>
           </div>
-          <div class="calendar-grid">
-            <div class="calendar-weekday">T2</div>
-            <div class="calendar-weekday">T3</div>
-            <div class="calendar-weekday">T4</div>
-            <div class="calendar-weekday">T5</div>
-            <div class="calendar-weekday">T6</div>
-            <div class="calendar-weekday">T7</div>
-            <div class="calendar-weekday">CN</div>
-            <div id="calendar-grid-cells" style="grid-column: span 7; display: contents;"></div>
+
+          <!-- Month View Container -->
+          <div class="calendar-month-container" id="calendar-month-container">
+            <div class="calendar-grid">
+              <div class="calendar-weekday">Thứ 2</div>
+              <div class="calendar-weekday">Thứ 3</div>
+              <div class="calendar-weekday">Thứ 4</div>
+              <div class="calendar-weekday">Thứ 5</div>
+              <div class="calendar-weekday">Thứ 6</div>
+              <div class="calendar-weekday">Thứ 7</div>
+              <div class="calendar-weekday sunday">Chủ Nhật</div>
+              <div id="calendar-grid-cells" style="grid-column: span 7; display: contents;"></div>
+            </div>
+          </div>
+
+          <!-- Week View Container -->
+          <div class="calendar-week-container" id="calendar-week-container" style="display: none;">
+            <div id="calendar-week-content" class="calendar-week-columns">
+              <!-- Rendered dynamically -->
+            </div>
           </div>
         </div>
 
@@ -605,39 +653,60 @@
 
   <!-- Modal: Add Event -->
   <div class="modal-overlay" id="modal-add-event">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 520px;">
       <div class="modal-header">
-        <h3 class="modal-title">📅 Thêm Sự Kiện Vào Lịch</h3>
+        <h3 class="modal-title">📅 Thêm Sự Kiện Vào Lịch Trình</h3>
         <button class="modal-close-btn">✕</button>
       </div>
       <form id="form-add-event">
         <div class="modal-body">
           <div class="form-group">
-            <label class="form-label">Tên Sự Kiện</label>
-            <input type="text" class="input-text" id="event-title" placeholder="VD: Họp tổng duyệt kịch bản" required>
+            <label class="form-label">Tên Sự Kiện <span style="color: #ef4444;">*</span></label>
+            <input type="text" class="input-text" id="event-title" placeholder="VD: Họp tổng duyệt kịch bản live concert" required>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div class="form-group">
-              <label class="form-label">Ngày Diễn Ra</label>
-              <input type="date" class="input-text" id="event-date" value="2026-08-22" required>
+              <label class="form-label">Ngày Diễn Ra <span style="color: #ef4444;">*</span></label>
+              <input type="date" class="input-text" id="event-date" required>
             </div>
             <div class="form-group">
-              <label class="form-label">Khung Giờ</label>
-              <input type="text" class="input-text" id="event-time" value="14:00 - 15:30">
+              <label class="form-label">Khung Giờ (Sắp xếp theo thứ tự)</label>
+              <input type="text" class="input-text" id="event-time" placeholder="VD: 09:00 - 10:30 hoặc Cả ngày" value="09:00 - 10:30">
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Phân Loại</label>
-            <select class="input-select" id="event-type">
-              <option value="meeting">Cuộc họp (Meeting)</option>
-              <option value="deadline">Hạn chót (Deadline)</option>
-              <option value="launch">Ra mắt (Launch)</option>
+            <label class="form-label">Phân Loại Sự Kiện</label>
+            <select class="input-select" id="event-type" onchange="window.CalendarModule.onEventTypeChange(this.value)">
+              <option value="meeting">🟣 Cuộc họp (Meeting)</option>
+              <option value="deadline">🔴 Hạn chót (Deadline)</option>
+              <option value="launch">🟢 Ra mắt sản phẩm (Launch)</option>
+              <option value="media">🟡 Truyền thông & Phỏng vấn (Media)</option>
+              <option value="personal">🔵 Dự án / Kế hoạch nội bộ</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Màu Sắc Highlight (Hiển thị & Gradient trên Lịch)</label>
+            <div class="calendar-color-picker-group">
+              <label class="color-pill-choice active" style="--c: #8b5cf6;" title="Tím (Meeting)"><input type="radio" name="event-color-pick" value="#8b5cf6" checked><span class="color-dot" style="background:#8b5cf6;"></span> Tím</label>
+              <label class="color-pill-choice" style="--c: #ef4444;" title="Đỏ (Deadline)"><input type="radio" name="event-color-pick" value="#ef4444"><span class="color-dot" style="background:#ef4444;"></span> Đỏ</label>
+              <label class="color-pill-choice" style="--c: #10b981;" title="Xanh lục (Launch)"><input type="radio" name="event-color-pick" value="#10b981"><span class="color-dot" style="background:#10b981;"></span> Lục</label>
+              <label class="color-pill-choice" style="--c: #f59e0b;" title="Vàng cam (Media)"><input type="radio" name="event-color-pick" value="#f59e0b"><span class="color-dot" style="background:#f59e0b;"></span> Cam</label>
+              <label class="color-pill-choice" style="--c: #3b82f6;" title="Xanh lam (Dự án)"><input type="radio" name="event-color-pick" value="#3b82f6"><span class="color-dot" style="background:#3b82f6;"></span> Lam</label>
+              <label class="color-pill-choice" style="--c: #ec4899;" title="Hồng (Đặc biệt)"><input type="radio" name="event-color-pick" value="#ec4899"><span class="color-dot" style="background:#ec4899;"></span> Hồng</label>
+              <div class="color-custom-input-wrapper">
+                <input type="color" id="event-custom-color" value="#8b5cf6" title="Chọn màu tùy chỉnh">
+                <span>Tùy chỉnh</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Địa Điểm / Phòng Họp (Tùy chọn)</label>
+            <input type="text" class="input-text" id="event-location" placeholder="VD: Phòng Họp Trực Tuyến A / Studio 1">
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary modal-close-btn">Hủy</button>
-          <button type="submit" class="btn btn-primary" style="background: var(--app-calendar);">Lưu Sự Kiện</button>
+          <button type="submit" class="btn btn-primary" style="background: var(--app-calendar); box-shadow: 0 4px 12px var(--app-calendar-glow);">Lưu Sự Kiện</button>
         </div>
       </form>
     </div>
