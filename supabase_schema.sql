@@ -99,6 +99,21 @@ CREATE TABLE IF NOT EXISTS public.workspace_notes (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 8. BẢNG SỰ KIỆN LỊCH TRÌNH (Calendar Events)
+CREATE TABLE IF NOT EXISTS public.workspace_events (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    workspace_code TEXT DEFAULT 'MHENT-CORE-2026',
+    title TEXT NOT NULL,
+    date TEXT NOT NULL,
+    time TEXT DEFAULT 'Cả ngày',
+    type TEXT DEFAULT 'meeting',
+    color TEXT DEFAULT '#8b5cf6',
+    location TEXT DEFAULT '',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ==============================================================================
 -- BẬT ROW LEVEL SECURITY (RLS) & CẤP QUYỀN ĐỌC / GHI TỰ DO CHO CÁC BẢNG
 -- ==============================================================================
@@ -138,13 +153,37 @@ ALTER TABLE public.workspace_notes ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow public read/write notes" ON public.workspace_notes;
 CREATE POLICY "Allow public read/write notes" ON public.workspace_notes FOR ALL USING (true) WITH CHECK (true);
 
+-- Events
+ALTER TABLE public.workspace_events ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read/write workspace_events" ON public.workspace_events;
+CREATE POLICY "Allow public read/write workspace_events" ON public.workspace_events FOR ALL USING (true) WITH CHECK (true);
+
 -- ==============================================================================
--- BẬT SUPABASE REALTIME REPLICATION (Lắng nghe thời gian thực)
+-- BẬT SUPABASE REALTIME REPLICATION (Lắng nghe thời gian thực - Chống lỗi 42710 nếu đã tồn tại)
 -- ==============================================================================
-ALTER PUBLICATION supabase_realtime ADD TABLE public.workspaces;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.workspace_members;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.workspace_tasks;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.workspace_messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.workspace_mails;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.workspace_files;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.workspace_notes;
+DO $$
+DECLARE
+    tbl text;
+    target_tables text[] := ARRAY[
+        'workspaces',
+        'workspace_members',
+        'workspace_tasks',
+        'workspace_messages',
+        'workspace_mails',
+        'workspace_files',
+        'workspace_notes',
+        'workspace_events'
+    ];
+BEGIN
+    FOREACH tbl IN ARRAY target_tables LOOP
+        IF NOT EXISTS (
+            SELECT 1 FROM pg_publication_tables 
+            WHERE pubname = 'supabase_realtime' 
+              AND schemaname = 'public' 
+              AND tablename = tbl
+        ) THEN
+            EXECUTE format('ALTER PUBLICATION supabase_realtime ADD TABLE public.%I;', tbl);
+        END IF;
+    END LOOP;
+END $$;
+

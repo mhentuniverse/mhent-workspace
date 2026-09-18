@@ -39,10 +39,7 @@ window.MHENT_CONFIG = {
   },
 
   TEAM_MEMBERS: [
-    { id: "user-master-01", name: "Master Yurika", email: "yurika@mhentuniverse.internal", role: "master", avatar: "👑", status: "online" },
-    { id: "user-dev-02", name: "Kaelen (Dev Lead)", email: "kaelen@mhentuniverse.internal", role: "member", avatar: "💻", status: "online" },
-    { id: "user-media-03", name: "Sara (Media Dir)", email: "sara@mhentuniverse.internal", role: "member", avatar: "🎨", status: "away" },
-    { id: "user-event-04", name: "Ray (Logistics)", email: "ray@mhentuniverse.internal", role: "member", avatar: "⚡", status: "busy" }
+    { id: "user-master-01", name: "Master Yurika", email: "yurika@mhentuniverse.internal", role: "master", avatar: "👑", status: "online" }
   ]
 };
 

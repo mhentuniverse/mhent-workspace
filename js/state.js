@@ -8,27 +8,42 @@ class WorkspaceStore {
   }
 
   getDefaultMembers() {
-    const tm = (window.MHENT_CONFIG && window.MHENT_CONFIG.TEAM_MEMBERS) || [
-      { id: "user-master-01", name: "Master Yurika", email: "yurika@mhentuniverse.internal", role: "master", avatar: "👑", status: "online" },
-      { id: "user-dev-02", name: "Kaelen (Dev Lead)", email: "kaelen@mhentuniverse.internal", role: "member", avatar: "💻", status: "online" },
-      { id: "user-media-03", name: "Sara (Media Dir)", email: "sara@mhentuniverse.internal", role: "member", avatar: "🎨", status: "away" },
-      { id: "user-event-04", name: "Ray (Logistics)", email: "ray@mhentuniverse.internal", role: "member", avatar: "⚡", status: "busy" }
-    ];
-    return tm.map(m => ({
-      ...m,
-      workspaceCode: m.workspaceCode || "MHENT-CORE-2026",
-      joinedAt: m.joinedAt || "2026-01-01T00:00:00.000Z"
-    }));
+    const u = (window.MHENT_CONFIG && window.MHENT_CONFIG.CURRENT_USER) || {
+      id: "user-master-01",
+      name: "Master Yurika",
+      email: "yurika@mhentuniverse.internal",
+      role: "master",
+      avatar: "👑",
+      status: "online"
+    };
+    return [{
+      ...u,
+      workspaceCode: "MHENT-CORE-2026",
+      joinedAt: "2026-01-01T00:00:00.000Z"
+    }];
   }
 
   loadInitialState() {
-    const STORAGE_KEY = "mhent_workspace_v3_clean";
+    const STORAGE_KEY = "mhent_workspace_v4_clean";
+    // Clear out any old legacy mock/virtual data
+    try {
+      localStorage.removeItem("mhent_workspace_v3_clean");
+      localStorage.removeItem("mhent_workspace_v2");
+      localStorage.removeItem("mhent_workspace_state");
+    } catch (e) {}
+
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (!parsed.members || !Array.isArray(parsed.members) || parsed.members.length === 0) {
-          parsed.members = this.getDefaultMembers();
+        // Purge mock members
+        if (Array.isArray(parsed.members)) {
+          parsed.members = parsed.members.filter(m => !["user-dev-02", "user-media-03", "user-event-04"].includes(m.id));
+          if (parsed.members.length === 0) parsed.members = this.getDefaultMembers();
+        }
+        // Purge any demo events
+        if (Array.isArray(parsed.events)) {
+          parsed.events = parsed.events.filter(e => !String(e.id).startsWith("ev-demo-"));
         }
         if (!parsed.chatChannelsByWorkspace) {
           parsed.chatChannelsByWorkspace = {
@@ -50,14 +65,26 @@ class WorkspaceStore {
       aisaPersona: "both", // 'harmony' | 'echo' | 'both'
       theme: "dark",
       
-      workspace: window.MHENT_CONFIG.DEFAULT_WORKSPACE,
-      currentUser: window.MHENT_CONFIG.CURRENT_USER,
+      workspace: (window.MHENT_CONFIG && window.MHENT_CONFIG.DEFAULT_WORKSPACE) || {
+        id: "mhent-core",
+        name: "MHEnt Universe HQ",
+        code: "MHENT-CORE-2026",
+        role: "master"
+      },
+      currentUser: (window.MHENT_CONFIG && window.MHENT_CONFIG.CURRENT_USER) || {
+        id: "user-master-01",
+        name: "Master Yurika",
+        email: "yurika@mhentuniverse.internal",
+        role: "master",
+        avatar: "👑",
+        status: "online"
+      },
       userWorkspaces: [
         { code: "MHENT-CORE-2026", name: "MHEnt Universe HQ", role: "master", isDefault: true, icon: "planet" }
       ],
       members: this.getDefaultMembers(),
 
-      // 1. Chat Messages (Lưu riêng biệt theo từng Workspace Code)
+      // 1. Chat Messages (Trống - Đồng bộ từ Supabase)
       chatChannelsByWorkspace: {
         "MHENT-CORE-2026": {
           general: [],
@@ -71,26 +98,29 @@ class WorkspaceStore {
         dev: []
       },
 
-      // 2. Mails (Trống)
+      // 2. Mails (Trống - Đồng bộ từ Supabase)
       mails: [],
 
-      // 3. Todo Tasks (Trống)
+      // 3. Todo Tasks (Trống - Đồng bộ từ Supabase)
       tasks: [],
 
-      // 4. Drive Files (Trống)
+      // 4. Drive Files (Trống - Đồng bộ từ Supabase)
       files: [],
 
-      // 5. Calendar Events (Trống)
+      // 5. Calendar Events (Trống - Đồng bộ từ Supabase)
       events: [],
 
       // 6. AISA Chat Stream
-      aisaHistory: []
+      aisaHistory: [],
+
+      // 7. Notes
+      notes: []
     };
   }
 
   save() {
     try {
-      localStorage.setItem("mhent_workspace_v3_clean", JSON.stringify(this.state));
+      localStorage.setItem("mhent_workspace_v4_clean", JSON.stringify(this.state));
     } catch (e) {
       console.warn("Could not save state to localStorage", e);
     }

@@ -3,14 +3,30 @@
  */
 window.TodoModule = {
   init() {
+    this.populateAssignees();
     this.renderBoard();
     this.bindEvents();
+  },
+
+  populateAssignees() {
+    const select = document.getElementById("task-assignee");
+    if (!select) return;
+    const members = (window.store && window.store.state && window.store.state.members) ? window.store.state.members : [];
+    if (members.length === 0) {
+      const user = (window.store && window.store.state && window.store.state.currentUser) ? window.store.state.currentUser : { name: "Master Yurika", role: "master" };
+      select.innerHTML = `<option value="${user.name}">${user.name} (${user.role === 'master' ? 'Master' : 'Thành viên'})</option>`;
+      return;
+    }
+    select.innerHTML = members.map(m => `
+      <option value="${m.name}">${m.name} (${m.role === 'master' ? 'Master' : 'Thành viên'})</option>
+    `).join("");
   },
 
   bindEvents() {
     const addBtn = document.getElementById("btn-add-task");
     if (addBtn) {
       addBtn.addEventListener("click", () => {
+        this.populateAssignees();
         window.UI.openModal("modal-add-task");
       });
     }

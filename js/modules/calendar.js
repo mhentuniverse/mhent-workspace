@@ -16,68 +16,8 @@ window.CalendarModule = {
   selectedFilter: 'all',
 
   init() {
-    this.ensureDemoEvents();
     this.bindEvents();
     this.renderCalendar();
-  },
-
-  /**
-   * Seed realistic sample events if store has none,
-   * specifically setting 2 events on today so the user immediately sees the multi-color gradient!
-   */
-  ensureDemoEvents() {
-    if (!window.store.state.events || window.store.state.events.length === 0) {
-      const now = new Date();
-      const todayStr = this.formatDateStr(now);
-
-      const tmrw = new Date(now);
-      tmrw.setDate(now.getDate() + 1);
-      const tmrwStr = this.formatDateStr(tmrw);
-
-      const dayAfter = new Date(now);
-      dayAfter.setDate(now.getDate() + 2);
-      const dayAfterStr = this.formatDateStr(dayAfter);
-
-      window.store.state.events = [
-        {
-          id: "ev-demo-1",
-          title: "Họp giao ban chiến lược MHEnt Universe",
-          date: todayStr,
-          time: "09:00 - 10:30",
-          type: "meeting",
-          color: "#8b5cf6",
-          location: "Phòng Họp Trực Tuyến A"
-        },
-        {
-          id: "ev-demo-2",
-          title: "Tổng duyệt ra mắt MV AISA Harmony",
-          date: todayStr,
-          time: "15:00 - 16:30",
-          type: "launch",
-          color: "#10b981",
-          location: "Studio 1 / Premiere Hall"
-        },
-        {
-          id: "ev-demo-3",
-          title: "Hạn chót hoàn thiện thiết kế Stage 3D",
-          date: tmrwStr,
-          time: "17:00",
-          type: "deadline",
-          color: "#ef4444",
-          location: "Hệ thống MHEnt Drive"
-        },
-        {
-          id: "ev-demo-4",
-          title: "Ghi hình phỏng vấn tạp chí âm nhạc",
-          date: dayAfterStr,
-          time: "14:00 - 15:30",
-          type: "media",
-          color: "#f59e0b",
-          location: "Phòng Media MHEnt"
-        }
-      ];
-      window.store.save();
-    }
   },
 
   bindEvents() {

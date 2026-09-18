@@ -13,6 +13,9 @@ window.CloudModule = {
   init() {
     this.initSupabase();
     this.initFirestore();
+    const wsCode = (window.store && window.store.state && window.store.state.workspace ? window.store.state.workspace.code : null) || "MHENT-CORE-2026";
+    this.loadWorkspaceDataFromSupabase(wsCode);
+    this.initSupabaseRealtime(wsCode);
   },
 
   initSupabase() {
@@ -108,6 +111,18 @@ window.CloudModule = {
         window.store.state.notes = notesData;
         if (window.ToolsModule && typeof window.ToolsModule.renderNotes === 'function') {
           window.ToolsModule.renderNotes();
+        }
+      }
+      // 5. Tải events của user hoặc của workspace từ Supabase
+      const { data: eventsData, error: eventErr } = await this.sb
+        .from('workspace_events')
+        .select('*')
+        .or(`user_id.eq.${uid},workspace_code.eq.${this.currentWsCode}`);
+
+      if (!eventErr && eventsData && eventsData.length > 0) {
+        window.store.state.events = eventsData;
+        if (window.CalendarModule && typeof window.CalendarModule.renderCalendar === 'function') {
+          window.CalendarModule.renderCalendar();
         }
       }
     } catch (e) {
@@ -241,6 +256,8 @@ window.CloudModule = {
 
     // Tự động kéo dữ liệu thành viên mới nhất từ Supabase & Firestore
     this.fetchWorkspaceMembers(this.currentWsCode).catch(() => {});
+    this.loadWorkspaceDataFromSupabase(this.currentWsCode);
+    this.initSupabaseRealtime(this.currentWsCode);
   },
 
   // ==========================================
@@ -777,14 +794,205 @@ window.CloudModule = {
     }
   },
 
+  // ==========================================
+  // SUPABASE COMPREHENSIVE DATA LOADER & REALTIME
+  // ==========================================
+
+  async loadWorkspaceDataFromSupabase(wsCode) {
+    if (!this.sb) return;
+    const targetCode = (wsCode || this.currentWsCode || "MHENT-CORE-2026").toUpperCase();
+    console.log(`[Cloud Engine] ⚡ Đang đồng bộ toàn bộ dữ liệu Không Gian [${targetCode}] từ Supabase...`);
+
+    try {
+      // 1. Members
+      await this.fetchWorkspaceMembers(targetCode);
+
+      // 2. Tasks
+      const { data: tasks, error: tErr } = await this.sb
+        .from('workspace_tasks')
+        .select('*')
+        .eq('workspace_code', targetCode);
+      if (!tErr && tasks) {
+        window.store.state.tasks = tasks;
+        if (window.TodoModule) window.TodoModule.renderBoard();
+      }
+
+      // 3. Calendar Events
+      const { data: events, error: eErr } = await this.sb
+        .from('workspace_events')
+        .select('*')
+        .eq('workspace_code', targetCode);
+      if (!eErr && events) {
+        window.store.state.events = events;
+        if (window.CalendarModule && typeof window.CalendarModule.renderCalendar === 'function') {
+          window.CalendarModule.renderCalendar();
+        }
+      }
+
+      // 4. Drive Files
+      const { data: files, error: fErr } = await this.sb
+        .from('workspace_files')
+        .select('*')
+        .eq('workspace_code', targetCode);
+      if (!fErr && files) {
+        window.store.state.files = files;
+        if (window.DriveModule) window.DriveModule.renderFiles();
+      }
+
+      // 5. Messages for channels
+      for (const ch of ["general", "media", "dev"]) {
+        const { data: msgs, error: mErr } = await this.sb
+          .from('workspace_messages')
+          .select('*')
+          .eq('workspace_code', targetCode)
+          .eq('channel', ch)
+          .order('created_at', { ascending: true })
+          .limit(100);
+
+        if (!mErr && msgs) {
+          const formatted = msgs.map(m => {
+            const now = m.created_at ? new Date(m.created_at) : new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            return {
+              id: m.id,
+              sender: m.sender || "Thành viên",
+              senderId: m.user_id,
+              avt: m.avt || "👤",
+              time: timeStr,
+              text: m.text || "",
+              isSelf: m.user_id === (this.currentUserId || (window.store && window.store.state.currentUser ? window.store.state.currentUser.id : null)),
+              isBot: m.is_bot || false
+            };
+          });
+          window.store.state.chatChannels[ch] = formatted;
+          if (!window.store.state.chatChannelsByWorkspace) {
+            window.store.state.chatChannelsByWorkspace = {};
+          }
+          if (!window.store.state.chatChannelsByWorkspace[targetCode]) {
+            window.store.state.chatChannelsByWorkspace[targetCode] = {};
+          }
+          window.store.state.chatChannelsByWorkspace[targetCode][ch] = formatted;
+        }
+      }
+      if (window.ChatModule) window.ChatModule.renderMessages();
+
+      // 6. Notes
+      const uid = this.currentUserId || (window.store.state.currentUser ? window.store.state.currentUser.id : null);
+      if (uid) {
+        const { data: notes, error: nErr } = await this.sb
+          .from('workspace_notes')
+          .select('*')
+          .eq('user_id', uid);
+        if (!nErr && notes) {
+          window.store.state.notes = notes;
+          if (window.ToolsModule && typeof window.ToolsModule.renderNotes === 'function') {
+            window.ToolsModule.renderNotes();
+          }
+        }
+      }
+
+      window.store.save();
+    } catch (err) {
+      console.warn("[Cloud Engine] Lỗi khi tải dữ liệu từ Supabase:", err);
+    }
+  },
+
+  initSupabaseRealtime(wsCode) {
+    if (!this.sb) return;
+    const targetCode = (wsCode || this.currentWsCode || "MHENT-CORE-2026").toUpperCase();
+
+    try {
+      if (this.sbRealtimeChannel) {
+        this.sbRealtimeChannel.unsubscribe();
+      }
+
+      this.sbRealtimeChannel = this.sb.channel(`mhent-ws-${targetCode}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'workspace_tasks', filter: `workspace_code=eq.${targetCode}` }, () => {
+          this.loadWorkspaceDataFromSupabase(targetCode);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'workspace_events', filter: `workspace_code=eq.${targetCode}` }, () => {
+          this.loadWorkspaceDataFromSupabase(targetCode);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'workspace_files', filter: `workspace_code=eq.${targetCode}` }, () => {
+          this.loadWorkspaceDataFromSupabase(targetCode);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'workspace_messages', filter: `workspace_code=eq.${targetCode}` }, () => {
+          this.loadWorkspaceDataFromSupabase(targetCode);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'workspace_members', filter: `workspace_code=eq.${targetCode}` }, () => {
+          this.fetchWorkspaceMembers(targetCode);
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log(`[Cloud Engine] ⚡ Supabase Realtime đã kết nối cho Không Gian [${targetCode}]!`);
+          }
+        });
+    } catch (e) {
+      console.warn("[Cloud Engine] Lỗi khởi tạo Supabase Realtime Channel:", e);
+    }
+  },
+
+  async pushNote(note) {
+    window.store.saveNote(note);
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_notes').upsert([{
+          id: note.id,
+          user_id: this.currentUserId || (window.store && window.store.state && window.store.state.currentUser ? window.store.state.currentUser.id : "guest"),
+          title: note.title || "",
+          content: note.content || "",
+          updated_at: new Date().toISOString()
+        }]);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi lưu note Supabase:", err);
+      }
+    }
+  },
+
+  async deleteNote(noteId) {
+    window.store.deleteNote(noteId);
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_notes').delete().eq('id', noteId);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi xóa note Supabase:", err);
+      }
+    }
+  },
+
   async createCalendarEvent(event) {
+    const evId = event.id || ("ev-" + Date.now());
+    const uid = this.currentUserId || (window.store && window.store.state && window.store.state.currentUser ? window.store.state.currentUser.id : "guest");
+
+    // 1. Supabase (Primary Cloud Storage)
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_events').upsert([{
+          id: evId,
+          user_id: uid,
+          workspace_code: this.currentWsCode,
+          title: event.title,
+          date: event.date,
+          time: event.time || 'Cả ngày',
+          type: event.type || 'meeting',
+          color: event.color || '#8b5cf6',
+          location: event.location || '',
+          updated_at: new Date().toISOString()
+        }]);
+        console.log(`[Cloud Engine] 📅 Đã lưu sự kiện [${event.title}] lên Supabase!`);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi lưu sự kiện Calendar Supabase:", err);
+      }
+    }
+
+    // 2. Firestore
     if (this.db) {
       try {
-        const evId = event.id || ("ev-" + Date.now());
         await this.db.collection("workspaces").doc(this.currentWsCode)
           .collection("events").doc(evId).set({
             ...event,
-            userId: this.currentUserId || (window.store && window.store.state && window.store.state.currentUser ? window.store.state.currentUser.id : null),
+            id: evId,
+            userId: uid,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
       } catch (e) {
@@ -794,7 +1002,20 @@ window.CloudModule = {
   },
 
   async deleteCalendarEvent(eventId) {
-    if (this.db && eventId) {
+    if (!eventId) return;
+
+    // 1. Supabase
+    if (this.sb) {
+      try {
+        await this.sb.from('workspace_events').delete().eq('id', eventId);
+        console.log(`[Cloud Engine] 🗑️ Đã xóa sự kiện [${eventId}] trên Supabase!`);
+      } catch (err) {
+        console.warn("[Cloud Engine] Lỗi xóa sự kiện Calendar Supabase:", err);
+      }
+    }
+
+    // 2. Firestore
+    if (this.db) {
       try {
         await this.db.collection("workspaces").doc(this.currentWsCode)
           .collection("events").doc(eventId).delete();
