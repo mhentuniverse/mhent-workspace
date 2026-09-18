@@ -16,6 +16,13 @@ window.CalendarModule = {
   selectedFilter: 'all',
 
   init() {
+    if (window.store && window.store.state && Array.isArray(window.store.state.events)) {
+      const beforeLen = window.store.state.events.length;
+      window.store.state.events = window.store.state.events.filter(e => !String(e.id).startsWith("ev-demo-"));
+      if (window.store.state.events.length !== beforeLen) {
+        window.store.save();
+      }
+    }
     this.bindEvents();
     this.renderCalendar();
   },
@@ -203,7 +210,7 @@ window.CalendarModule = {
     // Monday is index 0, Sunday is index 6
     const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
 
-    const events = window.store.state.events || [];
+    const events = (window.store.state.events || []).filter(e => !String(e.id).startsWith("ev-demo-"));
     let cellsHtml = "";
 
     // 1. Previous month trailing days (dimmed)
@@ -334,7 +341,7 @@ window.CalendarModule = {
       titleEl.innerText = `Tuần: ${sDay}/${sMonth} - ${eDay}/${eMonth}/${eYear}`;
     }
 
-    const events = window.store.state.events || [];
+    const events = (window.store.state.events || []).filter(e => !String(e.id).startsWith("ev-demo-"));
     const dayNames = [
       { short: "T2", full: "Thứ Hai" },
       { short: "T3", full: "Thứ Ba" },

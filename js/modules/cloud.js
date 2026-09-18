@@ -242,7 +242,9 @@ window.CloudModule = {
         if (!snapshot) return;
         const cloudEvents = [];
         snapshot.forEach(doc => {
-          cloudEvents.push({ id: doc.id, ...doc.data() });
+          if (!doc.id.startsWith("ev-demo-")) {
+            cloudEvents.push({ id: doc.id, ...doc.data() });
+          }
         });
         if (cloudEvents.length > 0) {
           window.store.state.events = cloudEvents;
