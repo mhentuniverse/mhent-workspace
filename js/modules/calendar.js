@@ -463,7 +463,7 @@ window.CalendarModule = {
         const timeBadge = ev.time ? ev.time.split('-')[0].trim() : '';
         const recurIcon = ev.isRecurring ? '🔁 ' : '';
         return `
-          <div class="event-pill" style="background: ${this.hexToRgba(color, 0.28)}; border-left: 3px solid ${color}; color: #ffffff;" title="${ev.isRecurring ? '[Lặp lại] ' : ''}${this.escapeHtml(ev.title)} (${ev.time || 'Cả ngày'})" onclick="event.stopPropagation(); window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')">
+          <div class="event-pill" draggable="true" data-event-id="${ev.originalId || ev.id}" style="background: ${this.hexToRgba(color, 0.28)}; border-left: 3px solid ${color}; color: #ffffff;" title="${ev.isRecurring ? '[Lặp lại] ' : ''}${this.escapeHtml(ev.title)} (${ev.time || 'Cả ngày'})" onclick="event.stopPropagation(); window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')">
             ${timeBadge ? `<span class="pill-time">${timeBadge}</span>` : ''}
             <span class="pill-title">${recurIcon}${this.escapeHtml(ev.title)}</span>
           </div>
@@ -474,7 +474,7 @@ window.CalendarModule = {
       const moreHtml = moreCount > 0 ? `<div class="event-more-count">+${moreCount} sự kiện nữa</div>` : "";
 
       cellsHtml += `
-        <div class="calendar-day-cell ${isToday ? 'today' : ''}" style="${cellStyle}" onclick="window.CalendarModule.selectDay('${dateStr}')">
+        <div class="calendar-day-cell ${isToday ? 'today' : ''}" style="${cellStyle}" data-date="${dateStr}" onclick="window.CalendarModule.selectDay('${dateStr}')">
           <div class="day-header">
             <span class="day-number">${day}</span>
             ${isToday ? '<span class="today-badge">Hôm nay</span>' : ''}
@@ -504,6 +504,7 @@ window.CalendarModule = {
     }
 
     gridEl.innerHTML = cellsHtml;
+    this.setupCalendarDragAndDrop();
   },
 
   /**
@@ -577,7 +578,7 @@ window.CalendarModule = {
           const escapedTitle = this.escapeHtml(ev.title);
           const escapedLoc = this.escapeHtml(ev.location || '');
           return `
-            <div class="week-event-card" style="border-left-color: ${color}; background: ${this.hexToRgba(color, 0.12)};" onclick="window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')" title="${escapedTitle}">
+            <div class="week-event-card" draggable="true" data-event-id="${ev.originalId || ev.id}" style="border-left-color: ${color}; background: ${this.hexToRgba(color, 0.12)};" onclick="window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')" title="${escapedTitle}">
               <button class="week-event-del" onclick="event.stopPropagation(); window.CalendarModule.deleteEvent('${ev.originalId || ev.id}')" title="Xóa sự kiện">✕</button>
               <div class="week-event-top-row">
                 <div class="week-event-time">
@@ -599,13 +600,13 @@ window.CalendarModule = {
         `;
 
         colsHtml += `
-          <div class="week-day-col ${isToday ? 'is-today' : ''}">
+          <div class="week-day-col ${isToday ? 'is-today' : ''}" data-date="${dateStr}">
             <div class="week-col-header ${isToday ? 'is-today' : ''}">
               <div class="week-day-title">${dayNames[i].full}</div>
               <div class="week-day-date">${currDate.getDate()} thg ${currDate.getMonth() + 1}</div>
               ${isToday ? '<span class="today-badge" style="margin-top: 4px; display: inline-block;">Hôm nay 🌟</span>' : ''}
             </div>
-            <div class="week-col-events">
+            <div class="week-col-events" data-date="${dateStr}">
               ${eventsCardsHtml}
               <button class="week-col-add-btn" onclick="window.CalendarModule.selectDay('${dateStr}')">+ Thêm sự kiện</button>
             </div>
@@ -637,7 +638,7 @@ window.CalendarModule = {
           const escapedTitle = this.escapeHtml(ev.title);
           const escapedLoc = this.escapeHtml(ev.location || '');
           return `
-            <div class="week-event-card row-card" style="border-left-color: ${color}; background: ${this.hexToRgba(color, 0.12)};" onclick="window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')" title="${escapedTitle}">
+            <div class="week-event-card row-card" draggable="true" data-event-id="${ev.originalId || ev.id}" style="border-left-color: ${color}; background: ${this.hexToRgba(color, 0.12)};" onclick="window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')" title="${escapedTitle}">
               <button class="week-event-del" onclick="event.stopPropagation(); window.CalendarModule.deleteEvent('${ev.originalId || ev.id}')" title="Xóa sự kiện">✕</button>
               <div class="week-event-top-row">
                 <div class="week-event-time">
@@ -657,13 +658,13 @@ window.CalendarModule = {
         `;
 
         rowsHtml += `
-          <div class="week-row-card ${isToday ? 'is-today' : ''}">
+          <div class="week-row-card ${isToday ? 'is-today' : ''}" data-date="${dateStr}">
             <div class="week-row-header ${isToday ? 'is-today' : ''}">
               <div class="week-day-title">${dayNames[i].full}</div>
               <div class="week-day-date">${currDate.getDate()} thg ${currDate.getMonth() + 1}</div>
               ${isToday ? '<span class="today-badge" style="margin-top: 4px; display: inline-block;">Hôm nay 🌟</span>' : ''}
             </div>
-            <div class="week-row-events">
+            <div class="week-row-events" data-date="${dateStr}">
               ${eventsCardsHtml}
               <button class="week-col-add-btn" style="min-width: 90px; height: auto;" onclick="window.CalendarModule.selectDay('${dateStr}')">+ Thêm</button>
             </div>
@@ -672,6 +673,99 @@ window.CalendarModule = {
       }
       weekContent.innerHTML = rowsHtml;
     }
+    this.setupCalendarDragAndDrop();
+  },
+
+  /**
+   * Setup HTML5 Drag and Drop for Month Cells and Week Columns
+   */
+  setupCalendarDragAndDrop() {
+    // 1. Draggable items: .event-pill and .week-event-card
+    const draggables = document.querySelectorAll('.event-pill[draggable="true"], .week-event-card[draggable="true"]');
+    draggables.forEach(item => {
+      item.ondragstart = (e) => {
+        const eventId = item.getAttribute('data-event-id');
+        if (!eventId) return;
+        e.dataTransfer.setData('text/plain', eventId);
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => item.classList.add('is-dragging'), 0);
+      };
+
+      item.ondragend = () => {
+        item.classList.remove('is-dragging');
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      };
+    });
+
+    // 2. Drop targets: .calendar-day-cell, .week-day-col, .week-col-events, .week-row-card
+    const dropTargets = document.querySelectorAll('.calendar-day-cell[data-date], .week-day-col[data-date], .week-col-events[data-date], .week-row-card[data-date]');
+    dropTargets.forEach(target => {
+      target.ondragover = (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        target.classList.add('drag-over');
+      };
+
+      target.ondragenter = (e) => {
+        e.preventDefault();
+        target.classList.add('drag-over');
+      };
+
+      target.ondragleave = (e) => {
+        if (!target.contains(e.relatedTarget)) {
+          target.classList.remove('drag-over');
+        }
+      };
+
+      target.ondrop = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        target.classList.remove('drag-over');
+
+        const eventId = e.dataTransfer.getData('text/plain');
+        const targetDate = target.getAttribute('data-date');
+        if (eventId && targetDate) {
+          await this.moveEventToDate(eventId, targetDate);
+        }
+      };
+    });
+  },
+
+  /**
+   * Move event to a new date via Drag & Drop (Preserves all other data)
+   */
+  async moveEventToDate(eventId, targetDate) {
+    if (!eventId || !targetDate) return;
+
+    const events = window.store.state.events || [];
+    const idx = events.findIndex(e => e.id === eventId || e.originalId === eventId);
+    if (idx === -1) return;
+
+    const ev = events[idx];
+    const oldDate = ev.date;
+    if (oldDate === targetDate) return;
+
+    const realId = ev.originalId || ev.id;
+    const updatedEvent = {
+      ...ev,
+      id: realId,
+      date: targetDate,
+      updatedAt: new Date().toISOString()
+    };
+
+    events[idx] = updatedEvent;
+    window.store.save();
+
+    if (window.CloudModule) {
+      await window.CloudModule.createCalendarEvent(updatedEvent);
+    }
+
+    this.renderCalendar();
+
+    // Format target date for friendly toast: DD/MM/YYYY
+    const parts = targetDate.split('-');
+    const formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : targetDate;
+    window.UI.showToast("Đã dời lịch trình thành công! 📅", `"${ev.title}" → ${formattedDate}`, "success");
   },
 
   /**
@@ -847,6 +941,9 @@ window.CalendarModule = {
     const locInput = document.getElementById("event-location");
     if (locInput) locInput.value = "";
 
+    const descInput = document.getElementById("event-description");
+    if (descInput) descInput.value = "";
+
     const dateInput = document.getElementById("event-date");
     if (dateInput) {
       dateInput.value = dateStr || this.formatDateStr(this.viewDate);
@@ -969,6 +1066,10 @@ window.CalendarModule = {
     const locInput = document.getElementById("event-location");
     if (locInput) locInput.value = ev.location || "";
 
+    // Pre-fill Description
+    const descInput = document.getElementById("event-description");
+    if (descInput) descInput.value = ev.description || "";
+
     // Close detail modal if open & open edit modal
     window.UI.closeModal("modal-event-detail");
     window.UI.openModal("modal-add-event");
@@ -1038,6 +1139,8 @@ window.CalendarModule = {
     const timeInput = document.getElementById("event-time");
     const typeInput = document.getElementById("event-type");
     const locInput = document.getElementById("event-location");
+    const descInput = document.getElementById("event-description");
+    const descriptionVal = descInput ? descInput.value.trim() : "";
 
     if (!titleInput || !titleInput.value.trim() || !dateInput || !dateInput.value) {
       window.UI.showToast("Vui lòng nhập tên và ngày sự kiện!", "", "warning");
@@ -1086,6 +1189,7 @@ window.CalendarModule = {
         type: typeInput ? typeInput.value : "meeting",
         color: selectedColor,
         location: locInput ? locInput.value.trim() : "",
+        description: descriptionVal,
         isRecurring: isRecurring,
         recurrencePattern: recurrencePattern,
         recurrenceEnd: recurrenceEnd,
@@ -1116,6 +1220,7 @@ window.CalendarModule = {
         type: typeInput ? typeInput.value : "meeting",
         color: selectedColor,
         location: locInput ? locInput.value.trim() : "",
+        description: descriptionVal,
         isRecurring: isRecurring,
         recurrencePattern: recurrencePattern,
         recurrenceEnd: recurrenceEnd,
@@ -1137,6 +1242,7 @@ window.CalendarModule = {
     if (editIdInput) editIdInput.value = "";
     titleInput.value = "";
     if (locInput) locInput.value = "";
+    if (descInput) descInput.value = "";
     if (isRecurringInput) {
       isRecurringInput.checked = false;
       this.toggleRecurringFields(false);
@@ -1238,6 +1344,18 @@ window.CalendarModule = {
     // Location
     const locEl = document.getElementById("event-detail-location");
     if (locEl) locEl.innerText = ev.location || "Chưa có thông tin địa điểm";
+
+    // Description
+    const descBox = document.getElementById("event-detail-desc-box");
+    const descEl = document.getElementById("event-detail-desc");
+    if (descBox && descEl) {
+      if (ev.description && ev.description.trim()) {
+        descBox.style.display = "flex";
+        descEl.innerText = ev.description.trim();
+      } else {
+        descBox.style.display = "none";
+      }
+    }
 
     // Recurrence row
     const recurRow = document.getElementById("event-detail-recur-row");

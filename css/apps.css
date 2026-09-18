@@ -990,10 +990,36 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  border-radius: 6px;
-  border: 1px dashed transparent;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
+}
+
+/* ================= CALENDAR DRAG & DROP ================= */
+.event-pill[draggable="true"],
+.week-event-card[draggable="true"] {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+}
+
+.event-pill.is-dragging,
+.week-event-card.is-dragging {
+  opacity: 0.35 !important;
+  transform: scale(0.96) !important;
+  cursor: grabbing !important;
+}
+
+.calendar-day-cell.drag-over,
+.week-day-col.drag-over,
+.week-col-events.drag-over,
+.week-row-card.drag-over {
+  background: rgba(139, 92, 246, 0.18) !important;
+  outline: 2px dashed #8b5cf6 !important;
+  outline-offset: -2px !important;
+  border-color: #a78bfa !important;
+  box-shadow: inset 0 0 16px rgba(139, 92, 246, 0.25) !important;
 }
 
 .week-empty-placeholder:hover {

@@ -847,6 +847,20 @@ window.CloudModule = {
           let pattern = e.recurrence_pattern || 'none';
           let end = e.recurrence_end || '';
           let cleanLoc = e.location || '';
+          let desc = e.description || '';
+
+          // Parse embedded description if saved in location fallback
+          if (!desc && cleanLoc.includes('[DESC:')) {
+            const dMatch = cleanLoc.match(/\[DESC:([^\]]*)\]/);
+            if (dMatch) {
+              try {
+                desc = decodeURIComponent(dMatch[1]);
+              } catch (_) {
+                desc = dMatch[1];
+              }
+              cleanLoc = cleanLoc.replace(/\s*\|?\s*\[DESC:[^\]]*\]/, '').trim();
+            }
+          }
 
           // Parse embedded recurrence info if saved in location fallback
           if (!isRecur && cleanLoc.includes('[RECUR:')) {
@@ -861,6 +875,7 @@ window.CloudModule = {
 
           return {
             ...e,
+            description: desc,
             location: cleanLoc,
             isRecurring: isRecur,
             recurrencePattern: pattern,
@@ -1021,6 +1036,7 @@ window.CloudModule = {
           type: event.type || 'meeting',
           color: event.color || '#8b5cf6',
           location: event.location || '',
+          description: event.description || '',
           is_recurring: !!event.isRecurring,
           recurrence_pattern: event.recurrencePattern || 'none',
           recurrence_end: event.recurrenceEnd || '',
@@ -1029,13 +1045,16 @@ window.CloudModule = {
 
         let { error } = await this.sb.from('workspace_events').upsert([fullPayload]);
 
-        // Fallback: Nếu bảng workspace_events chưa được chạy SQL thêm cột is_recurring (PGRST204)
-        if (error && (error.code === 'PGRST204' || String(error.message || '').includes('is_recurring') || String(error.message || '').includes('column'))) {
-          console.warn("[Cloud Engine] Supabase chưa có cột is_recurring, kích hoạt fallback sang cấu trúc bảng chuẩn:", error.message);
+        // Fallback: Nếu bảng workspace_events chưa được chạy SQL thêm cột description hoặc is_recurring (PGRST204)
+        if (error && (error.code === 'PGRST204' || String(error.message || '').includes('is_recurring') || String(error.message || '').includes('description') || String(error.message || '').includes('column'))) {
+          console.warn("[Cloud Engine] Supabase chưa có cột description/is_recurring, kích hoạt fallback sang cấu trúc bảng chuẩn:", error.message);
 
-          let locWithRecur = event.location || '';
+          let locWithExtra = event.location || '';
+          if (event.description) {
+            locWithExtra = (locWithExtra ? locWithExtra + " | " : "") + `[DESC:${encodeURIComponent(event.description)}]`;
+          }
           if (event.isRecurring) {
-            locWithRecur = (locWithRecur ? locWithRecur + " | " : "") + `[RECUR:${event.recurrencePattern || 'weekly'}:${event.recurrenceEnd || ''}]`;
+            locWithExtra = (locWithExtra ? locWithExtra + " | " : "") + `[RECUR:${event.recurrencePattern || 'weekly'}:${event.recurrenceEnd || ''}]`;
           }
 
           const basePayload = {
@@ -1047,7 +1066,7 @@ window.CloudModule = {
             time: event.time || 'Cả ngày',
             type: event.type || 'meeting',
             color: event.color || '#8b5cf6',
-            location: locWithRecur,
+            location: locWithExtra,
             updated_at: new Date().toISOString()
           };
 

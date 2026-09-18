@@ -905,6 +905,14 @@
             </label>
             <input type="text" class="input-text-modern" id="event-location" placeholder="VD: Phòng Họp Trực Tuyến A / Studio 1">
           </div>
+
+          <!-- Ghi Chú / Mô Tả -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label-modern">
+              <span>Ghi Chú / Mô Tả Chi Tiết (Tùy chọn)</span>
+            </label>
+            <textarea class="input-text-modern" id="event-description" rows="2" placeholder="Ghi chú nội dung, checklist, link tài liệu hoặc lưu ý quan trọng..." style="resize: vertical; min-height: 52px; font-family: inherit; font-size: 13px; line-height: 1.4;"></textarea>
+          </div>
         </div>
 
         <div class="modal-footer-modern">
@@ -979,6 +987,15 @@
             <div>
               <div class="event-detail-item-label">Quy tắc lặp lại</div>
               <div class="event-detail-item-val" id="event-detail-recur-desc">Hàng tuần vào Thứ Hai</div>
+            </div>
+          </div>
+
+          <!-- Ghi chú / Mô tả nếu có -->
+          <div class="event-detail-item" id="event-detail-desc-box" style="grid-column: span 2; display: none;">
+            <div class="event-detail-item-icon">📝</div>
+            <div style="flex: 1; min-width: 0;">
+              <div class="event-detail-item-label">Ghi chú / Mô tả chi tiết</div>
+              <div class="event-detail-item-val" id="event-detail-desc" style="white-space: pre-wrap; font-weight: 500; font-size: 12.5px; line-height: 1.45; color: #e2e8f0; margin-top: 2px;"></div>
             </div>
           </div>
         </div>
