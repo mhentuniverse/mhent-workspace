@@ -14,6 +14,8 @@ window.CalendarModule = {
   currentView: 'month', // 'month' or 'week'
   weekLayout: localStorage.getItem('mhent_cal_layout') || 'columns', // 'columns' or 'rows'
   selectedFilter: 'all',
+  selectedModalColor: '#8b5cf6',
+  isCustomColorSelected: false,
 
   init() {
     if (window.store && window.store.state && Array.isArray(window.store.state.events)) {
@@ -204,17 +206,14 @@ window.CalendarModule = {
     // Modal color preset selector
     document.querySelectorAll('input[name="event-color-pick"]').forEach(radio => {
       radio.onchange = (e) => {
-        const val = e.target.value;
-        const customColor = document.getElementById("event-custom-color");
-        if (customColor) customColor.value = val;
-        this.updateColorPillChoices(val);
+        this.setColorSelection(e.target.value, false);
       };
     });
 
     const customColorInput = document.getElementById("event-custom-color");
     if (customColorInput) {
       customColorInput.oninput = (e) => {
-        this.updateColorPillChoices(e.target.value, true);
+        this.setColorSelection(e.target.value, true);
       };
     }
   },
@@ -876,7 +875,7 @@ window.CalendarModule = {
     // Reset Color / Category
     const typeInput = document.getElementById("event-type");
     if (typeInput) typeInput.value = "meeting";
-    this.updateColorPillChoices("#8b5cf6");
+    this.setColorSelection("#8b5cf6", false);
 
     window.UI.openModal("modal-add-event");
   },
@@ -958,8 +957,13 @@ window.CalendarModule = {
 
     // Pre-fill Type & Color
     const typeInput = document.getElementById("event-type");
-    if (typeInput) typeInput.value = ev.type || "meeting";
-    this.updateColorPillChoices(ev.color || this.getColorForType(ev.type || "meeting"));
+    const evType = ev.type || "meeting";
+    if (typeInput) typeInput.value = evType;
+
+    const evColor = ev.color || this.getColorForType(evType);
+    const presets = ["#8b5cf6", "#ef4444", "#10b981", "#f59e0b", "#3b82f6", "#ec4899"];
+    const isCustom = !presets.includes(String(evColor).toLowerCase());
+    this.setColorSelection(evColor, isCustom);
 
     // Pre-fill Location
     const locInput = document.getElementById("event-location");
@@ -976,25 +980,50 @@ window.CalendarModule = {
 
   onEventTypeChange(type) {
     const color = this.getColorForType(type);
-    const radio = document.querySelector(`input[name="event-color-pick"][value="${color}"]`);
-    if (radio) {
-      radio.checked = true;
-      this.updateColorPillChoices(color);
-    }
-    const customColor = document.getElementById("event-custom-color");
-    if (customColor) customColor.value = color;
+    this.setColorSelection(color, false);
   },
 
-  updateColorPillChoices(val, isCustom = false) {
-    document.querySelectorAll('.color-swatch-item, .color-pill-choice').forEach(swatch => {
+  setColorSelection(color, isCustom = false) {
+    this.selectedModalColor = color || "#8b5cf6";
+    this.isCustomColorSelected = !!isCustom;
+
+    // 1. Preset radios
+    let foundPreset = false;
+    document.querySelectorAll('.color-swatch-item').forEach(swatch => {
       const radio = swatch.querySelector('input');
-      if (radio && radio.value === val && !isCustom) {
-        swatch.classList.add('active');
+      if (radio && radio.value.toLowerCase() === String(color).toLowerCase() && !isCustom) {
         radio.checked = true;
+        swatch.classList.add('active');
+        foundPreset = true;
       } else {
+        if (radio && !isCustom) radio.checked = false;
         swatch.classList.remove('active');
       }
     });
+
+    // 2. Custom color swatch
+    const customSwatch = document.querySelector('.color-custom-swatch');
+    const customInput = document.getElementById('event-custom-color');
+    if (customInput) {
+      customInput.value = color;
+    }
+
+    if (customSwatch) {
+      if (isCustom || !foundPreset) {
+        this.isCustomColorSelected = true;
+        customSwatch.classList.add('active');
+        customSwatch.style.borderColor = color;
+        customSwatch.style.boxShadow = `0 0 14px ${this.hexToRgba(color, 0.45)}`;
+      } else {
+        customSwatch.classList.remove('active');
+        customSwatch.style.borderColor = '';
+        customSwatch.style.boxShadow = '';
+      }
+    }
+  },
+
+  updateColorPillChoices(val, isCustom = false) {
+    this.setColorSelection(val, isCustom);
   },
 
   /**
@@ -1015,16 +1044,20 @@ window.CalendarModule = {
       return;
     }
 
-    // Color extraction
-    let selectedColor = "#8b5cf6";
-    const customColorInput = document.getElementById("event-custom-color");
-    const checkedRadio = document.querySelector('input[name="event-color-pick"]:checked');
-    if (customColorInput && customColorInput.value) {
-      selectedColor = customColorInput.value;
-    } else if (checkedRadio) {
-      selectedColor = checkedRadio.value;
-    } else if (typeInput) {
-      selectedColor = this.getColorForType(typeInput.value);
+    // Color extraction from clean state
+    let selectedColor = this.selectedModalColor || "#8b5cf6";
+    if (this.isCustomColorSelected) {
+      const customColorInput = document.getElementById("event-custom-color");
+      if (customColorInput && customColorInput.value) {
+        selectedColor = customColorInput.value;
+      }
+    } else {
+      const checkedRadio = document.querySelector('input[name="event-color-pick"]:checked');
+      if (checkedRadio) {
+        selectedColor = checkedRadio.value;
+      } else if (typeInput) {
+        selectedColor = this.getColorForType(typeInput.value);
+      }
     }
 
     // Recurring event fields
