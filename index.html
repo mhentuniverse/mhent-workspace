@@ -648,59 +648,168 @@
     </div>
   </div>
 
-  <!-- Modal: Add Event -->
+  <!-- Modal: Add Event (Sleek Modern Glassmorphism Design) -->
   <div class="modal-overlay" id="modal-add-event">
-    <div class="modal-card" style="max-width: 520px;">
+    <div class="modal-card modal-calendar-card" style="max-width: 530px;">
+      <!-- Glowing Accent Line -->
+      <div class="modal-top-accent"></div>
+
       <div class="modal-header">
-        <h3 class="modal-title">📅 Thêm Sự Kiện Vào Lịch Trình</h3>
-        <button class="modal-close-btn">✕</button>
-      </div>
-      <form id="form-add-event">
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="form-label">Tên Sự Kiện <span style="color: #ef4444;">*</span></label>
-            <input type="text" class="input-text" id="event-title" placeholder="VD: Họp tổng duyệt kịch bản live concert" required>
+        <div class="modal-header-brand">
+          <div class="modal-header-icon-box">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="3" ry="3"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
           </div>
+          <div>
+            <h3 class="modal-title" style="font-size: 16px; font-weight: 800; color: #ffffff;">Thêm Sự Kiện Lịch Trình</h3>
+            <p class="modal-subtitle">Lên kế hoạch, lịch họp hoặc lịch làm việc định kỳ</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" title="Đóng">✕</button>
+      </div>
+
+      <form id="form-add-event">
+        <div class="modal-body custom-scrollbar" style="max-height: 74vh; padding: 18px 22px; gap: 14px; display: flex; flex-direction: column;">
+          <!-- Tên sự kiện -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label-modern">
+              <span>Tên Sự Kiện</span>
+              <span class="required-star">*</span>
+            </label>
+            <input type="text" class="input-text-modern" id="event-title" placeholder="VD: Họp tổng duyệt kịch bản / Ca làm việc sáng" required autofocus>
+          </div>
+
+          <!-- Ngày & Khung giờ -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="form-group">
-              <label class="form-label">Ngày Bắt Đầu <span style="color: #ef4444;">*</span></label>
-              <input type="date" class="input-text" id="event-date" required>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label-modern">
+                <span>Ngày Bắt Đầu</span>
+                <span class="required-star">*</span>
+              </label>
+              <input type="date" class="input-text-modern" id="event-date" onchange="window.CalendarModule.updateWeekdayIndicator()" required>
             </div>
-            <div class="form-group">
-              <label class="form-label">Khung Giờ</label>
-              <input type="text" class="input-text" id="event-time" placeholder="VD: 07:00 - 17:00 hoặc Cả ngày" value="09:00 - 10:30">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label-modern">
+                <span>Khung Giờ</span>
+              </label>
+              <input type="text" class="input-text-modern" id="event-time" placeholder="VD: 07:00 - 17:00 hoặc Cả ngày" value="09:00 - 10:30">
             </div>
           </div>
 
-          <!-- Tính Năng Lịch Lặp Lại Cố Định (Recurring) -->
-          <div style="margin-top: 8px; margin-bottom: 14px; padding: 12px; border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-              <label style="font-size: 13px; font-weight: 700; color: var(--text-high); display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox" id="event-is-recurring" onchange="window.CalendarModule.toggleRecurringFields(this.checked)" style="width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;">
-                <span>🔁 Lặp lại sự kiện (Lịch đi làm / cố định)</span>
+          <!-- KHUNG THIẾT LẬP LỊCH LẶP LẠI (RECURRING EVENT CARD - ULTRA SLEEK) -->
+          <div class="event-recurring-card" id="event-recurring-card">
+            <!-- Header Card with Switch -->
+            <div class="recurring-header-row" onclick="window.CalendarModule.toggleRecurringSwitch(event)">
+              <div class="recurring-title-box">
+                <div class="recurring-icon-badge">
+                  <span>🔁</span>
+                </div>
+                <div>
+                  <div class="recurring-label">
+                    <span>Lịch Lặp Lại Cố Định</span>
+                    <span class="recurring-status-badge">Tự Động</span>
+                  </div>
+                  <div class="recurring-desc">Lịch đi làm, ca trực cố định hoặc họp định kỳ</div>
+                </div>
+              </div>
+              <label class="ui-switch" onclick="event.stopPropagation()">
+                <input type="checkbox" id="event-is-recurring" onchange="window.CalendarModule.toggleRecurringFields(this.checked)">
+                <span class="switch-slider"></span>
               </label>
             </div>
 
-            <div id="event-recurring-fields" style="display: none; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
-              <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Tần Suất Lặp Lại</label>
-                <select class="input-select" id="event-recurrence-pattern">
-                  <option value="weekly">Hàng tuần vào thứ này (VD: Thứ 2)</option>
-                  <option value="daily">Hàng ngày (Mỗi ngày)</option>
-                  <option value="weekdays">Thứ 2 đến Thứ 6 (Ngày làm việc)</option>
-                  <option value="monthly">Hàng tháng vào ngày này</option>
-                </select>
+            <!-- Hidden select for form value compatibility -->
+            <select id="event-recurrence-pattern" style="display: none;">
+              <option value="weekly" selected>weekly</option>
+              <option value="daily">daily</option>
+              <option value="weekdays">weekdays</option>
+              <option value="monthly">monthly</option>
+            </select>
+
+            <!-- Expanded Config Panel -->
+            <div id="event-recurring-fields" class="recurring-config-panel" style="display: none;">
+              <!-- 1. Tần Suất Lặp Buttons -->
+              <div class="recur-field-group">
+                <div class="recur-field-label">Tần Suất Lặp Lại</div>
+                <div class="recur-freq-grid">
+                  <button type="button" class="recur-freq-btn active" data-pattern="weekly" onclick="window.CalendarModule.setRecurrencePattern('weekly')">
+                    <span class="freq-icon">🗓️</span>
+                    <span class="freq-text">Hàng Tuần</span>
+                    <span class="freq-sub" id="recur-weekly-sub">Vào Thứ Hai</span>
+                  </button>
+                  <button type="button" class="recur-freq-btn" data-pattern="daily" onclick="window.CalendarModule.setRecurrencePattern('daily')">
+                    <span class="freq-icon">☀️</span>
+                    <span class="freq-text">Mỗi Ngày</span>
+                    <span class="freq-sub">Tất cả các ngày</span>
+                  </button>
+                  <button type="button" class="recur-freq-btn" data-pattern="weekdays" onclick="window.CalendarModule.setRecurrencePattern('weekdays')">
+                    <span class="freq-icon">💼</span>
+                    <span class="freq-text">Thứ 2 - Thứ 6</span>
+                    <span class="freq-sub">Ngày làm việc</span>
+                  </button>
+                  <button type="button" class="recur-freq-btn" data-pattern="monthly" onclick="window.CalendarModule.setRecurrencePattern('monthly')">
+                    <span class="freq-icon">📅</span>
+                    <span class="freq-text">Hàng Tháng</span>
+                    <span class="freq-sub">Cùng ngày hàng tháng</span>
+                  </button>
+                </div>
               </div>
-              <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Lặp Đến Ngày (Giới hạn)</label>
-                <input type="date" class="input-text" id="event-recurrence-end" placeholder="VD: 2026-10-15">
-                <span style="font-size: 10.5px; color: var(--text-muted); margin-top: 3px; display: block;">VD: Đến 15/10 thì dừng lặp</span>
+
+              <!-- Weekday Indicator Row (for weekly) -->
+              <div id="recur-weekdays-indicator" class="recur-days-row">
+                <span class="recur-days-hint">Ngày trong tuần lặp lại:</span>
+                <div class="recur-days-chips">
+                  <span class="recur-day-chip" data-day="1">T2</span>
+                  <span class="recur-day-chip" data-day="2">T3</span>
+                  <span class="recur-day-chip" data-day="3">T4</span>
+                  <span class="recur-day-chip" data-day="4">T5</span>
+                  <span class="recur-day-chip" data-day="5">T6</span>
+                  <span class="recur-day-chip" data-day="6">T7</span>
+                  <span class="recur-day-chip" data-day="0">CN</span>
+                </div>
+              </div>
+
+              <!-- 2. Giới Hạn Kết Thúc Chuỗi -->
+              <div class="recur-field-group">
+                <div class="recur-field-label">Thời Hạn Kết Thúc Chuỗi</div>
+                <div class="recur-mode-switch">
+                  <button type="button" class="recur-mode-btn active" id="btn-recur-mode-never" onclick="window.CalendarModule.setRecurrenceEndMode('never')">
+                    <span>♾️ Vô Hạn (Không dừng)</span>
+                  </button>
+                  <button type="button" class="recur-mode-btn" id="btn-recur-mode-until" onclick="window.CalendarModule.setRecurrenceEndMode('until')">
+                    <span>⏳ Đến ngày cụ thể</span>
+                  </button>
+                </div>
+
+                <div id="recur-until-picker-box" style="display: none; margin-top: 8px;">
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <div style="flex: 1;">
+                      <input type="date" class="input-text-modern" id="event-recurrence-end" placeholder="VD: 2026-10-15" onchange="window.CalendarModule.updateRecurSummary()">
+                    </div>
+                    <div class="recur-quick-chips">
+                      <button type="button" class="quick-date-btn" onclick="window.CalendarModule.setRecurQuickEnd(1)">+1T</button>
+                      <button type="button" class="quick-date-btn" onclick="window.CalendarModule.setRecurQuickEnd(3)">+3T</button>
+                      <button type="button" class="quick-date-btn" onclick="window.CalendarModule.setRecurQuickEnd('year')">Hết Năm</button>
+                    </div>
+                  </div>
+                  <div class="recur-live-summary" id="recur-live-summary">
+                    <span>✨ Lịch sẽ tự động kết thúc sau ngày đã chọn</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Phân Loại Sự Kiện</label>
-            <select class="input-select" id="event-type" onchange="window.CalendarModule.onEventTypeChange(this.value)">
+
+          <!-- Phân Loại Sự Kiện -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label-modern">
+              <span>Phân Loại Sự Kiện</span>
+            </label>
+            <select class="input-select-modern" id="event-type" onchange="window.CalendarModule.onEventTypeChange(this.value)">
               <option value="meeting">🟣 Cuộc họp (Meeting)</option>
               <option value="deadline">🔴 Hạn chót (Deadline)</option>
               <option value="launch">🟢 Ra mắt sản phẩm (Launch)</option>
@@ -708,29 +817,72 @@
               <option value="personal">🔵 Dự án / Kế hoạch nội bộ</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Màu Sắc Highlight (Hiển thị & Gradient trên Lịch)</label>
-            <div class="calendar-color-picker-group">
-              <label class="color-pill-choice active" style="--c: #8b5cf6;" title="Tím (Meeting)"><input type="radio" name="event-color-pick" value="#8b5cf6" checked><span class="color-dot" style="background:#8b5cf6;"></span> Tím</label>
-              <label class="color-pill-choice" style="--c: #ef4444;" title="Đỏ (Deadline)"><input type="radio" name="event-color-pick" value="#ef4444"><span class="color-dot" style="background:#ef4444;"></span> Đỏ</label>
-              <label class="color-pill-choice" style="--c: #10b981;" title="Xanh lục (Launch)"><input type="radio" name="event-color-pick" value="#10b981"><span class="color-dot" style="background:#10b981;"></span> Lục</label>
-              <label class="color-pill-choice" style="--c: #f59e0b;" title="Vàng cam (Media)"><input type="radio" name="event-color-pick" value="#f59e0b"><span class="color-dot" style="background:#f59e0b;"></span> Cam</label>
-              <label class="color-pill-choice" style="--c: #3b82f6;" title="Xanh lam (Dự án)"><input type="radio" name="event-color-pick" value="#3b82f6"><span class="color-dot" style="background:#3b82f6;"></span> Lam</label>
-              <label class="color-pill-choice" style="--c: #ec4899;" title="Hồng (Đặc biệt)"><input type="radio" name="event-color-pick" value="#ec4899"><span class="color-dot" style="background:#ec4899;"></span> Hồng</label>
-              <div class="color-custom-input-wrapper">
-                <input type="color" id="event-custom-color" value="#8b5cf6" title="Chọn màu tùy chỉnh">
-                <span>Tùy chỉnh</span>
+
+          <!-- Màu Sắc Highlight Swatches (Gems) -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label-modern">
+              <span>Màu Sắc Highlight (Hiển thị & Gradient trên Lịch)</span>
+            </label>
+            <div class="calendar-color-swatches">
+              <label class="color-swatch-item active" style="--c: #8b5cf6;" title="Tím (Meeting)">
+                <input type="radio" name="event-color-pick" value="#8b5cf6" checked>
+                <span class="color-swatch-circle" style="background: #8b5cf6;"></span>
+                <span class="color-swatch-check">✓</span>
+              </label>
+              <label class="color-swatch-item" style="--c: #ef4444;" title="Đỏ (Deadline)">
+                <input type="radio" name="event-color-pick" value="#ef4444">
+                <span class="color-swatch-circle" style="background: #ef4444;"></span>
+                <span class="color-swatch-check">✓</span>
+              </label>
+              <label class="color-swatch-item" style="--c: #10b981;" title="Xanh lục (Launch)">
+                <input type="radio" name="event-color-pick" value="#10b981">
+                <span class="color-swatch-circle" style="background: #10b981;"></span>
+                <span class="color-swatch-check">✓</span>
+              </label>
+              <label class="color-swatch-item" style="--c: #f59e0b;" title="Vàng cam (Media)">
+                <input type="radio" name="event-color-pick" value="#f59e0b">
+                <span class="color-swatch-circle" style="background: #f59e0b;"></span>
+                <span class="color-swatch-check">✓</span>
+              </label>
+              <label class="color-swatch-item" style="--c: #3b82f6;" title="Xanh lam (Dự án)">
+                <input type="radio" name="event-color-pick" value="#3b82f6">
+                <span class="color-swatch-circle" style="background: #3b82f6;"></span>
+                <span class="color-swatch-check">✓</span>
+              </label>
+              <label class="color-swatch-item" style="--c: #ec4899;" title="Hồng (Đặc biệt)">
+                <input type="radio" name="event-color-pick" value="#ec4899">
+                <span class="color-swatch-circle" style="background: #ec4899;"></span>
+                <span class="color-swatch-check">✓</span>
+              </label>
+
+              <!-- Custom Color Swatch with gradient border -->
+              <div class="color-custom-swatch" title="Chọn mã màu tùy chỉnh">
+                <input type="color" id="event-custom-color" value="#8b5cf6">
+                <div class="custom-color-icon">🎨</div>
+                <span class="custom-color-label">Tùy biến</span>
               </div>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Địa Điểm / Phòng Họp (Tùy chọn)</label>
-            <input type="text" class="input-text" id="event-location" placeholder="VD: Phòng Họp Trực Tuyến A / Studio 1">
+
+          <!-- Địa Điểm -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label-modern">
+              <span>Địa Điểm / Phòng Họp (Tùy chọn)</span>
+            </label>
+            <input type="text" class="input-text-modern" id="event-location" placeholder="VD: Phòng Họp Trực Tuyến A / Studio 1">
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary modal-close-btn">Hủy</button>
-          <button type="submit" class="btn btn-primary" style="background: var(--app-calendar); box-shadow: 0 4px 12px var(--app-calendar-glow);">Lưu Sự Kiện</button>
+
+        <div class="modal-footer-modern">
+          <button type="button" class="btn-modern-ghost modal-close-btn">Hủy</button>
+          <button type="submit" class="btn-modern-primary">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Lưu Sự Kiện</span>
+          </button>
         </div>
       </form>
     </div>

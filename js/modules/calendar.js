@@ -27,11 +27,147 @@ window.CalendarModule = {
     this.renderCalendar();
   },
 
-  toggleRecurringFields(show) {
-    const fields = document.getElementById("event-recurring-fields");
-    if (fields) {
-      fields.style.display = show ? "grid" : "none";
+  toggleRecurringSwitch(e) {
+    const chk = document.getElementById("event-is-recurring");
+    if (chk) {
+      chk.checked = !chk.checked;
+      this.toggleRecurringFields(chk.checked);
     }
+  },
+
+  toggleRecurringFields(show) {
+    const card = document.getElementById("event-recurring-card");
+    const fields = document.getElementById("event-recurring-fields");
+    if (card) {
+      if (show) card.classList.add("active");
+      else card.classList.remove("active");
+    }
+    if (fields) {
+      fields.style.display = show ? "flex" : "none";
+    }
+    if (show) {
+      this.updateWeekdayIndicator();
+      this.updateRecurSummary();
+    }
+  },
+
+  setRecurrencePattern(pattern) {
+    const select = document.getElementById("event-recurrence-pattern");
+    if (select) select.value = pattern;
+
+    document.querySelectorAll(".recur-freq-btn").forEach(btn => {
+      if (btn.dataset.pattern === pattern) btn.classList.add("active");
+      else btn.classList.remove("active");
+    });
+
+    const weekdayIndicator = document.getElementById("recur-weekdays-indicator");
+    if (weekdayIndicator) {
+      weekdayIndicator.style.display = (pattern === "weekly") ? "flex" : "none";
+    }
+
+    this.updateWeekdayIndicator();
+    this.updateRecurSummary();
+  },
+
+  updateWeekdayIndicator() {
+    const dateInput = document.getElementById("event-date");
+    if (!dateInput || !dateInput.value) return;
+
+    const d = new Date(dateInput.value + "T00:00:00");
+    const dayOfWeek = d.getDay(); // 0 = Sunday, 1 = Monday ... 6 = Saturday
+
+    const dayNames = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+    const sub = document.getElementById("recur-weekly-sub");
+    if (sub) {
+      sub.innerText = `Vào ${dayNames[dayOfWeek]}`;
+    }
+
+    document.querySelectorAll(".recur-day-chip").forEach(chip => {
+      const chipDay = parseInt(chip.dataset.day, 10);
+      if (chipDay === dayOfWeek) {
+        chip.classList.add("active");
+      } else {
+        chip.classList.remove("active");
+      }
+    });
+
+    this.updateRecurSummary();
+  },
+
+  setRecurrenceEndMode(mode) {
+    const neverBtn = document.getElementById("btn-recur-mode-never");
+    const untilBtn = document.getElementById("btn-recur-mode-until");
+    const pickerBox = document.getElementById("recur-until-picker-box");
+    const endInput = document.getElementById("event-recurrence-end");
+
+    if (mode === "never") {
+      if (neverBtn) neverBtn.classList.add("active");
+      if (untilBtn) untilBtn.classList.remove("active");
+      if (pickerBox) pickerBox.style.display = "none";
+      if (endInput) endInput.value = "";
+    } else {
+      if (neverBtn) neverBtn.classList.remove("active");
+      if (untilBtn) untilBtn.classList.add("active");
+      if (pickerBox) pickerBox.style.display = "block";
+      if (endInput && !endInput.value) {
+        const dateInput = document.getElementById("event-date");
+        const base = dateInput && dateInput.value ? new Date(dateInput.value) : new Date();
+        base.setMonth(base.getMonth() + 1);
+        endInput.value = this.formatDateStr(base);
+      }
+    }
+    this.updateRecurSummary();
+  },
+
+  setRecurQuickEnd(type) {
+    const dateInput = document.getElementById("event-date");
+    const base = dateInput && dateInput.value ? new Date(dateInput.value) : new Date();
+    const endInput = document.getElementById("event-recurrence-end");
+    if (!endInput) return;
+
+    if (typeof type === "number") {
+      base.setMonth(base.getMonth() + type);
+    } else if (type === "year") {
+      base.setMonth(11);
+      base.setDate(31);
+    }
+    endInput.value = this.formatDateStr(base);
+    this.updateRecurSummary();
+  },
+
+  updateRecurSummary() {
+    const summaryEl = document.getElementById("recur-live-summary");
+    if (!summaryEl) return;
+
+    const patternEl = document.getElementById("event-recurrence-pattern");
+    const endInput = document.getElementById("event-recurrence-end");
+    const pattern = patternEl ? patternEl.value : "weekly";
+    const endVal = endInput ? endInput.value : "";
+
+    const dateInput = document.getElementById("event-date");
+    const d = (dateInput && dateInput.value) ? new Date(dateInput.value + "T00:00:00") : new Date();
+    const dayNames = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+
+    let text = "";
+    if (pattern === "weekly") {
+      text = `Lặp vào mỗi ${dayNames[d.getDay()]} hàng tuần`;
+    } else if (pattern === "daily") {
+      text = "Lặp lại mỗi ngày";
+    } else if (pattern === "weekdays") {
+      text = "Lặp lại từ Thứ 2 đến Thứ 6 (ngày làm việc)";
+    } else if (pattern === "monthly") {
+      text = `Lặp lại vào ngày ${d.getDate()} hàng tháng`;
+    }
+
+    if (endVal) {
+      const endParts = endVal.split("-");
+      const formattedEnd = endParts.length === 3 ? `${endParts[2]}/${endParts[1]}/${endParts[0]}` : endVal;
+      text += ` cho đến ngày ${formattedEnd}`;
+    } else {
+      text += ` (lặp vô hạn)`;
+    }
+
+    summaryEl.innerHTML = `<span>✨ ${text}</span>`;
   },
 
   bindEvents() {
@@ -618,6 +754,15 @@ window.CalendarModule = {
     if (dateInput) {
       dateInput.value = dateStr || this.formatDateStr(this.viewDate);
     }
+    const isRecurringInput = document.getElementById("event-is-recurring");
+    if (isRecurringInput) {
+      isRecurringInput.checked = false;
+      this.toggleRecurringFields(false);
+    }
+    this.setRecurrencePattern('weekly');
+    this.setRecurrenceEndMode('never');
+    this.updateWeekdayIndicator();
+    this.updateRecurSummary();
     window.UI.openModal("modal-add-event");
   },
 
@@ -637,13 +782,13 @@ window.CalendarModule = {
   },
 
   updateColorPillChoices(val, isCustom = false) {
-    document.querySelectorAll('.color-pill-choice').forEach(pill => {
-      const radio = pill.querySelector('input');
+    document.querySelectorAll('.color-swatch-item, .color-pill-choice').forEach(swatch => {
+      const radio = swatch.querySelector('input');
       if (radio && radio.value === val && !isCustom) {
-        pill.classList.add('active');
+        swatch.classList.add('active');
         radio.checked = true;
       } else {
-        pill.classList.remove('active');
+        swatch.classList.remove('active');
       }
     });
   },
@@ -716,6 +861,8 @@ window.CalendarModule = {
       isRecurringInput.checked = false;
       this.toggleRecurringFields(false);
     }
+    this.setRecurrenceEndMode('never');
+    this.setRecurrencePattern('weekly');
     if (endInput) endInput.value = "";
     window.UI.showToast("Đã lưu sự kiện thành công! 📅", newEvent.title, "success");
   },
