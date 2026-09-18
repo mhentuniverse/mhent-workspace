@@ -749,11 +749,110 @@ window.CalendarModule = {
     this.renderCalendar();
   },
 
+  toggleAllDay(isAllDay) {
+    const pickersRow = document.getElementById("event-time-pickers-row");
+    const banner = document.getElementById("event-all-day-banner");
+    const presets = document.getElementById("event-time-quick-presets");
+    const timeInput = document.getElementById("event-time");
+
+    if (isAllDay) {
+      if (pickersRow) pickersRow.style.display = "none";
+      if (presets) presets.style.display = "none";
+      if (banner) banner.style.display = "block";
+      if (timeInput) timeInput.value = "Cả ngày";
+    } else {
+      if (pickersRow) pickersRow.style.display = "flex";
+      if (presets) presets.style.display = "flex";
+      if (banner) banner.style.display = "none";
+      this.onTimePickerChange();
+    }
+  },
+
+  onTimePickerChange() {
+    const isAllDay = document.getElementById("event-is-all-day")?.checked;
+    const timeInput = document.getElementById("event-time");
+    if (isAllDay) {
+      if (timeInput) timeInput.value = "Cả ngày";
+      return;
+    }
+    const startInput = document.getElementById("event-time-start");
+    const endInput = document.getElementById("event-time-end");
+    const start = startInput && startInput.value ? startInput.value : "09:00";
+    const end = endInput && endInput.value ? endInput.value : "10:30";
+
+    if (timeInput) {
+      timeInput.value = `${start} - ${end}`;
+    }
+  },
+
+  setTimeDuration(minutes) {
+    const allDayChk = document.getElementById("event-is-all-day");
+    if (allDayChk && allDayChk.checked) {
+      allDayChk.checked = false;
+      this.toggleAllDay(false);
+    }
+    const startInput = document.getElementById("event-time-start");
+    const endInput = document.getElementById("event-time-end");
+    const startVal = (startInput && startInput.value) ? startInput.value : "09:00";
+
+    const parts = startVal.split(":");
+    let h = parseInt(parts[0], 10) || 9;
+    let m = parseInt(parts[1], 10) || 0;
+
+    let totalM = h * 60 + m + minutes;
+    let endH = Math.floor(totalM / 60) % 24;
+    let endM = totalM % 60;
+
+    const endFormatted = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+    if (endInput) endInput.value = endFormatted;
+    this.onTimePickerChange();
+  },
+
+  setTimeRange(start, end) {
+    const allDayChk = document.getElementById("event-is-all-day");
+    if (allDayChk && allDayChk.checked) {
+      allDayChk.checked = false;
+      this.toggleAllDay(false);
+    }
+    const startInput = document.getElementById("event-time-start");
+    const endInput = document.getElementById("event-time-end");
+    if (startInput) startInput.value = start;
+    if (endInput) endInput.value = end;
+    this.onTimePickerChange();
+  },
+
   openAddModal(dateStr) {
+    const editIdInput = document.getElementById("event-edit-id");
+    if (editIdInput) editIdInput.value = "";
+
+    const titleEl = document.getElementById("modal-add-event-title");
+    if (titleEl) titleEl.innerText = "Thêm Sự Kiện Lịch Trình";
+    const subEl = document.getElementById("modal-add-event-subtitle");
+    if (subEl) subEl.innerText = "Lên kế hoạch, lịch họp hoặc lịch làm việc định kỳ";
+    const btnText = document.getElementById("event-submit-btn-text");
+    if (btnText) btnText.innerText = "Lưu Sự Kiện";
+
+    const titleInput = document.getElementById("event-title");
+    if (titleInput) titleInput.value = "";
+
+    const locInput = document.getElementById("event-location");
+    if (locInput) locInput.value = "";
+
     const dateInput = document.getElementById("event-date");
     if (dateInput) {
       dateInput.value = dateStr || this.formatDateStr(this.viewDate);
     }
+
+    // Reset Time Pickers
+    const allDayChk = document.getElementById("event-is-all-day");
+    if (allDayChk) allDayChk.checked = false;
+    const startInput = document.getElementById("event-time-start");
+    if (startInput) startInput.value = "09:00";
+    const endInput = document.getElementById("event-time-end");
+    if (endInput) endInput.value = "10:30";
+    this.toggleAllDay(false);
+
+    // Reset Recurrence
     const isRecurringInput = document.getElementById("event-is-recurring");
     if (isRecurringInput) {
       isRecurringInput.checked = false;
@@ -763,6 +862,101 @@ window.CalendarModule = {
     this.setRecurrenceEndMode('never');
     this.updateWeekdayIndicator();
     this.updateRecurSummary();
+
+    // Reset Color / Category
+    const typeInput = document.getElementById("event-type");
+    if (typeInput) typeInput.value = "meeting";
+    this.updateColorPillChoices("#8b5cf6");
+
+    window.UI.openModal("modal-add-event");
+  },
+
+  openEditModal(eventId) {
+    if (!eventId) return;
+    const allEvents = window.store.state.events || [];
+    let ev = allEvents.find(e => e.id === eventId);
+    if (!ev) {
+      for (const d of [this.formatDateStr(this.viewDate), this.getTodayStr()]) {
+        const found = this.getEventsForDate(d).find(e => e.id === eventId || e.originalId === eventId);
+        if (found) { ev = found; break; }
+      }
+    }
+    if (!ev) return;
+
+    // Set Edit Mode
+    const editIdInput = document.getElementById("event-edit-id");
+    if (editIdInput) editIdInput.value = ev.originalId || ev.id;
+
+    const titleEl = document.getElementById("modal-add-event-title");
+    if (titleEl) titleEl.innerText = "✏️ Chỉnh Sửa Sự Kiện Lịch Trình";
+    const subEl = document.getElementById("modal-add-event-subtitle");
+    if (subEl) subEl.innerText = "Cập nhật thông tin hoặc lịch trình của sự kiện";
+    const btnText = document.getElementById("event-submit-btn-text");
+    if (btnText) btnText.innerText = "Cập Nhật Sự Kiện";
+
+    // Pre-fill Title & Date
+    const titleInput = document.getElementById("event-title");
+    if (titleInput) titleInput.value = ev.title || "";
+
+    const dateInput = document.getElementById("event-date");
+    if (dateInput) dateInput.value = ev.date || this.formatDateStr(this.viewDate);
+
+    // Pre-fill Time Pickers
+    const allDayChk = document.getElementById("event-is-all-day");
+    const startInput = document.getElementById("event-time-start");
+    const endInput = document.getElementById("event-time-end");
+    const timeStr = String(ev.time || "").trim();
+
+    if (timeStr.toLowerCase() === "cả ngày" || timeStr.toLowerCase() === "all day" || !timeStr) {
+      if (allDayChk) allDayChk.checked = true;
+      this.toggleAllDay(true);
+    } else {
+      if (allDayChk) allDayChk.checked = false;
+      this.toggleAllDay(false);
+      if (timeStr.includes("-")) {
+        const parts = timeStr.split("-");
+        if (startInput) startInput.value = parts[0].trim();
+        if (endInput) endInput.value = parts[1].trim();
+      } else {
+        if (startInput) startInput.value = timeStr;
+        if (endInput) endInput.value = timeStr;
+      }
+      this.onTimePickerChange();
+    }
+
+    // Pre-fill Recurrence
+    const isRecurringInput = document.getElementById("event-is-recurring");
+    if (isRecurringInput) {
+      isRecurringInput.checked = !!ev.isRecurring;
+      this.toggleRecurringFields(ev.isRecurring);
+    }
+    if (ev.isRecurring) {
+      this.setRecurrencePattern(ev.recurrencePattern || 'weekly');
+      if (ev.recurrenceEnd) {
+        this.setRecurrenceEndMode('until');
+        const recEndInput = document.getElementById("event-recurrence-end");
+        if (recEndInput) recEndInput.value = ev.recurrenceEnd;
+      } else {
+        this.setRecurrenceEndMode('never');
+      }
+    } else {
+      this.setRecurrencePattern('weekly');
+      this.setRecurrenceEndMode('never');
+    }
+    this.updateWeekdayIndicator();
+    this.updateRecurSummary();
+
+    // Pre-fill Type & Color
+    const typeInput = document.getElementById("event-type");
+    if (typeInput) typeInput.value = ev.type || "meeting";
+    this.updateColorPillChoices(ev.color || this.getColorForType(ev.type || "meeting"));
+
+    // Pre-fill Location
+    const locInput = document.getElementById("event-location");
+    if (locInput) locInput.value = ev.location || "";
+
+    // Close detail modal if open & open edit modal
+    window.UI.closeModal("modal-event-detail");
     window.UI.openModal("modal-add-event");
   },
 
@@ -794,9 +988,12 @@ window.CalendarModule = {
   },
 
   /**
-   * Save new event (Local Store + Cloud Firestore)
+   * Save event (Supports both Create and Edit)
    */
   async saveEvent() {
+    const editIdInput = document.getElementById("event-edit-id");
+    const editId = editIdInput ? editIdInput.value : "";
+
     const titleInput = document.getElementById("event-title");
     const dateInput = document.getElementById("event-date");
     const timeInput = document.getElementById("event-time");
@@ -829,32 +1026,72 @@ window.CalendarModule = {
     const recurrencePattern = (isRecurring && patternInput) ? patternInput.value : "none";
     const recurrenceEnd = (isRecurring && endInput && endInput.value) ? endInput.value.trim() : "";
 
-    const newEvent = {
-      id: "ev-" + Date.now(),
-      title: titleInput.value.trim(),
-      date: dateInput.value,
-      time: timeInput && timeInput.value.trim() ? timeInput.value.trim() : "Cả ngày",
-      type: typeInput ? typeInput.value : "meeting",
-      color: selectedColor,
-      location: locInput ? locInput.value.trim() : "",
-      isRecurring: isRecurring,
-      recurrencePattern: recurrencePattern,
-      recurrenceEnd: recurrenceEnd,
-      createdAt: new Date().toISOString()
-    };
+    const timeVal = (timeInput && timeInput.value.trim()) ? timeInput.value.trim() : "Cả ngày";
 
-    // 1. Lưu local store
-    window.store.addEvent(newEvent);
+    if (editId) {
+      // UPDATE EXISTING EVENT
+      const events = window.store.state.events || [];
+      const idx = events.findIndex(e => e.id === editId || e.originalId === editId);
+      const existing = idx !== -1 ? events[idx] : {};
 
-    // 2. Lưu Cloud Firestore & Supabase
-    if (window.CloudModule) {
-      await window.CloudModule.createCalendarEvent(newEvent);
+      const updatedEvent = {
+        ...existing,
+        id: editId,
+        title: titleInput.value.trim(),
+        date: dateInput.value,
+        time: timeVal,
+        type: typeInput ? typeInput.value : "meeting",
+        color: selectedColor,
+        location: locInput ? locInput.value.trim() : "",
+        isRecurring: isRecurring,
+        recurrencePattern: recurrencePattern,
+        recurrenceEnd: recurrenceEnd,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (idx !== -1) {
+        events[idx] = updatedEvent;
+      } else {
+        events.push(updatedEvent);
+      }
+      window.store.save();
+
+      if (window.CloudModule) {
+        await window.CloudModule.createCalendarEvent(updatedEvent);
+      }
+
+      this.renderCalendar();
+      window.UI.closeModal("modal-add-event");
+      window.UI.showToast("Đã cập nhật sự kiện thành công! 📅", updatedEvent.title, "success");
+    } else {
+      // CREATE NEW EVENT
+      const newEvent = {
+        id: "ev-" + Date.now(),
+        title: titleInput.value.trim(),
+        date: dateInput.value,
+        time: timeVal,
+        type: typeInput ? typeInput.value : "meeting",
+        color: selectedColor,
+        location: locInput ? locInput.value.trim() : "",
+        isRecurring: isRecurring,
+        recurrencePattern: recurrencePattern,
+        recurrenceEnd: recurrenceEnd,
+        createdAt: new Date().toISOString()
+      };
+
+      window.store.addEvent(newEvent);
+
+      if (window.CloudModule) {
+        await window.CloudModule.createCalendarEvent(newEvent);
+      }
+
+      this.renderCalendar();
+      window.UI.closeModal("modal-add-event");
+      window.UI.showToast("Đã lưu sự kiện thành công! 📅", newEvent.title, "success");
     }
 
-    this.renderCalendar();
-    window.UI.closeModal("modal-add-event");
-
     // Reset inputs
+    if (editIdInput) editIdInput.value = "";
     titleInput.value = "";
     if (locInput) locInput.value = "";
     if (isRecurringInput) {
@@ -864,7 +1101,6 @@ window.CalendarModule = {
     this.setRecurrenceEndMode('never');
     this.setRecurrencePattern('weekly');
     if (endInput) endInput.value = "";
-    window.UI.showToast("Đã lưu sự kiện thành công! 📅", newEvent.title, "success");
   },
 
   /**
@@ -899,7 +1135,7 @@ window.CalendarModule = {
   },
 
   /**
-   * Quick event detail view
+   * Event detail popup modal (Xem, Sửa & Xóa sự kiện)
    */
   showEventDetail(eventId) {
     const events = window.store.state.events || [];
@@ -912,21 +1148,89 @@ window.CalendarModule = {
     }
     if (!ev) return;
 
-    let recurInfo = "";
-    if (ev.isRecurring) {
-      let pat = "Hàng tuần";
-      if (ev.recurrencePattern === "daily") pat = "Hàng ngày";
-      else if (ev.recurrencePattern === "weekdays") pat = "Thứ 2 đến Thứ 6";
-      else if (ev.recurrencePattern === "monthly") pat = "Hàng tháng";
+    const realId = ev.originalId || ev.id;
+    const color = ev.color || this.getColorForType(ev.type);
 
-      recurInfo = ` | 🔁 Lặp: ${pat} ${ev.recurrenceEnd ? `(đến ${ev.recurrenceEnd})` : '(vô hạn)'}`;
+    // Accent line
+    const accent = document.getElementById("event-detail-accent");
+    if (accent) {
+      accent.style.background = `linear-gradient(90deg, ${color}, #8b5cf6)`;
+      accent.style.boxShadow = `0 0 16px ${color}`;
     }
 
-    window.UI.showToast(
-      `📅 ${ev.title}`,
-      `⏰ ${ev.time || 'Cả ngày'} | 📍 ${ev.location || 'Chưa định vị'}${recurInfo} | Phân loại: ${this.getTypeLabel(ev.type)}`,
-      "info"
-    );
+    // Title
+    const titleEl = document.getElementById("event-detail-title");
+    if (titleEl) titleEl.innerText = ev.title;
+
+    // Type Badge
+    const typeBadge = document.getElementById("event-detail-type-badge");
+    if (typeBadge) {
+      typeBadge.innerText = this.getTypeLabel(ev.type);
+      typeBadge.style.color = color;
+      typeBadge.style.borderColor = color;
+      typeBadge.style.background = this.hexToRgba(color, 0.15);
+    }
+
+    // Recur Badge
+    const recurBadge = document.getElementById("event-detail-recur-badge");
+    if (recurBadge) {
+      recurBadge.style.display = ev.isRecurring ? "inline-flex" : "none";
+    }
+
+    // Date
+    const dateEl = document.getElementById("event-detail-date");
+    if (dateEl) {
+      const parts = String(ev.instanceDate || ev.date).split("-");
+      if (parts.length === 3) {
+        dateEl.innerText = `${parts[2]}/${parts[1]}/${parts[0]}`;
+      } else {
+        dateEl.innerText = ev.date;
+      }
+    }
+
+    // Time
+    const timeEl = document.getElementById("event-detail-time");
+    if (timeEl) timeEl.innerText = ev.time || "Cả ngày";
+
+    // Location
+    const locEl = document.getElementById("event-detail-location");
+    if (locEl) locEl.innerText = ev.location || "Chưa có thông tin địa điểm";
+
+    // Recurrence row
+    const recurRow = document.getElementById("event-detail-recur-row");
+    const recurDesc = document.getElementById("event-detail-recur-desc");
+    if (recurRow && recurDesc) {
+      if (ev.isRecurring) {
+        recurRow.style.display = "flex";
+        let pat = "Hàng tuần";
+        if (ev.recurrencePattern === "daily") pat = "Hàng ngày (Mỗi ngày)";
+        else if (ev.recurrencePattern === "weekdays") pat = "Thứ 2 đến Thứ 6 (Ngày làm việc)";
+        else if (ev.recurrencePattern === "monthly") pat = "Hàng tháng";
+
+        const limit = ev.recurrenceEnd ? ` (đến ${ev.recurrenceEnd})` : " (vô hạn)";
+        recurDesc.innerText = `${pat}${limit}`;
+      } else {
+        recurRow.style.display = "none";
+      }
+    }
+
+    // Actions
+    const delBtn = document.getElementById("event-detail-delete-btn");
+    if (delBtn) {
+      delBtn.onclick = () => {
+        window.UI.closeModal("modal-event-detail");
+        this.deleteEvent(realId);
+      };
+    }
+
+    const editBtn = document.getElementById("event-detail-edit-btn");
+    if (editBtn) {
+      editBtn.onclick = () => {
+        this.openEditModal(realId);
+      };
+    }
+
+    window.UI.openModal("modal-event-detail");
   },
 
   findCommonFreeTime() {

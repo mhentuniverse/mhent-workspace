@@ -665,14 +665,17 @@
             </svg>
           </div>
           <div>
-            <h3 class="modal-title" style="font-size: 16px; font-weight: 800; color: #ffffff;">Thêm Sự Kiện Lịch Trình</h3>
-            <p class="modal-subtitle">Lên kế hoạch, lịch họp hoặc lịch làm việc định kỳ</p>
+            <h3 class="modal-title" id="modal-add-event-title" style="font-size: 16px; font-weight: 800; color: #ffffff;">Thêm Sự Kiện Lịch Trình</h3>
+            <p class="modal-subtitle" id="modal-add-event-subtitle">Lên kế hoạch, lịch họp hoặc lịch làm việc định kỳ</p>
           </div>
         </div>
         <button type="button" class="modal-close-btn" title="Đóng">✕</button>
       </div>
 
       <form id="form-add-event">
+        <!-- Hidden Edit Event ID -->
+        <input type="hidden" id="event-edit-id" value="">
+
         <div class="modal-body custom-scrollbar" style="max-height: 74vh; padding: 18px 22px; gap: 14px; display: flex; flex-direction: column;">
           <!-- Tên sự kiện -->
           <div class="form-group" style="margin-bottom: 0;">
@@ -683,20 +686,51 @@
             <input type="text" class="input-text-modern" id="event-title" placeholder="VD: Họp tổng duyệt kịch bản / Ca làm việc sáng" required autofocus>
           </div>
 
-          <!-- Ngày & Khung giờ -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <!-- Ngày & Khung giờ dạng Time Picker Selection -->
+          <div style="display: grid; grid-template-columns: 1fr 1.15fr; gap: 12px;">
             <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label-modern">
-                <span>Ngày Bắt Đầu</span>
+                <span>Ngày Diễn Ra</span>
                 <span class="required-star">*</span>
               </label>
               <input type="date" class="input-text-modern" id="event-date" onchange="window.CalendarModule.updateWeekdayIndicator()" required>
             </div>
+
+            <!-- Khung giờ dạng Time Selection -->
             <div class="form-group" style="margin-bottom: 0;">
-              <label class="form-label-modern">
-                <span>Khung Giờ</span>
-              </label>
-              <input type="text" class="input-text-modern" id="event-time" placeholder="VD: 07:00 - 17:00 hoặc Cả ngày" value="09:00 - 10:30">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <label class="form-label-modern" style="margin-bottom: 0;">
+                  <span>Khung Giờ</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); cursor: pointer; user-select: none;">
+                  <input type="checkbox" id="event-is-all-day" onchange="window.CalendarModule.toggleAllDay(this.checked)" style="width: 14px; height: 14px; accent-color: var(--primary); cursor: pointer;">
+                  <span>Cả ngày</span>
+                </label>
+              </div>
+
+              <!-- Time Pickers Row -->
+              <div id="event-time-pickers-row" style="display: flex; align-items: center; gap: 6px;">
+                <input type="time" class="input-text-modern" id="event-time-start" value="09:00" style="padding: 9px 8px; font-size: 13px;" onchange="window.CalendarModule.onTimePickerChange()">
+                <span style="color: var(--text-muted); font-size: 12px; font-weight: 700;">-</span>
+                <input type="time" class="input-text-modern" id="event-time-end" value="10:30" style="padding: 9px 8px; font-size: 13px;" onchange="window.CalendarModule.onTimePickerChange()">
+              </div>
+
+              <!-- All day banner (hidden by default) -->
+              <div id="event-all-day-banner" style="display: none; padding: 8px 10px; border-radius: 9px; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); font-size: 12px; color: #c4b5fd; font-weight: 600; text-align: center;">
+                ☀️ Sự kiện diễn ra cả ngày
+              </div>
+
+              <!-- Hidden input keeping event-time string -->
+              <input type="hidden" id="event-time" value="09:00 - 10:30">
+
+              <!-- Quick Time Preset Chips -->
+              <div id="event-time-quick-presets" style="display: flex; gap: 4px; margin-top: 5px; overflow-x: auto;">
+                <button type="button" class="time-preset-btn" onclick="window.CalendarModule.setTimeDuration(30)">+30p</button>
+                <button type="button" class="time-preset-btn" onclick="window.CalendarModule.setTimeDuration(60)">+1h</button>
+                <button type="button" class="time-preset-btn" onclick="window.CalendarModule.setTimeDuration(120)">+2h</button>
+                <button type="button" class="time-preset-btn" onclick="window.CalendarModule.setTimeRange('08:00', '12:00')">Sáng</button>
+                <button type="button" class="time-preset-btn" onclick="window.CalendarModule.setTimeRange('13:30', '17:30')">Chiều</button>
+              </div>
             </div>
           </div>
 
@@ -881,10 +915,86 @@
               <polyline points="17 21 17 13 7 13 7 21"></polyline>
               <polyline points="7 3 7 8 15 8"></polyline>
             </svg>
-            <span>Lưu Sự Kiện</span>
+            <span id="event-submit-btn-text">Lưu Sự Kiện</span>
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal: Event Detail Popup (Xem, Sửa & Xóa Sự Kiện) -->
+  <div class="modal-overlay" id="modal-event-detail">
+    <div class="modal-card modal-calendar-card" style="max-width: 480px; padding: 0; overflow: hidden;">
+      <div class="modal-top-accent" id="event-detail-accent" style="background: #8b5cf6;"></div>
+
+      <div class="modal-header" style="padding: 16px 20px 12px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span id="event-detail-type-badge" class="event-detail-badge" style="background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.4);">
+            🟣 Cuộc họp
+          </span>
+          <span id="event-detail-recur-badge" class="event-detail-badge" style="display: none; background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4);">
+            🔁 Lặp lại
+          </span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="window.UI.closeModal('modal-event-detail')" title="Đóng">✕</button>
+      </div>
+
+      <div class="modal-body custom-scrollbar" style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+        <h2 id="event-detail-title" style="margin: 0; font-size: 18px; font-weight: 800; color: #ffffff; line-height: 1.35; word-break: break-word;">
+          Tên sự kiện
+        </h2>
+
+        <!-- Detail Cards -->
+        <div class="event-detail-grid">
+          <!-- Ngày diễn ra -->
+          <div class="event-detail-item">
+            <div class="event-detail-item-icon">📅</div>
+            <div>
+              <div class="event-detail-item-label">Ngày diễn ra</div>
+              <div class="event-detail-item-val" id="event-detail-date">18/09/2026</div>
+            </div>
+          </div>
+
+          <!-- Khung giờ -->
+          <div class="event-detail-item">
+            <div class="event-detail-item-icon">⏰</div>
+            <div>
+              <div class="event-detail-item-label">Khung giờ</div>
+              <div class="event-detail-item-val" id="event-detail-time">09:00 - 10:30</div>
+            </div>
+          </div>
+
+          <!-- Địa điểm -->
+          <div class="event-detail-item" style="grid-column: span 2;">
+            <div class="event-detail-item-icon">📍</div>
+            <div>
+              <div class="event-detail-item-label">Địa điểm / Phòng họp</div>
+              <div class="event-detail-item-val" id="event-detail-location">Chưa có thông tin địa điểm</div>
+            </div>
+          </div>
+
+          <!-- Chuỗi lặp lại nếu có -->
+          <div class="event-detail-item" id="event-detail-recur-row" style="grid-column: span 2; display: none;">
+            <div class="event-detail-item-icon">🔁</div>
+            <div>
+              <div class="event-detail-item-label">Quy tắc lặp lại</div>
+              <div class="event-detail-item-val" id="event-detail-recur-desc">Hàng tuần vào Thứ Hai</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer-modern" style="padding: 12px 20px; justify-content: space-between;">
+        <button type="button" class="btn-modern-ghost" id="event-detail-delete-btn" style="color: #f87171; border-color: rgba(239, 68, 68, 0.35);">
+          🗑️ Xóa sự kiện
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-modern-ghost" onclick="window.UI.closeModal('modal-event-detail')">Đóng</button>
+          <button type="button" class="btn-modern-primary" id="event-detail-edit-btn">
+            ✏️ Chỉnh sửa
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
