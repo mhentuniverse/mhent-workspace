@@ -127,16 +127,20 @@ window.MailModule = {
   },
 
   async deleteMail(mailId) {
-    if (confirm("Cậu có chắc muốn xóa thư này không?")) {
-      if (window.CloudModule) {
-        await window.CloudModule.deleteMail(mailId);
-      } else {
-        window.store.deleteMail(mailId);
-      }
-      this.renderMailList();
-      this.renderActiveMail();
-      window.UI.showToast("Đã xóa thư!", "", "info");
+    const ok = await window.showConfirmPopup(
+      "Xác Nhận Xóa Thư ✉️",
+      "Cậu có chắc chắn muốn xóa thư này không?"
+    );
+    if (!ok) return;
+
+    if (window.CloudModule) {
+      await window.CloudModule.deleteMail(mailId);
+    } else {
+      window.store.deleteMail(mailId);
     }
+    this.renderMailList();
+    this.renderActiveMail();
+    window.UI.showToast("Đã xóa thư! 🗑️", "", "info");
   },
 
   generateAiDraft() {

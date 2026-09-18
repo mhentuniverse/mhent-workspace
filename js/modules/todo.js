@@ -173,15 +173,19 @@ window.TodoModule = {
   },
 
   async deleteTask(taskId) {
-    if (confirm("Cậu có chắc muốn xóa nhiệm vụ này không?")) {
-      if (window.CloudModule) {
-        await window.CloudModule.deleteTask(taskId);
-      } else {
-        window.store.deleteTask(taskId);
-      }
-      this.renderBoard();
-      window.UI.showToast("Đã xóa nhiệm vụ!", "", "info");
+    const ok = await window.showConfirmPopup(
+      "Xác Nhận Xóa Nhiệm Vụ 📋",
+      "Cậu có chắc chắn muốn xóa nhiệm vụ này không?"
+    );
+    if (!ok) return;
+
+    if (window.CloudModule) {
+      await window.CloudModule.deleteTask(taskId);
+    } else {
+      window.store.deleteTask(taskId);
     }
+    this.renderBoard();
+    window.UI.showToast("Đã xóa nhiệm vụ! 🗑️", "", "info");
   },
 
   async saveNewTask() {

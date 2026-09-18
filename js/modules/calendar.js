@@ -878,9 +878,13 @@ window.CalendarModule = {
 
     const confirmMsg = isRecur 
       ? `Đây là sự kiện lặp lại [${ev.title}]. Bạn có muốn xóa toàn bộ chuỗi lịch lặp này?`
-      : "Bạn có chắc chắn muốn xóa sự kiện này?";
+      : `Bạn có chắc chắn muốn xóa sự kiện [${ev ? ev.title : ''}] này?`;
 
-    if (!confirm(confirmMsg)) return;
+    const ok = await window.showConfirmPopup(
+      isRecur ? "Xóa Chuỗi Lịch Lặp Lại 🔁" : "Xác Nhận Xóa Sự Kiện 🗑️",
+      confirmMsg
+    );
+    if (!ok) return;
 
     // 1. Local Store
     window.store.deleteEvent(eventId);

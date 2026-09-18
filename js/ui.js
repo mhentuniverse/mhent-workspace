@@ -493,29 +493,58 @@ window.showConfirmPopup = function(title, message, onConfirm) {
   overlay.className = 'mhent-ui-overlay';
   overlay.id = 'mhent-active-confirm';
 
+  const isDanger = (String(title) + " " + String(message)).toLowerCase().includes("xóa") || 
+                   (String(title) + " " + String(message)).toLowerCase().includes("delete");
+
   const svgWarning = `<svg viewBox="0 0 24 24" width="44" height="44" stroke="#f59e0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+  const svgDanger = `<svg viewBox="0 0 24 24" width="44" height="44" stroke="#ef4444" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
 
-  overlay.innerHTML = `
-    <div class="mhent-ui-box warning">
-      <div class="mhent-ui-icon">${svgWarning}</div>
-      <h3 class="mhent-ui-title">${title}</h3>
-      <p class="mhent-ui-msg">${message}</p>
-      <div class="mhent-ui-actions">
-        <button class="mhent-ui-btn-outline" id="mhent-cancel">Hủy bỏ</button>
-        <button class="mhent-ui-btn-primary" id="mhent-accept">Xác nhận</button>
+  return new Promise((resolve) => {
+    overlay.innerHTML = `
+      <div class="mhent-ui-box ${isDanger ? 'error' : 'warning'}">
+        <div class="mhent-ui-icon">${isDanger ? svgDanger : svgWarning}</div>
+        <h3 class="mhent-ui-title">${title}</h3>
+        <p class="mhent-ui-msg">${message}</p>
+        <div class="mhent-ui-actions">
+          <button class="mhent-ui-btn-outline" id="mhent-cancel">Hủy bỏ</button>
+          <button class="mhent-ui-btn-primary" id="mhent-accept" style="${isDanger ? 'background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);' : ''}">
+            ${isDanger ? 'Xác nhận xóa' : 'Xác nhận'}
+          </button>
+        </div>
       </div>
-    </div>
-  `;
+    `;
 
-  document.body.appendChild(overlay);
-  setTimeout(() => overlay.classList.add('show'), 10);
+    document.body.appendChild(overlay);
+    setTimeout(() => overlay.classList.add('show'), 10);
 
-  document.getElementById('mhent-cancel').onclick = () => window.closeConfirmPopup();
-  document.getElementById('mhent-accept').onclick = () => {
-    window.closeConfirmPopup();
-    if (typeof onConfirm === 'function') onConfirm();
-  };
+    const cancel = () => {
+      window.closeConfirmPopup();
+      resolve(false);
+    };
+
+    const accept = () => {
+      window.closeConfirmPopup();
+      if (typeof onConfirm === 'function') onConfirm();
+      resolve(true);
+    };
+
+    const cancelBtn = document.getElementById('mhent-cancel');
+    if (cancelBtn) cancelBtn.onclick = cancel;
+
+    const acceptBtn = document.getElementById('mhent-accept');
+    if (acceptBtn) {
+      acceptBtn.onclick = accept;
+      acceptBtn.focus();
+    }
+
+    overlay.onclick = (e) => {
+      if (e.target === overlay) cancel();
+    };
+  });
 };
+
+window.UI.confirm = window.showConfirmPopup;
+window.UI.showPopup = window.showPopup;
 
 window.closePopup = function() {
   const popup = document.getElementById('mhent-active-popup');

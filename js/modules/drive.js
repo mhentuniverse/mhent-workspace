@@ -103,15 +103,19 @@ window.DriveModule = {
   },
 
   async deleteFile(fileId) {
-    if (confirm("Cậu có chắc muốn xóa tệp này khỏi Drive không?")) {
-      if (window.CloudModule) {
-        await window.CloudModule.deleteFile(fileId);
-      } else {
-        window.store.deleteFile(fileId);
-      }
-      window.UI.closeModal("modal-file-preview");
-      this.renderFiles();
-      window.UI.showToast("Đã xóa tệp khỏi Drive!", "", "info");
+    const ok = await window.showConfirmPopup(
+      "Xác Nhận Xóa Tệp Tin 📁",
+      "Cậu có chắc chắn muốn xóa tệp này khỏi Drive không?"
+    );
+    if (!ok) return;
+
+    if (window.CloudModule) {
+      await window.CloudModule.deleteFile(fileId);
+    } else {
+      window.store.deleteFile(fileId);
     }
+    window.UI.closeModal("modal-file-preview");
+    this.renderFiles();
+    window.UI.showToast("Đã xóa tệp khỏi Drive! 🗑️", "", "info");
   }
 };
