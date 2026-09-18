@@ -574,18 +574,22 @@ window.CalendarModule = {
 
         const eventsCardsHtml = dayEvents.length > 0 ? dayEvents.map(ev => {
           const color = ev.color || this.getColorForType(ev.type);
-          const recurBadge = ev.isRecurring ? '<span style="font-size: 9px; opacity: 0.85; margin-left: 4px;">🔁 Lặp lại</span>' : '';
+          const recurIcon = ev.isRecurring ? '<span title="Sự kiện lặp lại" style="font-size: 9.5px; margin-left: 2px;">🔁</span>' : '';
+          const escapedTitle = this.escapeHtml(ev.title);
+          const escapedLoc = this.escapeHtml(ev.location || '');
           return `
-            <div class="week-event-card" style="border-left-color: ${color}; background: ${this.hexToRgba(color, 0.12)};" onclick="window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')">
+            <div class="week-event-card" style="border-left-color: ${color}; background: ${this.hexToRgba(color, 0.12)};" onclick="window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')" title="${escapedTitle}">
               <button class="week-event-del" onclick="event.stopPropagation(); window.CalendarModule.deleteEvent('${ev.originalId || ev.id}')" title="Xóa sự kiện">✕</button>
-              <div class="week-event-time">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span>${ev.time || 'Cả ngày'}</span>
-                ${recurBadge}
+              <div class="week-event-top-row">
+                <div class="week-event-time">
+                  <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>${ev.time || 'Cả ngày'}</span>
+                  ${recurIcon}
+                </div>
+                <span class="week-event-badge" style="color: ${color};">${this.getTypeLabel(ev.type)}</span>
               </div>
-              <div class="week-event-title">${ev.isRecurring ? '🔁 ' : ''}${this.escapeHtml(ev.title)}</div>
-              ${ev.location ? `<div class="week-event-loc">📍 ${this.escapeHtml(ev.location)}</div>` : ''}
-              <div class="week-event-badge" style="color: ${color};">${this.getTypeLabel(ev.type)}</div>
+              <div class="week-event-title">${escapedTitle}</div>
+              ${ev.location ? `<div class="week-event-loc">📍 ${escapedLoc}</div>` : ''}
             </div>
           `;
         }).join("") : `
@@ -630,15 +634,21 @@ window.CalendarModule = {
 
         const eventsCardsHtml = dayEvents.length > 0 ? dayEvents.map(ev => {
           const color = ev.color || this.getColorForType(ev.type);
+          const recurIcon = ev.isRecurring ? '<span title="Sự kiện lặp lại" style="font-size: 9.5px; margin-left: 2px;">🔁</span>' : '';
+          const escapedTitle = this.escapeHtml(ev.title);
+          const escapedLoc = this.escapeHtml(ev.location || '');
           return `
-            <div class="week-event-card row-card" style="border-left-color: ${color}; background: ${this.hexToRgba(color, 0.12)};" onclick="window.CalendarModule.showEventDetail('${ev.id}')">
-              <button class="week-event-del" onclick="event.stopPropagation(); window.CalendarModule.deleteEvent('${ev.id}')" title="Xóa sự kiện">✕</button>
-              <div class="week-event-time">
-                <span>⏰ ${ev.time || 'Cả ngày'}</span>
+            <div class="week-event-card row-card" style="border-left-color: ${color}; background: ${this.hexToRgba(color, 0.12)};" onclick="window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')" title="${escapedTitle}">
+              <button class="week-event-del" onclick="event.stopPropagation(); window.CalendarModule.deleteEvent('${ev.originalId || ev.id}')" title="Xóa sự kiện">✕</button>
+              <div class="week-event-top-row">
+                <div class="week-event-time">
+                  <span>⏰ ${ev.time || 'Cả ngày'}</span>
+                  ${recurIcon}
+                </div>
+                <span class="week-event-badge" style="color: ${color};">${this.getTypeLabel(ev.type)}</span>
               </div>
-              <div class="week-event-title">${this.escapeHtml(ev.title)}</div>
-              ${ev.location ? `<div class="week-event-loc">📍 ${this.escapeHtml(ev.location)}</div>` : ''}
-              <div class="week-event-badge" style="color: ${color};">${this.getTypeLabel(ev.type)}</div>
+              <div class="week-event-title">${escapedTitle}</div>
+              ${ev.location ? `<div class="week-event-loc">📍 ${escapedLoc}</div>` : ''}
             </div>
           `;
         }).join("") : `
