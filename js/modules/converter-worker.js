@@ -308,8 +308,12 @@ async function processAudio(file, targetFormat, options, baseName, reportProgres
       format: WAVE
     });
 
-    const conversion = await Conversion.create({ input, output });
+    const conversion = await Conversion.init({ input, output });
     self.activeConversion = conversion;
+
+    if (!conversion.isValid) {
+      throw new Error("Không thể trích xuất âm thanh từ tệp này qua bộ xử lý trực tiếp.");
+    }
 
     conversion.onProgress = (fraction) => {
       if (self.isCancelled) return;
@@ -359,10 +363,33 @@ async function processVideoWithMediabunny(file, targetFormat, options, baseName,
   reportProgress(15, "Đang phân tích codec luồng video & âm thanh (Stream copy mode)...", Math.floor(file.size * 0.15), file.size);
 
   // Conversion with automatic stream copy (transmuxing) or WebCodecs hardware transcode
-  const conversion = await Conversion.create({
-    input,
-    output
-  });
+  let conversion = null;
+  try {
+    conversion = await Conversion.init({
+      input,
+      output
+    });
+  } catch (initErr) {
+    console.warn("[Mediabunny] Standard init failed, retrying with primary tracks:", initErr);
+    conversion = await Conversion.init({
+      input,
+      output,
+      tracks: "primary"
+    });
+  }
+
+  if (!conversion.isValid) {
+    console.warn("[Mediabunny] All tracks invalid, retrying with primary tracks...");
+    conversion = await Conversion.init({
+      input,
+      output,
+      tracks: "primary"
+    });
+  }
+
+  if (!conversion.isValid) {
+    throw new Error("Không thể chuyển đổi codec của tệp video này qua Fast-Remux (các luồng không tương thích).");
+  }
 
   self.activeConversion = conversion;
 
