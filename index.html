@@ -209,10 +209,36 @@
 
         <!-- 7. TOOLS SIDEBAR SECTION -->
         <div class="sidebar-app-section" id="sidebar-sec-tools" style="display: none;">
+          <button class="btn btn-primary" id="btn-tools-pick-file" style="width: 100%; margin-bottom: 16px; background: linear-gradient(135deg, var(--app-tools), #ec4899); box-shadow: 0 4px 14px var(--app-tools-glow);" onclick="window.ToolsModule.triggerFileInput()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <span>⚡ Chọn Tệp Chuyển Đổi</span>
+          </button>
           <div class="sidebar-section-title"><span>Trạm Công Cụ</span></div>
-          <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/></svg></span><span>QR Check-in & Điểm Danh</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><span>Wiki & Noticeboard</span></div></li>
+          <ul class="sidebar-nav-list" id="tools-sidebar-nav">
+            <li class="sidebar-nav-item active" data-tool-tab="converter" onclick="window.ToolsModule.setTab('converter')">
+              <div class="item-left">
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></span>
+                <span>Chuyển Đổi Tệp Đa Năng</span>
+              </div>
+            </li>
+            <li class="sidebar-nav-item" data-tool-tab="qr" onclick="window.ToolsModule.setTab('qr')">
+              <div class="item-left">
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/></svg></span>
+                <span>QR Check-in & Scanner</span>
+              </div>
+            </li>
+            <li class="sidebar-nav-item" data-tool-tab="wiki" onclick="window.ToolsModule.setTab('wiki')">
+              <div class="item-left">
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+                <span>Wiki & Quy Chuẩn</span>
+              </div>
+            </li>
+            <li class="sidebar-nav-item" data-tool-tab="notes" onclick="window.ToolsModule.setTab('notes')">
+              <div class="item-left">
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+                <span>Ghi Chú Nhanh (Notes)</span>
+              </div>
+            </li>
           </ul>
         </div>
       </div>
@@ -426,74 +452,244 @@
         <!-- 7. TOOLS APP VIEW -->
         <div class="app-stage-view tools-app-view" id="view-tools" style="display: none;">
           <div class="tools-nav-tabs">
-            <button class="tool-tab-btn active" data-tab="qr">📱 QR Check-in</button>
-            <button class="tool-tab-btn" data-tab="wiki">📖 Wiki & Noticeboard</button>
-            <button class="tool-tab-btn" data-tab="media">⚡ Quick Media Tools</button>
+            <button class="tool-tab-btn active" data-tab="converter" onclick="window.ToolsModule.setTab('converter')">⚡ Chuyển Đổi Định Dạng Đa Năng</button>
+            <button class="tool-tab-btn" data-tab="qr" onclick="window.ToolsModule.setTab('qr')">📱 QR Code & Điểm Danh</button>
+            <button class="tool-tab-btn" data-tab="wiki" onclick="window.ToolsModule.setTab('wiki')">📖 Wiki & Quy Chuẩn MHEnt</button>
+            <button class="tool-tab-btn" data-tab="notes" onclick="window.ToolsModule.setTab('notes')">📝 Ghi Chú & Wiki Nội Bộ</button>
           </div>
 
-          <!-- Tab 1: QR Checkin -->
-          <div class="tool-pane active" id="tool-pane-qr">
-            <div style="display: flex; gap: 24px; flex-wrap: wrap;">
-              <div style="flex: 1; min-width: 280px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
-                <h3 style="margin-bottom: 12px; font-size: 16px;">Tạo Mã QR Điểm Danh Sự Kiện</h3>
-                <div class="form-group">
-                  <label class="form-label">Nội Dung / Mã Sự Kiện</label>
-                  <input type="text" class="input-text" id="qr-input-text" value="MHENT-EVENT-CHECKIN-2026">
+          <!-- Tab 1: Universal File Converter (Central Super Tool) -->
+          <div class="tool-pane active" id="tool-pane-converter">
+            <!-- Hidden file input -->
+            <input type="file" id="universal-file-input" style="display: none;" onchange="window.ToolsModule.onFileSelected(event)">
+
+            <!-- Dropzone Area -->
+            <div class="converter-dropzone" id="converter-dropzone" 
+                 onclick="window.ToolsModule.triggerFileInput()" 
+                 ondragover="window.ToolsModule.onDragOver(event)" 
+                 ondragleave="window.ToolsModule.onDragLeave(event)" 
+                 ondrop="window.ToolsModule.onFileDrop(event)">
+              <div class="dropzone-glow-ring">
+                <div class="dropzone-icon">
+                  <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
                 </div>
-                <button class="btn btn-primary" id="btn-gen-qr" style="background: var(--app-tools);">Tạo Lại Mã QR</button>
+              </div>
+              <div class="dropzone-title">Kéo Thả Tệp Bất Kỳ Vào Đây Hoặc Bấm Để Chọn</div>
+              <div class="dropzone-subtitle">Chuyển đổi tức thì mọi định dạng video, âm thanh, hình ảnh và tài liệu bảng tính</div>
+              
+              <div class="dropzone-format-tags">
+                <span class="format-tag-pill video">🎬 Video (MP4, MKV, WebM, MOV, AVI)</span>
+                <span class="format-tag-pill audio">🎵 Audio (MP3, WAV, OGG, M4A, AAC)</span>
+                <span class="format-tag-pill image">🖼️ Ảnh (PNG, JPG, WebP, GIF, BMP, ICO, PDF)</span>
+                <span class="format-tag-pill doc">📄 Dữ Liệu (JSON, CSV, MD, HTML, TXT)</span>
+              </div>
+            </div>
+
+            <!-- Active Converter Workspace (shown after picking a file) -->
+            <div id="converter-active-workspace" style="display: none;">
+              <div class="converter-main-card">
+                <!-- File Meta Header -->
+                <div class="converter-card-header">
+                  <div class="converter-file-info">
+                    <div class="converter-file-avatar" id="file-meta-icon">📄</div>
+                    <div style="min-width: 0;">
+                      <div class="converter-file-name" id="file-meta-name" title="Tên tệp nguồn">source_file.dat</div>
+                      <div class="converter-file-subtext">
+                        <span id="file-meta-size">0.0 MB</span>
+                        <span class="meta-dot">•</span>
+                        <span class="converter-type-badge" id="file-meta-category">Định dạng</span>
+                        <span class="meta-dot">•</span>
+                        <span id="file-meta-ext" style="font-family: var(--font-mono); color: var(--text-muted);">.ext</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-ghost" onclick="window.ToolsModule.triggerFileInput()" style="font-size: 12.5px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    <span>Đổi tệp khác</span>
+                  </button>
+                </div>
+
+                <!-- Live Preview Section -->
+                <div class="converter-preview-wrapper" id="converter-preview-area">
+                  <div id="preview-image-box" style="display: none; text-align: center;">
+                    <img id="preview-image-el" src="" alt="Xem trước ảnh" class="converter-img-preview">
+                  </div>
+                  <div id="preview-video-box" style="display: none; text-align: center;">
+                    <video id="preview-video-el" controls class="converter-video-preview"></video>
+                  </div>
+                  <div id="preview-audio-box" style="display: none; text-align: center; padding: 12px 0;">
+                    <audio id="preview-audio-el" controls style="width: 100%; max-width: 520px;"></audio>
+                  </div>
+                  <div id="preview-text-box" style="display: none;">
+                    <div class="preview-text-header">Trích đoạn nội dung tệp:</div>
+                    <pre id="preview-text-el" class="converter-text-preview custom-scrollbar"></pre>
+                  </div>
+                </div>
+
+                <!-- Target Format Selector -->
+                <div class="converter-section">
+                  <div class="converter-section-header">
+                    <span class="section-title">1. Chọn Định Dạng Muốn Chuyển Đổi Sang:</span>
+                    <span class="section-hint" id="converter-format-hint">Khuyên dùng cho loại tệp này</span>
+                  </div>
+
+                  <div class="target-format-chips" id="converter-format-chips">
+                    <!-- Populated dynamically -->
+                  </div>
+
+                  <!-- Dynamic Options (Sliders / Parameters) -->
+                  <div class="converter-options-panel" id="converter-options-row">
+                    <!-- Image Quality Slider -->
+                    <div id="option-image-quality" class="converter-option-item" style="display: none;">
+                      <div class="option-label-box">
+                        <span class="option-label">Chất lượng nén ảnh:</span>
+                        <span id="val-img-quality" class="option-val-badge">90%</span>
+                      </div>
+                      <input type="range" id="converter-img-quality" min="30" max="100" value="90" oninput="document.getElementById('val-img-quality').innerText = this.value + '%'" class="converter-slider">
+                    </div>
+
+                    <!-- Audio Options -->
+                    <div id="option-audio-sample" class="converter-option-item" style="display: none;">
+                      <span class="option-label">Tần số lấy mẫu (Sample Rate):</span>
+                      <select id="converter-audio-rate" class="input-select-modern" style="padding: 6px 12px; font-size: 12px;">
+                        <option value="44100" selected>44.1 kHz (Chuẩn Studio / CD)</option>
+                        <option value="48000">48.0 kHz (Chuẩn Video & Phim Ảnh)</option>
+                        <option value="22050">22.05 kHz (Tiết kiệm dung lượng)</option>
+                      </select>
+                    </div>
+
+                    <!-- Video Options -->
+                    <div id="option-video-mode" class="converter-option-item" style="display: none;">
+                      <span class="option-label">Chế độ Video:</span>
+                      <select id="converter-video-bitrate" class="input-select-modern" style="padding: 6px 12px; font-size: 12px;">
+                        <option value="high">Chất lượng cao (Giữ nguyên độ sắc nét)</option>
+                        <option value="medium" selected>Cân bằng (Dung lượng tối ưu)</option>
+                        <option value="low">Nén siêu nhẹ (Chia sẻ nhanh)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Start Action Bar -->
+                  <div class="converter-action-bar">
+                    <button type="button" class="btn-convert-execute" id="btn-start-universal-convert" onclick="window.ToolsModule.startConversion()">
+                      <span class="convert-icon-spin">⚡</span>
+                      <span id="btn-convert-label">Bắt Đầu Chuyển Đổi Ngay</span>
+                    </button>
+                    <div class="converter-security-badge">
+                      <span>🔒 100% Xử lý nội bộ trên máy khách (Client-Side), an toàn và bảo mật riêng tư tuyệt đối</span>
+                    </div>
+                  </div>
+
+                  <!-- Progress Indicator -->
+                  <div id="converter-progress-box" class="converter-progress-box" style="display: none;">
+                    <div class="progress-info-row">
+                      <span id="converter-progress-status" class="progress-status-text">Đang phân tích cấu trúc tệp...</span>
+                      <span id="converter-progress-percent" class="progress-percent-text">0%</span>
+                    </div>
+                    <div class="converter-progress-bar-bg">
+                      <div class="converter-progress-bar-fill" id="converter-progress-fill"></div>
+                    </div>
+                  </div>
+
+                  <!-- Result Card (Download / Save to Drive) -->
+                  <div id="converter-result-box" class="converter-result-panel" style="display: none;">
+                    <div class="result-header-row">
+                      <div class="result-icon-box">🎉</div>
+                      <div>
+                        <div class="result-headline">Chuyển Đổi Thành Công!</div>
+                        <div class="result-subline" id="result-meta-text">Tệp đã sẵn sàng tải về máy</div>
+                      </div>
+                    </div>
+                    <div class="result-buttons-row">
+                      <button type="button" class="btn-result-action download" id="btn-download-result" onclick="window.ToolsModule.downloadResult()">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        <span>Tải Tệp Về Máy</span>
+                      </button>
+                      <button type="button" class="btn-result-action drive" id="btn-save-to-drive" onclick="window.ToolsModule.saveResultToDrive()">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+                        <span>Lưu Vào MHEnt Media Drive</span>
+                      </button>
+                      <button type="button" class="btn-result-action reset" onclick="window.ToolsModule.resetConverter()">
+                        <span>🔄 Chuyển tệp khác</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: QR Checkin & Scanner -->
+          <div class="tool-pane" id="tool-pane-qr">
+            <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 280px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 22px; box-shadow: 0 4px 18px rgba(0,0,0,0.2);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                  <span style="font-size: 20px;">📱</span>
+                  <h3 style="font-size: 16px; font-weight: 700; color: #fff;">Tạo Mã QR Điểm Danh & Truy Cập</h3>
+                </div>
+                <div class="form-group">
+                  <label class="form-label-modern">Nội Dung Hoặc Đường Dẫn Cần Tạo QR</label>
+                  <input type="text" class="input-text-modern" id="qr-input-text" value="https://workspace.mhentuniverse.com">
+                </div>
+                <button class="btn btn-primary" id="btn-gen-qr" style="background: var(--app-tools); width: 100%; padding: 10px;">Tạo Mã QR Mới</button>
                 <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center;">
-                  <canvas id="qr-display-canvas" width="240" height="240" style="border-radius: var(--radius-sm); box-shadow: var(--shadow-md);"></canvas>
-                  <span id="qr-code-content-text" style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 8px;"></span>
+                  <canvas id="qr-display-canvas" width="220" height="220" style="border-radius: var(--radius-sm); box-shadow: var(--shadow-md);"></canvas>
+                  <span id="qr-code-content-text" style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 10px; word-break: break-all; text-align: center;"></span>
                 </div>
               </div>
 
-              <div style="flex: 1; min-width: 280px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
-                <h3 style="margin-bottom: 12px; font-size: 16px;">Máy Quét Mã QR Camera</h3>
-                <div class="qr-scanner-box">
-                  <div class="qr-scan-line"></div>
-                  <span style="color: var(--text-muted); font-size: 13px; z-index: 2;">📷 Khung ngắm Camera Scanner</span>
+              <div style="flex: 1; min-width: 280px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 22px; box-shadow: 0 4px 18px rgba(0,0,0,0.2);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                  <span style="font-size: 20px;">📷</span>
+                  <h3 style="font-size: 16px; font-weight: 700; color: #fff;">Máy Quét Mã QR Thành Viên</h3>
                 </div>
-                <button class="btn btn-secondary" style="width: 100%; margin-top: 14px;" onclick="window.UI.showToast('Điểm danh thành công! ✅', 'Thành viên đã check-in', 'success')">
-                  Bấm Thử Quét Mã Thành Viên
+                <div class="qr-scanner-box" style="margin: 0 auto;">
+                  <div class="qr-scan-line"></div>
+                  <span style="color: var(--text-muted); font-size: 13px; z-index: 2;">Khung ngắm Camera Scanner</span>
+                </div>
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 18px; padding: 10px;" onclick="window.UI.showToast('Điểm danh thành công! ✅', 'Thành viên đã check-in vào sự kiện', 'success')">
+                  Bấm Thử Quét Mã Điểm Danh
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- Tab 2: Wiki -->
+          <!-- Tab 3: Wiki -->
           <div class="tool-pane" id="tool-pane-wiki">
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px;">
-              <h2 style="font-size: 20px; margin-bottom: 12px;">🌟 MHEnt Universe - Quy Chuẩn & Thiết Lập Thế Giới</h2>
-              <div style="line-height: 1.7; color: var(--text-medium); font-size: 14px;">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; box-shadow: 0 4px 18px rgba(0,0,0,0.2);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                <span style="font-size: 24px;">🌟</span>
+                <h2 style="font-size: 19px; font-weight: 800; color: #fff;">MHEnt Universe - Quy Chuẩn & Thiết Lập Thế Giới</h2>
+              </div>
+              <div style="line-height: 1.7; color: var(--text-medium); font-size: 14px; display: flex; flex-direction: column; gap: 12px;">
                 <p><strong>1. Tôn chỉ hoạt động:</strong> Sáng tạo vô cực, kết nối không gian mạng, tối ưu năng suất và bảo tồn bản sắc MHEnt.</p>
                 <p><strong>2. Hệ thống nhân cách AISA:</strong></p>
-                <ul>
+                <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
                   <li>🌸 <strong>Harmony:</strong> Luôn hỗ trợ tận tình, ngọt ngào, xưng 'em' và gọi người dùng là 'Master'.</li>
                   <li>😈 <strong>Echo:</strong> Đanh đá, sắc sảo, thích cà khịa nhưng luôn bám sát tiến độ công việc để nhắc nhở team.</li>
                 </ul>
+                <p><strong>3. Tiêu chuẩn bảo mật dữ liệu:</strong> Mọi thao tác xử lý hình ảnh, video và tài liệu đều ưu tiên vận hành tại máy khách (client-side) để đảm bảo quyền riêng tư nội bộ tối đa.</p>
               </div>
             </div>
           </div>
 
-          <!-- Tab 3: Media Tools -->
-          <div class="tool-pane" id="tool-pane-media">
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; max-width: 600px;">
-              <h3 style="margin-bottom: 14px;">⚡ Trạm Chuyển Đổi Video (MKV ➔ MP4)</h3>
-              <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
-                Chạy hoàn toàn trên máy khách với WebAssembly (FFmpeg WASM), đảm bảo không cần tải video lên máy chủ, riêng tư tuyệt đối.
-              </p>
-              <div class="form-group">
-                <label class="form-label">Chọn tệp video nguồn</label>
-                <input type="file" class="input-text" accept=".mkv,.mp4,.mov,.avi">
+          <!-- Tab 4: Quick Notes & Internal Wiki -->
+          <div class="tool-pane" id="tool-pane-notes">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 22px;">📝</span>
+                <h3 style="font-size: 17px; font-weight: 700; color: #fff;">Ghi Chú Nhanh & Sổ Tay Nội Bộ</h3>
               </div>
-              <button class="btn btn-primary" id="btn-start-convert" style="background: var(--app-tools);">Bắt Đầu Chuyển Đổi Sang MP4</button>
-              
-              <div style="margin-top: 18px;">
-                <div style="height: 6px; background: var(--bg-surface-elevated); border-radius: var(--radius-full); overflow: hidden;">
-                  <div id="media-convert-progress" style="width: 0%; height: 100%; background: var(--app-tools); transition: width 0.3s ease;"></div>
-                </div>
-                <div id="media-convert-status" style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">Sẵn sàng xử lý tệp...</div>
-              </div>
+              <button type="button" class="btn btn-primary" onclick="window.ToolsModule.createQuickNote()" style="background: var(--app-tools);">
+                ➕ Thêm Ghi Chú Mới
+              </button>
+            </div>
+            <div id="tools-notes-list" class="tools-notes-grid">
+              <!-- Rendered dynamically -->
             </div>
           </div>
         </div>

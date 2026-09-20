@@ -1,5 +1,5 @@
 // MHENT WORKSPACE - SERVICE WORKER (AUTO-PURGE CACHE & NETWORK-FIRST)
-const CACHE_NAME = 'mhent-workspace-v3.0-live';
+const CACHE_NAME = 'mhent-workspace-v3.1-converter';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
