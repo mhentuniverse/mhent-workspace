@@ -489,8 +489,8 @@ window.ToolsModule = {
         { id: "base64", label: "Base64 (Data URI Text)", icon: "💻" }
       ],
       video: [
-        { id: "webm", label: "WEBM (Transcode chuẩn Web VP9/VP8)", icon: "🌐", default: true },
-        { id: "mp4", label: "MP4 (Mã hóa phần cứng H.264/AAC)", icon: "🎬" },
+        { id: "mp4", label: "MP4 (Fast-Remuxer siêu tốc ~15s / Lossless)", icon: "🎬", default: true },
+        { id: "webm", label: "WEBM (Transcode chuẩn Web VP9/VP8)", icon: "🌐" },
         { id: "wav_audio", label: "Trích xuất Âm thanh (WAV Lossless PCM)", icon: "🎵" },
         { id: "gif", label: "Chụp ảnh Frame (Snapshot)", icon: "🎞️" }
       ],
@@ -563,6 +563,8 @@ window.ToolsModule = {
     }
   },
 
+  activeWorker: null,
+
   async startConversion() {
     if (!this.currentFile) {
       window.UI.showToast("Lỗi", "Vui lòng chọn một tệp để bắt đầu!", "warning");
@@ -589,7 +591,7 @@ window.ToolsModule = {
       e.returnValue = "Quá trình chuyển đổi tệp đang diễn ra. Bạn có chắc chắn muốn rời khỏi?";
     };
 
-    const updateProgress = (pct, status) => {
+    const updateProgress = (pct, status, bytesProcessed, totalBytes, speedMBps) => {
       if (this.conversionCancelled) return;
       if (progPercent) progPercent.textContent = pct + "%";
       if (progStatus) progStatus.textContent = status;
@@ -598,69 +600,81 @@ window.ToolsModule = {
       if (progTimer && this.conversionStartTime) {
         const elapsedSec = Math.floor((Date.now() - this.conversionStartTime) / 1000);
         let tStr = `⏱️ Đã chạy: ${this.formatDuration(elapsedSec)}`;
+        if (speedMBps && speedMBps > 0) {
+          tStr += ` • Tốc độ: ${speedMBps} MB/s`;
+        }
+        if (bytesProcessed && totalBytes && totalBytes > 0) {
+          const mbDone = (bytesProcessed / (1024 * 1024)).toFixed(0);
+          const mbTotal = (totalBytes / (1024 * 1024)).toFixed(0);
+          tStr += ` • Đã xử lý: ${mbDone}/${mbTotal} MB`;
+        }
         if (pct > 5 && pct < 100) {
           const estTotal = Math.round((elapsedSec / pct) * 100);
           const remainSec = Math.max(0, estTotal - elapsedSec);
-          tStr += ` • Ước tính còn: ~${this.formatDuration(remainSec)}`;
+          tStr += ` • Còn lại: ~${this.formatDuration(remainSec)}`;
         }
         progTimer.textContent = tStr;
       }
     };
 
     try {
-      updateProgress(10, "Đang nạp và phân tích cấu trúc dữ liệu...");
-      await this.sleep(250);
-      if (this.conversionCancelled) return;
-
       const file = this.currentFile;
       const fmt = this.targetFormat;
       const baseName = file.name.substring(0, file.name.lastIndexOf(".")) || file.name;
       let outputBlob = null;
       let outputFilename = "";
 
-      updateProgress(30, `Đang khởi tạo bộ mã hóa cho định dạng ${fmt.toUpperCase()}...`);
-      await this.sleep(250);
+      // Check if task can run in Web Worker
+      const workerFormats = ["csv", "json", "html", "txt", "base64_doc", "base64_raw", "webp", "png", "jpg", "jpeg", "bmp", "ico", "base64", "mp4", "webm"];
+      let usedWorker = false;
+
+      if (typeof Worker !== "undefined" && workerFormats.includes(fmt)) {
+        try {
+          updateProgress(5, "Đang kích hoạt Web Worker xử lý ngầm siêu phân luồng...", 0, file.size);
+          const res = await this.runInWorker(file, fmt, baseName, updateProgress);
+          if (res) {
+            outputBlob = res.blob;
+            outputFilename = res.filename;
+            usedWorker = true;
+          }
+        } catch (workerErr) {
+          if (this.conversionCancelled) return;
+          console.warn("[Worker Engine] Chuyển tiếp sang engine trực tiếp:", workerErr);
+        }
+      }
+
+      // Fallback or specialized tasks not handled by Worker
+      if (!usedWorker && !this.conversionCancelled) {
+        updateProgress(15, "Đang xử lý qua bộ engine chuyên sâu...", 0, file.size);
+        if (["png", "jpg", "webp", "bmp", "ico", "pdf", "base64"].includes(fmt)) {
+          const qualityInput = document.getElementById("converter-img-quality");
+          const quality = qualityInput ? parseInt(qualityInput.value, 10) / 100 : 0.9;
+          const res = await this.convertImage(file, fmt, quality, baseName);
+          outputBlob = res.blob;
+          outputFilename = res.filename;
+        } else if (["wav", "wav_audio", "webm_audio", "ogg"].includes(fmt)) {
+          const sampleRateSelect = document.getElementById("converter-audio-rate");
+          const sampleRate = sampleRateSelect ? parseInt(sampleRateSelect.value, 10) : 44100;
+          const res = await this.convertAudio(file, fmt, sampleRate, baseName);
+          outputBlob = res.blob;
+          outputFilename = res.filename;
+        } else if (["mp4", "webm", "gif"].includes(fmt)) {
+          const res = await this.convertVideo(file, fmt, baseName);
+          outputBlob = res.blob;
+          outputFilename = res.filename;
+        } else {
+          const res = await this.convertDocument(file, fmt, baseName);
+          outputBlob = res.blob;
+          outputFilename = res.filename;
+        }
+      }
+
       if (this.conversionCancelled) return;
 
-      // 1. IMAGE CONVERSIONS
-      if (["png", "jpg", "webp", "bmp", "ico", "pdf", "base64"].includes(fmt)) {
-        updateProgress(55, "Đang giải mã điểm ảnh và nén định dạng đích...");
-        const qualityInput = document.getElementById("converter-img-quality");
-        const quality = qualityInput ? parseInt(qualityInput.value, 10) / 100 : 0.9;
-        const res = await this.convertImage(file, fmt, quality, baseName);
-        outputBlob = res.blob;
-        outputFilename = res.filename;
-      }
-      // 2. AUDIO & VIDEO AUDIO EXTRACTION
-      else if (["wav", "wav_audio", "webm_audio", "ogg"].includes(fmt)) {
-        updateProgress(60, "Đang giải mã luồng sóng âm (Web Audio PCM Lossless)...");
-        const sampleRateSelect = document.getElementById("converter-audio-rate");
-        const sampleRate = sampleRateSelect ? parseInt(sampleRateSelect.value, 10) : 44100;
-        const res = await this.convertAudio(file, fmt, sampleRate, baseName);
-        outputBlob = res.blob;
-        outputFilename = res.filename;
-      }
-      // 3. VIDEO TRANSCODING / REMUX
-      else if (["mp4", "webm", "gif"].includes(fmt)) {
-        updateProgress(35, "Đang chuẩn bị luồng MediaStream & mã hóa từng frame...");
-        const res = await this.convertVideo(file, fmt, baseName);
-        outputBlob = res.blob;
-        outputFilename = res.filename;
-      }
-      // 4. DOCUMENT & STRUCTURED DATA
-      else {
-        updateProgress(65, "Đang phân tích cú pháp và trích xuất bảng dữ liệu...");
-        const res = await this.convertDocument(file, fmt, baseName);
-        outputBlob = res.blob;
-        outputFilename = res.filename;
-      }
-
-      if (this.conversionCancelled) return;
-
-      updateProgress(100, "Hoàn tất chuyển đổi thành công!");
+      updateProgress(100, "Hoàn tất chuyển đổi thành công!", file.size, file.size);
       if (progTimer && this.conversionStartTime) {
         const totalSec = Math.floor((Date.now() - this.conversionStartTime) / 1000);
-        progTimer.textContent = `⏱️ Tổng thời gian hoàn thành: ${this.formatDuration(totalSec)}`;
+        progTimer.textContent = `⏱️ Tổng thời gian hoàn thành: ${this.formatDuration(totalSec)} • Kích thước tệp: ${this.formatFileSize(outputBlob.size)}`;
       }
       await this.sleep(200);
 
@@ -688,7 +702,55 @@ window.ToolsModule = {
       window.onbeforeunload = null;
       this.currentRecorder = null;
       this.currentTranscodeVideo = null;
+      if (this.activeWorker) {
+        try { this.activeWorker.terminate(); } catch(e) {}
+        this.activeWorker = null;
+      }
     }
+  },
+
+  runInWorker(file, targetFormat, baseName, onProgress) {
+    return new Promise((resolve, reject) => {
+      const worker = new Worker("js/modules/converter-worker.js", { type: "module" });
+      this.activeWorker = worker;
+      const taskId = "task-" + Date.now();
+
+      const qualityInput = document.getElementById("converter-img-quality");
+      const quality = qualityInput ? parseInt(qualityInput.value, 10) / 100 : 0.9;
+
+      worker.onmessage = (e) => {
+        const data = e.data || {};
+        if (data.type === "PROGRESS") {
+          onProgress(data.pct, data.status, data.bytesProcessed, data.totalBytes, data.speedMBps);
+        } else if (data.type === "DONE") {
+          worker.terminate();
+          this.activeWorker = null;
+          resolve({ blob: data.blob, filename: data.filename });
+        } else if (data.type === "CANCELLED") {
+          worker.terminate();
+          this.activeWorker = null;
+          reject(new Error("Đã hủy bởi người dùng"));
+        } else if (data.type === "ERROR") {
+          worker.terminate();
+          this.activeWorker = null;
+          reject(new Error(data.message || "Lỗi xử lý Worker"));
+        }
+      };
+
+      worker.onerror = (err) => {
+        worker.terminate();
+        this.activeWorker = null;
+        reject(err);
+      };
+
+      worker.postMessage({
+        type: "START",
+        taskId,
+        file,
+        targetFormat,
+        options: { quality }
+      });
+    });
   },
 
   // ==========================================
@@ -1204,6 +1266,14 @@ window.ToolsModule = {
   cancelConversion() {
     this.conversionCancelled = true;
     window.onbeforeunload = null;
+
+    if (this.activeWorker) {
+      try {
+        this.activeWorker.postMessage({ type: "CANCEL" });
+        this.activeWorker.terminate();
+      } catch (e) {}
+      this.activeWorker = null;
+    }
 
     if (this.currentRecorder && this.currentRecorder.state === "recording") {
       try { this.currentRecorder.stop(); } catch(e) {}
