@@ -231,15 +231,14 @@ window.ToolsModule = {
         { id: "base64", label: "Base64 (Data URI Text)", icon: "💻" }
       ],
       video: [
-        { id: "mp4", label: "MP4 (Chuẩn H.264 tương thích cao)", icon: "🎬", default: true },
-        { id: "webm", label: "WEBM (Chuẩn Web hiện đại)", icon: "🌐" },
-        { id: "wav_audio", label: "Trích xuất Âm thanh (WAV PCM)", icon: "🎵" },
-        { id: "gif", label: "Ảnh động GIF (Animated GIF)", icon: "🎞️" }
+        { id: "webm", label: "WEBM (Transcode chuẩn Web VP9/VP8)", icon: "🌐", default: true },
+        { id: "mp4", label: "MP4 (Mã hóa phần cứng H.264/AAC)", icon: "🎬" },
+        { id: "wav_audio", label: "Trích xuất Âm thanh (WAV Lossless PCM)", icon: "🎵" },
+        { id: "gif", label: "Chụp ảnh Frame (Snapshot)", icon: "🎞️" }
       ],
       audio: [
-        { id: "wav", label: "WAV (Lossless Studio PCM)", icon: "🎼", default: true },
-        { id: "webm_audio", label: "WEBM (Opus Audio)", icon: "📻" },
-        { id: "ogg", label: "OGG (Vorbis Audio)", icon: "🔊" }
+        { id: "wav", label: "WAV (Lossless Studio PCM 16-bit)", icon: "🎼", default: true },
+        { id: "base64", label: "Mã hóa Base64 Audio", icon: "💻" }
       ],
       doc: [
         { id: "csv", label: "CSV (Bảng tính Excel UTF-8)", icon: "📊", default: currentExt === "json" },
@@ -438,14 +437,16 @@ window.ToolsModule = {
     }
 
     if (fmt === "ico") {
-      // Scale down to standard 64x64 favicon
+      // Scale down to standard 64x64 favicon and wrap into valid ICO binary
       const icoCanvas = document.createElement("canvas");
       icoCanvas.width = 64;
       icoCanvas.height = 64;
       const icoCtx = icoCanvas.getContext("2d");
       icoCtx.drawImage(canvas, 0, 0, 64, 64);
-      const blob = await new Promise(r => icoCanvas.toBlob(r, "image/x-icon"));
-      return { blob: blob || await new Promise(r => icoCanvas.toBlob(r, "image/png")), filename: `${baseName}.ico` };
+      const pngBlob = await new Promise(r => icoCanvas.toBlob(r, "image/png"));
+      const pngBuf = await pngBlob.arrayBuffer();
+      const icoBlob = this.createIcoFromPng(new Uint8Array(pngBuf), 64, 64);
+      return { blob: icoBlob, filename: `${baseName}.ico` };
     }
 
     if (fmt === "bmp") {
@@ -454,9 +455,9 @@ window.ToolsModule = {
     }
 
     if (fmt === "pdf") {
-      // Generate clean PDF embedding the image
+      // Generate genuine standard ISO 32000-1 compliant PDF 1.4 embedding the image
       const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
-      const pdfBlob = this.createSimplePdfFromImage(dataUrl, canvas.width, canvas.height, baseName);
+      const pdfBlob = await this.createRealPdfFromImage(dataUrl, canvas.width, canvas.height);
       return { blob: pdfBlob, filename: `${baseName}.pdf` };
     }
 
@@ -464,6 +465,12 @@ window.ToolsModule = {
   },
 
   async convertAudio(file, fmt, sampleRate, baseName) {
+    if (fmt === "base64") {
+      const b64 = await this.readFileAsDataURL(file);
+      const blob = new Blob([b64], { type: "text/plain;charset=utf-8" });
+      return { blob, filename: `${baseName}_audio_base64.txt` };
+    }
+
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) throw new Error("Trình duyệt không hỗ trợ Web Audio API");
 
@@ -476,60 +483,181 @@ window.ToolsModule = {
       return { blob: wavBlob, filename: `${baseName}_audio.wav` };
     }
 
-    if (fmt === "webm_audio") {
-      const wavBlob = this.audioBufferToWav(audioBuffer, sampleRate);
-      return { blob: new Blob([wavBlob], { type: "audio/webm" }), filename: `${baseName}_audio.webm` };
-    }
-
-    if (fmt === "ogg") {
-      const wavBlob = this.audioBufferToWav(audioBuffer, sampleRate);
-      return { blob: new Blob([wavBlob], { type: "audio/ogg" }), filename: `${baseName}_audio.ogg` };
-    }
-
     throw new Error("Định dạng âm thanh không được hỗ trợ");
   },
 
   async convertVideo(file, fmt, baseName) {
-    // In-browser video remux / transcode simulation with actual container repackaging
+    // 1. Lossless Audio Extraction via Web Audio API PCM decoder
     if (fmt === "wav_audio") {
       return this.convertAudio(file, "wav", 44100, baseName);
     }
 
+    // 2. Video Frame Snapshot
     if (fmt === "gif") {
-      // Capture frame sequence
       const video = document.createElement("video");
       video.muted = true;
+      video.playsInline = true;
       video.src = URL.createObjectURL(file);
-      await new Promise(r => { video.onloadedmetadata = r; });
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = () => resolve();
+        video.onerror = () => reject(new Error("Trình duyệt không thể giải mã cấu trúc video này."));
+        setTimeout(() => reject(new Error("Quá thời gian nạp video.")), 7000);
+      });
 
       const canvas = document.createElement("canvas");
-      canvas.width = Math.min(video.videoWidth || 480, 480);
+      canvas.width = Math.min(video.videoWidth || 640, 640);
       canvas.height = Math.round(canvas.width * (video.videoHeight / video.videoWidth));
       const ctx = canvas.getContext("2d");
 
-      video.currentTime = Math.min(1.0, video.duration / 2);
+      video.currentTime = Math.min(1.0, (video.duration || 2) / 2);
       await new Promise(r => { video.onseeked = r; });
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const blob = await new Promise(r => canvas.toBlob(r, "image/gif"));
-      return { blob: blob || await new Promise(r => canvas.toBlob(r, "image/png")), filename: `${baseName}_preview.gif` };
+      const blob = await new Promise(r => canvas.toBlob(r, "image/png"));
+      return { blob, filename: `${baseName}_frame.png` };
     }
 
-    if (fmt === "webm") {
-      // Output standard webm video blob
-      const arrayBuf = await file.arrayBuffer();
-      const blob = new Blob([arrayBuf], { type: "video/webm" });
-      return { blob, filename: `${baseName}.webm` };
+    // 3. Genuine In-Browser Video Transcoding via MediaRecorder & Stream Capture
+    const video = document.createElement("video");
+    video.muted = false;
+    video.playsInline = true;
+    const videoUrl = URL.createObjectURL(file);
+    video.src = videoUrl;
+
+    await new Promise((resolve, reject) => {
+      video.onloadedmetadata = () => resolve();
+      video.onerror = () => {
+        reject(new Error("Trình duyệt không hỗ trợ giải mã trực tiếp codec của video này (như MKV dùng codec HEVC/H.265 hoặc âm thanh DTS). Hãy chọn 'Trích xuất Âm thanh (WAV PCM)' nếu bạn cần tiếng!"));
+      };
+      setTimeout(() => {
+        if (!video.videoWidth && !video.duration) {
+          reject(new Error("Không thể nạp thông tin video hoặc định dạng không được trình duyệt hỗ trợ trực tiếp."));
+        }
+      }, 8000);
+    });
+
+    const stream = video.captureStream ? video.captureStream() : (video.mozCaptureStream ? video.mozCaptureStream() : null);
+    if (!stream) {
+      throw new Error("Trình duyệt không hỗ trợ MediaStream capture từ video.");
     }
+
+    // Determine target MIME type supported by browser
+    let targetMime = "video/webm";
+    let outputExt = "webm";
 
     if (fmt === "mp4") {
-      // Output standardized MP4 video container
-      const arrayBuf = await file.arrayBuffer();
-      const blob = new Blob([arrayBuf], { type: "video/mp4" });
-      return { blob, filename: `${baseName}.mp4` };
+      if (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported("video/mp4;codecs=avc1,mp4a.40.2")) {
+        targetMime = "video/mp4;codecs=avc1,mp4a.40.2";
+        outputExt = "mp4";
+      } else if (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported("video/mp4")) {
+        targetMime = "video/mp4";
+        outputExt = "mp4";
+      } else {
+        targetMime = (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")) ? "video/webm;codecs=vp9,opus" : "video/webm";
+        outputExt = "webm";
+        if (window.UI && typeof window.UI.showToast === "function") {
+          window.UI.showToast("Ghi chú định dạng", "Trình duyệt chưa hỗ trợ encoder MP4 trực tiếp, hệ thống tự động chuyển sang WebM (VP9) chuẩn web sắc nét!", "info");
+        }
+      }
+    } else {
+      targetMime = (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")) ? "video/webm;codecs=vp9,opus" : "video/webm";
+      outputExt = "webm";
     }
 
-    throw new Error("Không thể xử lý định dạng video này");
+    // Route audio silently via Web Audio API so it doesn't blast speakers during transcoding
+    let combinedStream = stream;
+    let audioCtx = null;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        audioCtx = new AudioCtx();
+        const source = audioCtx.createMediaElementSource(video);
+        const dest = audioCtx.createMediaStreamDestination();
+        source.connect(dest);
+        const audioTracks = dest.stream.getAudioTracks();
+        if (audioTracks.length > 0) {
+          combinedStream = new MediaStream([
+            ...stream.getVideoTracks(),
+            ...audioTracks
+          ]);
+        }
+      }
+    } catch (e) {
+      console.warn("Audio stream routing fallback:", e);
+    }
+
+    // Read bitrate option
+    const bitrateSelect = document.getElementById("converter-video-bitrate");
+    let videoBps = 2500000;
+    if (bitrateSelect) {
+      if (bitrateSelect.value === "high") videoBps = 4500000;
+      else if (bitrateSelect.value === "low") videoBps = 1000000;
+    }
+
+    const chunks = [];
+    const recorder = new MediaRecorder(combinedStream, {
+      mimeType: targetMime,
+      videoBitsPerSecond: videoBps
+    });
+
+    recorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) chunks.push(e.data);
+    };
+
+    const updateProgress = (pct, text) => {
+      const progPercent = document.getElementById("converter-progress-percent");
+      const progStatus = document.getElementById("converter-progress-status");
+      const progFill = document.getElementById("converter-progress-fill");
+      if (progPercent) progPercent.textContent = pct + "%";
+      if (progStatus) progStatus.textContent = text;
+      if (progFill) progFill.style.width = pct + "%";
+    };
+
+    return new Promise((resolve, reject) => {
+      let isDone = false;
+      const cleanup = () => {
+        if (audioCtx) {
+          try { audioCtx.close(); } catch(e) {}
+        }
+        URL.revokeObjectURL(videoUrl);
+      };
+
+      recorder.onstop = () => {
+        if (isDone) return;
+        isDone = true;
+        cleanup();
+        const outBlob = new Blob(chunks, { type: targetMime });
+        resolve({ blob: outBlob, filename: `${baseName}_converted.${outputExt}` });
+      };
+
+      recorder.onerror = (err) => {
+        cleanup();
+        reject(err);
+      };
+
+      try {
+        video.playbackRate = 2.0; // 2x playback speed for faster transcoding
+      } catch(e) {}
+
+      video.ontimeupdate = () => {
+        if (video.duration && video.duration > 0) {
+          const currentPct = Math.min(95, Math.round((video.currentTime / video.duration) * 60) + 35);
+          updateProgress(currentPct, `Đang transcode frame video (${Math.round(video.currentTime)}s / ${Math.round(video.duration)}s)...`);
+        }
+      };
+
+      video.onended = () => {
+        if (recorder.state === "recording") {
+          recorder.stop();
+        }
+      };
+
+      recorder.start(250);
+      video.play().catch(err => {
+        cleanup();
+        reject(new Error("Trình duyệt chặn phát video tự động: " + err.message));
+      });
+    });
   },
 
   async convertDocument(file, fmt, baseName) {
@@ -574,8 +702,8 @@ window.ToolsModule = {
     }
 
     if (fmt === "pdf_doc") {
-      // Generate clean text PDF document
-      const pdfBlob = this.createTextPdf(rawText, baseName);
+      // Generate genuine text PDF document
+      const pdfBlob = await this.createTextPdf(rawText, baseName);
       return { blob: pdfBlob, filename: `${baseName}.pdf` };
     }
 
@@ -818,17 +946,180 @@ window.ToolsModule = {
 </html>`;
   },
 
-  // Simple PDF from Image
-  createSimplePdfFromImage(dataUrl, width, height, title) {
-    // Generate valid standard PDF 1.4 wrapping an HTML document or raw PostScript/PDF binary
-    const html = `<!DOCTYPE html><html><head><title>${title}</title><style>@page{margin:0;size:${width}px ${height}px;}body{margin:0;display:flex;justify-content:center;align-items:center;background:#fff;}img{width:100%;height:auto;}</style></head><body><img src="${dataUrl}"/></body></html>`;
-    return new Blob([html], { type: "application/pdf" });
+  // Genuine Binary PDF 1.4 from Image (ISO 32000-1 standard)
+  async createRealPdfFromImage(dataUrl, width, height) {
+    const base64Data = dataUrl.split(",")[1];
+    const binaryStr = atob(base64Data);
+    const jpegBytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      jpegBytes[i] = binaryStr.charCodeAt(i);
+    }
+
+    const maxWidth = 595.28;
+    const maxHeight = 841.89;
+    let pdfW = width;
+    let pdfH = height;
+    if (pdfW > maxWidth || pdfH > maxHeight) {
+      const ratio = Math.min(maxWidth / pdfW, maxHeight / pdfH);
+      pdfW = Math.round(pdfW * ratio);
+      pdfH = Math.round(pdfH * ratio);
+    }
+
+    const headerStr = "%PDF-1.4\n";
+    const obj1 = "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
+    const obj2 = "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n";
+    const obj3 = `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pdfW} ${pdfH}] /Contents 4 0 R /Resources << /XObject << /Im1 5 0 R >> >> >>\nendobj\n`;
+    
+    const contentStream = `q\n${pdfW} 0 0 ${pdfH} 0 0 cm\n/Im1 Do\nQ\n`;
+    const obj4 = `4 0 obj\n<< /Length ${contentStream.length} >>\nstream\n${contentStream}endstream\nendobj\n`;
+    
+    const obj5Head = `5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`;
+    const obj5Tail = "\nendstream\nendobj\n";
+
+    const enc = new TextEncoder();
+    const hBytes = enc.encode(headerStr);
+    const o1Bytes = enc.encode(obj1);
+    const o2Bytes = enc.encode(obj2);
+    const o3Bytes = enc.encode(obj3);
+    const o4Bytes = enc.encode(obj4);
+    const o5HeadBytes = enc.encode(obj5Head);
+    const o5TailBytes = enc.encode(obj5Tail);
+
+    const offsets = [0];
+    let cur = hBytes.length;
+    offsets.push(cur); cur += o1Bytes.length;
+    offsets.push(cur); cur += o2Bytes.length;
+    offsets.push(cur); cur += o3Bytes.length;
+    offsets.push(cur); cur += o4Bytes.length;
+    offsets.push(cur); cur += o5HeadBytes.length + jpegBytes.length + o5TailBytes.length;
+
+    let xrefStr = `xref\n0 6\n0000000000 65535 f \n`;
+    for (let i = 1; i <= 5; i++) {
+      xrefStr += String(offsets[i]).padStart(10, '0') + " 00000 n \n";
+    }
+    const trailerStr = `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${cur}\n%%EOF\n`;
+    const xrefBytes = enc.encode(xrefStr);
+    const trailerBytes = enc.encode(trailerStr);
+
+    const totalLen = cur + xrefBytes.length + trailerBytes.length;
+    const outBuf = new Uint8Array(totalLen);
+    let ptr = 0;
+
+    outBuf.set(hBytes, ptr); ptr += hBytes.length;
+    outBuf.set(o1Bytes, ptr); ptr += o1Bytes.length;
+    outBuf.set(o2Bytes, ptr); ptr += o2Bytes.length;
+    outBuf.set(o3Bytes, ptr); ptr += o3Bytes.length;
+    outBuf.set(o4Bytes, ptr); ptr += o4Bytes.length;
+    outBuf.set(o5HeadBytes, ptr); ptr += o5HeadBytes.length;
+    outBuf.set(jpegBytes, ptr); ptr += jpegBytes.length;
+    outBuf.set(o5TailBytes, ptr); ptr += o5TailBytes.length;
+    outBuf.set(xrefBytes, ptr); ptr += xrefBytes.length;
+    outBuf.set(trailerBytes, ptr);
+
+    return new Blob([outBuf], { type: "application/pdf" });
   },
 
-  // Simple Text PDF
-  createTextPdf(text, title) {
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title><style>body{font-family:sans-serif;line-height:1.6;padding:30px;white-space:pre-wrap;}</style></head><body><h2>${title}</h2><hr/><p>${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p></body></html>`;
-    return new Blob([html], { type: "application/pdf" });
+  // High-DPI Canvas Text to Real PDF 1.4 with full Unicode / Vietnamese support
+  async createTextPdf(text, title) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1240; // 150 DPI A4
+    canvas.height = 1754;
+    const ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Accent bar
+    ctx.fillStyle = "#6366f1";
+    ctx.fillRect(0, 0, canvas.width, 14);
+
+    // Header Title
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 34px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText(title || "Tài Liệu MHEnt Universe", 80, 100);
+
+    // Subtitle
+    ctx.fillStyle = "#64748b";
+    ctx.font = "17px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    const dateStr = new Date().toLocaleDateString("vi-VN") + " • MIYAZAKI HARUTO ENTERTAINMENT CO., LTD.";
+    ctx.fillText(dateStr, 80, 135);
+
+    // Divider line
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(80, 160);
+    ctx.lineTo(canvas.width - 80, 160);
+    ctx.stroke();
+
+    // Body text with word wrap
+    ctx.fillStyle = "#1e293b";
+    ctx.font = "20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    const lineHeight = 34;
+    const maxTextWidth = canvas.width - 160;
+    let y = 210;
+
+    const rawLines = text.split("\n");
+    for (const rawLine of rawLines) {
+      if (y > canvas.height - 100) break;
+      if (rawLine.trim() === "") {
+        y += lineHeight * 0.7;
+        continue;
+      }
+      const words = rawLine.split(" ");
+      let currentLine = "";
+      for (const word of words) {
+        const testLine = currentLine ? currentLine + " " + word : word;
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxTextWidth && currentLine) {
+          ctx.fillText(currentLine, 80, y);
+          y += lineHeight;
+          currentLine = word;
+          if (y > canvas.height - 100) break;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine && y <= canvas.height - 100) {
+        ctx.fillText(currentLine, 80, y);
+        y += lineHeight;
+      }
+    }
+
+    // Footer
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillText("MHEnt Universe Client-Side Document Export Engine • Chuẩn PDF 1.4", 80, canvas.height - 50);
+
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+    return this.createRealPdfFromImage(dataUrl, canvas.width, canvas.height);
+  },
+
+  // Genuine Windows .ICO Binary Generator (6-byte header + 16-byte dir + PNG payload)
+  createIcoFromPng(pngBytes, width = 64, height = 64) {
+    const totalHeaderSize = 6 + 16;
+    const buffer = new ArrayBuffer(totalHeaderSize + pngBytes.length);
+    const view = new DataView(buffer);
+
+    // ICONDIR
+    view.setUint16(0, 0, true);
+    view.setUint16(2, 1, true); // 1 = ICO
+    view.setUint16(4, 1, true); // 1 Image
+
+    // ICONDIRENTRY
+    view.setUint8(6, width >= 256 ? 0 : width);
+    view.setUint8(7, height >= 256 ? 0 : height);
+    view.setUint8(8, 0); // Palette
+    view.setUint8(9, 0); // Reserved
+    view.setUint16(10, 1, true); // Color planes
+    view.setUint16(12, 32, true); // Bits per pixel
+    view.setUint32(14, pngBytes.length, true); // Size
+    view.setUint32(18, totalHeaderSize, true); // Offset
+
+    const byteView = new Uint8Array(buffer);
+    byteView.set(pngBytes, totalHeaderSize);
+
+    return new Blob([buffer], { type: "image/x-icon" });
   },
 
   // Canvas to BMP Blob
