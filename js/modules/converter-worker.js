@@ -12,6 +12,7 @@ import {
   Conversion,
   BlobSource,
   BufferTarget,
+  ALL_FORMATS,
   MP4,
   WEBM,
   MATROSKA,
@@ -301,7 +302,10 @@ async function processAudio(file, targetFormat, options, baseName, reportProgres
   reportProgress(20, "Đang phân tích luồng âm thanh...", 0, file.size);
   // Pass to Mediabunny or raw WAV extraction
   try {
-    const input = new Input({ source: new BlobSource(file) });
+    const input = new Input({
+      formats: ALL_FORMATS,
+      source: new BlobSource(file)
+    });
     const target = new BufferTarget();
     const output = new Output({
       target,
@@ -338,7 +342,10 @@ async function processAudio(file, targetFormat, options, baseName, reportProgres
 async function processVideoWithMediabunny(file, targetFormat, options, baseName, reportProgress) {
   reportProgress(5, "Đang nạp bộ giải nén container đa định dạng Mediabunny...", 0, file.size);
 
-  const input = new Input({ source: new BlobSource(file) });
+  const input = new Input({
+    formats: ALL_FORMATS,
+    source: new BlobSource(file)
+  });
   const target = new BufferTarget();
 
   let outFormat = MP4;
