@@ -830,6 +830,8 @@ window.ToolsModule = {
       }, 8000);
     });
 
+    const sourceDuration = video.duration || 0;
+
     const stream = video.captureStream ? video.captureStream() : (video.mozCaptureStream ? video.mozCaptureStream() : null);
     if (!stream) {
       throw new Error("Trình duyệt không hỗ trợ MediaStream capture từ video.");
@@ -932,7 +934,7 @@ window.ToolsModule = {
         URL.revokeObjectURL(videoUrl);
       };
 
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
         if (isDone) return;
         isDone = true;
         cleanup();
@@ -940,7 +942,21 @@ window.ToolsModule = {
           reject(new Error("Tiến trình chuyển đổi đã bị người dùng hủy."));
           return;
         }
-        const outBlob = new Blob(chunks, { type: targetMime });
+
+        let outBlob = new Blob(chunks, { type: targetMime });
+        const finalDurationSec = sourceDuration || (video.duration || 0);
+
+        // Fix Duration & Seekability metadata so player can scrub forward and backward!
+        try {
+          if (outputExt === "webm" || targetMime.includes("webm")) {
+            outBlob = await this.fixWebmDurationBlob(outBlob, finalDurationSec * 1000);
+          } else if (outputExt === "mp4" || targetMime.includes("mp4")) {
+            outBlob = await this.fixMp4DurationBlob(outBlob, finalDurationSec);
+          }
+        } catch (patchErr) {
+          console.warn("[Media Duration Patcher] Error:", patchErr);
+        }
+
         resolve({ blob: outBlob, filename: `${baseName}_converted.${outputExt}` });
       };
 
@@ -950,7 +966,7 @@ window.ToolsModule = {
       };
 
       try {
-        video.playbackRate = 2.0; // 2x playback speed for faster transcoding
+        video.playbackRate = 1.0; // 1.0x normal speed - preserves 100% original tempo and pitch
       } catch(e) {}
 
       video.ontimeupdate = () => {
@@ -973,7 +989,7 @@ window.ToolsModule = {
         }
       };
 
-      recorder.start(250);
+      recorder.start(); // Continuous capture without timeslice fragmentation
       video.play().catch(err => {
         cleanup();
         reject(new Error("Trình duyệt chặn phát video tự động: " + err.message));
@@ -1037,6 +1053,103 @@ window.ToolsModule = {
     // Default: text blob
     const blob = new Blob([rawText], { type: "text/plain;charset=utf-8" });
     return { blob, filename: `${baseName}.txt` };
+  },
+
+  // ==========================================
+  // MEDIA CONTAINER DURATION & SEEKABILITY FIXERS
+  // ==========================================
+
+  async fixWebmDurationBlob(blob, durationMs) {
+    if (!durationMs || isNaN(durationMs) || durationMs <= 0) return blob;
+    if (typeof window.ysFixWebmDuration === "function") {
+      try {
+        const fixedBlob = await window.ysFixWebmDuration(blob, durationMs, { logger: false });
+        return fixedBlob || blob;
+      } catch (e) {
+        console.warn("[WebM Duration] Could not patch WebM:", e);
+        return blob;
+      }
+    }
+    return blob;
+  },
+
+  async fixMp4DurationBlob(blob, durationSec) {
+    if (!durationSec || isNaN(durationSec) || durationSec <= 0) return blob;
+    try {
+      const buffer = await blob.arrayBuffer();
+      this.patchMp4Duration(buffer, durationSec);
+      return new Blob([buffer], { type: blob.type || "video/mp4" });
+    } catch (e) {
+      console.warn("[MP4 Duration] Could not patch MP4:", e);
+      return blob;
+    }
+  },
+
+  patchMp4Duration(buffer, durationSec) {
+    const view = new DataView(buffer);
+    const bytes = new Uint8Array(buffer);
+    let movieTimescale = 1000;
+
+    const readBox = (offset, end) => {
+      while (offset < end && offset + 8 <= buffer.byteLength) {
+        const size = view.getUint32(offset);
+        if (size < 8) break;
+        const type = String.fromCharCode(
+          bytes[offset + 4],
+          bytes[offset + 5],
+          bytes[offset + 6],
+          bytes[offset + 7]
+        );
+        const boxEnd = Math.min(offset + size, end);
+
+        if (type === "moov" || type === "trak" || type === "mdia" || type === "mvex") {
+          readBox(offset + 8, boxEnd);
+        } else if (type === "mvhd") {
+          const ver = view.getUint8(offset + 8);
+          if (ver === 0) {
+            movieTimescale = view.getUint32(offset + 20) || 1000;
+            const dur = Math.round(durationSec * movieTimescale);
+            view.setUint32(offset + 24, dur);
+          } else if (ver === 1) {
+            movieTimescale = view.getUint32(offset + 28) || 1000;
+            const dur = BigInt(Math.round(durationSec * movieTimescale));
+            view.setBigUint64(offset + 32, dur);
+          }
+        } else if (type === "tkhd") {
+          const ver = view.getUint8(offset + 8);
+          const dur = Math.round(durationSec * movieTimescale);
+          if (ver === 0) {
+            view.setUint32(offset + 28, dur);
+          } else if (ver === 1) {
+            view.setBigUint64(offset + 36, BigInt(dur));
+          }
+        } else if (type === "mdhd") {
+          const ver = view.getUint8(offset + 8);
+          if (ver === 0) {
+            const mediaTimescale = view.getUint32(offset + 20) || movieTimescale;
+            const dur = Math.round(durationSec * mediaTimescale);
+            view.setUint32(offset + 24, dur);
+          } else if (ver === 1) {
+            const mediaTimescale = view.getUint32(offset + 28) || movieTimescale;
+            const dur = BigInt(Math.round(durationSec * mediaTimescale));
+            view.setBigUint64(offset + 32, dur);
+          }
+        } else if (type === "mehd") {
+          const ver = view.getUint8(offset + 8);
+          const dur = Math.round(durationSec * movieTimescale);
+          if (ver === 0) {
+            view.setUint32(offset + 12, dur);
+          } else if (ver === 1) {
+            view.setBigUint64(offset + 12, BigInt(dur));
+          }
+        }
+
+        offset += size;
+      }
+    };
+
+    readBox(0, buffer.byteLength);
+    return buffer;
   },
 
   // ==========================================
