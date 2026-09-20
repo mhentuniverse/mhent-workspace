@@ -242,9 +242,9 @@ window.ToolsModule = {
     const dockDur = document.getElementById("dock-meta-duration");
     const dockSize = document.getElementById("dock-meta-size");
     const timeDisplay = document.getElementById("cinema-player-time");
-    const progressContainer = document.getElementById("converter-progress-container");
-    const progressFill = document.getElementById("converter-progress-fill");
-    const bufferFill = document.getElementById("converter-buffer-fill");
+    const progressContainer = document.getElementById("cinema-progress-container");
+    const progressFill = document.getElementById("cinema-progress-fill");
+    const bufferFill = document.getElementById("cinema-buffer-fill");
     const playBtn = document.getElementById("btn-cinema-play");
     const playIconPath = document.getElementById("icon-cinema-play-path");
     const rewindBtn = document.getElementById("btn-cinema-rewind");
@@ -573,20 +573,44 @@ window.ToolsModule = {
     const progStatus = document.getElementById("converter-progress-status");
     const progPercent = document.getElementById("converter-progress-percent");
     const progFill = document.getElementById("converter-progress-fill");
+    const progTimer = document.getElementById("converter-progress-timer");
     const resBox = document.getElementById("converter-result-box");
 
     if (resBox) resBox.style.display = "none";
     if (progBox) progBox.style.display = "block";
+    if (progFill) progFill.style.width = "0%";
+
+    this.conversionStartTime = Date.now();
+    this.conversionCancelled = false;
+
+    // Prevent accidental page reloads / navigation during active conversion
+    window.onbeforeunload = (e) => {
+      e.preventDefault();
+      e.returnValue = "Quá trình chuyển đổi tệp đang diễn ra. Bạn có chắc chắn muốn rời khỏi?";
+    };
 
     const updateProgress = (pct, status) => {
+      if (this.conversionCancelled) return;
       if (progPercent) progPercent.textContent = pct + "%";
       if (progStatus) progStatus.textContent = status;
       if (progFill) progFill.style.width = pct + "%";
+
+      if (progTimer && this.conversionStartTime) {
+        const elapsedSec = Math.floor((Date.now() - this.conversionStartTime) / 1000);
+        let tStr = `⏱️ Đã chạy: ${this.formatDuration(elapsedSec)}`;
+        if (pct > 5 && pct < 100) {
+          const estTotal = Math.round((elapsedSec / pct) * 100);
+          const remainSec = Math.max(0, estTotal - elapsedSec);
+          tStr += ` • Ước tính còn: ~${this.formatDuration(remainSec)}`;
+        }
+        progTimer.textContent = tStr;
+      }
     };
 
     try {
-      updateProgress(15, "Đang nạp và phân tích cấu trúc dữ liệu...");
+      updateProgress(10, "Đang nạp và phân tích cấu trúc dữ liệu...");
       await this.sleep(250);
+      if (this.conversionCancelled) return;
 
       const file = this.currentFile;
       const fmt = this.targetFormat;
@@ -594,12 +618,13 @@ window.ToolsModule = {
       let outputBlob = null;
       let outputFilename = "";
 
-      updateProgress(35, `Đang xử lý thuật toán chuyển đổi sang ${fmt.toUpperCase()}...`);
-      await this.sleep(300);
+      updateProgress(30, `Đang khởi tạo bộ mã hóa cho định dạng ${fmt.toUpperCase()}...`);
+      await this.sleep(250);
+      if (this.conversionCancelled) return;
 
       // 1. IMAGE CONVERSIONS
       if (["png", "jpg", "webp", "bmp", "ico", "pdf", "base64"].includes(fmt)) {
-        updateProgress(60, "Đang giải mã điểm ảnh và mã hóa định dạng đích...");
+        updateProgress(55, "Đang giải mã điểm ảnh và nén định dạng đích...");
         const qualityInput = document.getElementById("converter-img-quality");
         const quality = qualityInput ? parseInt(qualityInput.value, 10) / 100 : 0.9;
         const res = await this.convertImage(file, fmt, quality, baseName);
@@ -608,7 +633,7 @@ window.ToolsModule = {
       }
       // 2. AUDIO & VIDEO AUDIO EXTRACTION
       else if (["wav", "wav_audio", "webm_audio", "ogg"].includes(fmt)) {
-        updateProgress(65, "Đang giải mã luồng sóng âm (Web Audio PCM)...");
+        updateProgress(60, "Đang giải mã luồng sóng âm (Web Audio PCM Lossless)...");
         const sampleRateSelect = document.getElementById("converter-audio-rate");
         const sampleRate = sampleRateSelect ? parseInt(sampleRateSelect.value, 10) : 44100;
         const res = await this.convertAudio(file, fmt, sampleRate, baseName);
@@ -617,20 +642,26 @@ window.ToolsModule = {
       }
       // 3. VIDEO TRANSCODING / REMUX
       else if (["mp4", "webm", "gif"].includes(fmt)) {
-        updateProgress(65, "Đang xử lý container video và chuẩn hóa frame...");
+        updateProgress(35, "Đang chuẩn bị luồng MediaStream & mã hóa từng frame...");
         const res = await this.convertVideo(file, fmt, baseName);
         outputBlob = res.blob;
         outputFilename = res.filename;
       }
       // 4. DOCUMENT & STRUCTURED DATA
       else {
-        updateProgress(70, "Đang phân tích cú pháp và trích xuất bảng dữ liệu...");
+        updateProgress(65, "Đang phân tích cú pháp và trích xuất bảng dữ liệu...");
         const res = await this.convertDocument(file, fmt, baseName);
         outputBlob = res.blob;
         outputFilename = res.filename;
       }
 
+      if (this.conversionCancelled) return;
+
       updateProgress(100, "Hoàn tất chuyển đổi thành công!");
+      if (progTimer && this.conversionStartTime) {
+        const totalSec = Math.floor((Date.now() - this.conversionStartTime) / 1000);
+        progTimer.textContent = `⏱️ Tổng thời gian hoàn thành: ${this.formatDuration(totalSec)}`;
+      }
       await this.sleep(200);
 
       this.convertedBlob = outputBlob;
@@ -649,9 +680,14 @@ window.ToolsModule = {
 
       window.UI.showToast("Chuyển đổi thành công! ⚡", `Đã tạo ${outputFilename}`, "success");
     } catch (err) {
+      if (this.conversionCancelled) return;
       console.error("[Universal Converter] Lỗi:", err);
       updateProgress(100, "Lỗi trong quá trình chuyển đổi: " + (err.message || "Không thể xử lý"));
       window.UI.showToast("Lỗi chuyển đổi", err.message || "Không thể chuyển đổi tệp này", "error");
+    } finally {
+      window.onbeforeunload = null;
+      this.currentRecorder = null;
+      this.currentTranscodeVideo = null;
     }
   },
 
@@ -857,18 +893,34 @@ window.ToolsModule = {
       mimeType: targetMime,
       videoBitsPerSecond: videoBps
     });
+    this.currentRecorder = recorder;
+    this.currentTranscodeVideo = video;
 
     recorder.ondataavailable = (e) => {
       if (e.data && e.data.size > 0) chunks.push(e.data);
     };
 
     const updateProgress = (pct, text) => {
+      if (this.conversionCancelled) return;
       const progPercent = document.getElementById("converter-progress-percent");
       const progStatus = document.getElementById("converter-progress-status");
       const progFill = document.getElementById("converter-progress-fill");
+      const progTimer = document.getElementById("converter-progress-timer");
+
       if (progPercent) progPercent.textContent = pct + "%";
       if (progStatus) progStatus.textContent = text;
       if (progFill) progFill.style.width = pct + "%";
+
+      if (progTimer && this.conversionStartTime) {
+        const elapsedSec = Math.floor((Date.now() - this.conversionStartTime) / 1000);
+        let tStr = `⏱️ Đã chạy: ${this.formatDuration(elapsedSec)}`;
+        if (pct > 5 && pct < 100) {
+          const estTotal = Math.round((elapsedSec / pct) * 100);
+          const remainSec = Math.max(0, estTotal - elapsedSec);
+          tStr += ` • Ước tính còn: ~${this.formatDuration(remainSec)}`;
+        }
+        progTimer.textContent = tStr;
+      }
     };
 
     return new Promise((resolve, reject) => {
@@ -884,6 +936,10 @@ window.ToolsModule = {
         if (isDone) return;
         isDone = true;
         cleanup();
+        if (this.conversionCancelled) {
+          reject(new Error("Tiến trình chuyển đổi đã bị người dùng hủy."));
+          return;
+        }
         const outBlob = new Blob(chunks, { type: targetMime });
         resolve({ blob: outBlob, filename: `${baseName}_converted.${outputExt}` });
       };
@@ -898,9 +954,16 @@ window.ToolsModule = {
       } catch(e) {}
 
       video.ontimeupdate = () => {
+        if (this.conversionCancelled) {
+          try { video.pause(); } catch(e) {}
+          return;
+        }
         if (video.duration && video.duration > 0) {
-          const currentPct = Math.min(95, Math.round((video.currentTime / video.duration) * 60) + 35);
-          updateProgress(currentPct, `Đang transcode frame video (${Math.round(video.currentTime)}s / ${Math.round(video.duration)}s)...`);
+          const transcodeRatio = video.currentTime / video.duration;
+          const currentPct = Math.min(95, Math.round(transcodeRatio * 60) + 35);
+          const currSec = Math.round(video.currentTime);
+          const totSec = Math.round(video.duration);
+          updateProgress(currentPct, `Đang mã hóa frame video (${this.formatDuration(currSec)} / ${this.formatDuration(totSec)})...`);
         }
       };
 
@@ -1025,7 +1088,29 @@ window.ToolsModule = {
     window.UI.showToast("Đã lưu vào Media Drive! ☁️", `Tệp [${this.convertedFilename}] đã sẵn sàng trong kho Drive`, "success");
   },
 
+  cancelConversion() {
+    this.conversionCancelled = true;
+    window.onbeforeunload = null;
+
+    if (this.currentRecorder && this.currentRecorder.state === "recording") {
+      try { this.currentRecorder.stop(); } catch(e) {}
+    }
+    if (this.currentTranscodeVideo) {
+      try { this.currentTranscodeVideo.pause(); } catch(e) {}
+      this.currentTranscodeVideo.src = "";
+    }
+
+    const progBox = document.getElementById("converter-progress-box");
+    if (progBox) progBox.style.display = "none";
+
+    const progFill = document.getElementById("converter-progress-fill");
+    if (progFill) progFill.style.width = "0%";
+
+    window.UI.showToast("Đã dừng", "Đã hủy quá trình chuyển đổi tệp.", "info");
+  },
+
   resetConverter() {
+    this.cancelConversion();
     this.currentFile = null;
     this.targetFormat = null;
     this.convertedBlob = null;

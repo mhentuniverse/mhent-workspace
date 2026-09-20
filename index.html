@@ -563,9 +563,9 @@
                       <!-- Custom Cinema Floating Controls Bar -->
                       <div class="mhent-controls" id="converter-cinema-controls">
                         <!-- Progress Track -->
-                        <div class="mhent-progress-container" id="converter-progress-container" title="Kéo để tua nhanh">
-                          <div class="mhent-buffer-bar" id="converter-buffer-fill"></div>
-                          <div class="mhent-progress-bar" id="converter-progress-fill"></div>
+                        <div class="mhent-progress-container" id="cinema-progress-container" title="Kéo để tua nhanh">
+                          <div class="mhent-buffer-bar" id="cinema-buffer-fill"></div>
+                          <div class="mhent-progress-bar" id="cinema-progress-fill"></div>
                         </div>
 
                         <!-- Controls Row -->
@@ -707,8 +707,14 @@
                   <!-- Progress Indicator -->
                   <div id="converter-progress-box" class="converter-progress-box" style="display: none;">
                     <div class="progress-info-row">
-                      <span id="converter-progress-status" class="progress-status-text">Đang phân tích cấu trúc tệp...</span>
-                      <span id="converter-progress-percent" class="progress-percent-text">0%</span>
+                      <div class="progress-info-left">
+                        <span id="converter-progress-status" class="progress-status-text">Đang nạp và phân tích cấu trúc dữ liệu...</span>
+                        <span id="converter-progress-timer" class="progress-timer-text">⏱️ Đang ước tính thời gian...</span>
+                      </div>
+                      <div class="progress-info-right">
+                        <span id="converter-progress-percent" class="progress-percent-text">0%</span>
+                        <button type="button" class="btn-cancel-convert" id="btn-cancel-convert" onclick="window.ToolsModule.cancelConversion()" title="Hủy quá trình chuyển đổi">✕ Hủy</button>
+                      </div>
                     </div>
                     <div class="converter-progress-bar-bg">
                       <div class="converter-progress-bar-fill" id="converter-progress-fill"></div>

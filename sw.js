@@ -1,5 +1,5 @@
-// MHENT WORKSPACE - SERVICE WORKER (AUTO-PURGE CACHE & NETWORK-FIRST)
-const CACHE_NAME = 'mhent-workspace-v3.3-cinema-player';
+// MHENT WORKSPACE - SERVICE WORKER (AUTO-PURGE CACHE & NETWORK-FIRST, NO FORCE-RELOAD)
+const CACHE_NAME = 'mhent-workspace-v3.4-converter-stable';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -11,14 +11,6 @@ self.addEventListener('activate', (event) => {
       return Promise.all(keys.map((key) => caches.delete(key)));
     }).then(() => {
       return self.clients.claim();
-    }).then(() => {
-      return self.clients.matchAll({ type: 'window' }).then((clients) => {
-        clients.forEach((client) => {
-          if (client.url && 'navigate' in client) {
-            client.navigate(client.url);
-          }
-        });
-      });
     })
   );
 });
