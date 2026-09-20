@@ -13,10 +13,10 @@ import {
   BlobSource,
   BufferTarget,
   ALL_FORMATS,
-  MP4,
-  WEBM,
-  MATROSKA,
-  WAVE
+  Mp4OutputFormat,
+  WebMOutputFormat,
+  MkvOutputFormat,
+  WavOutputFormat
 } from "./mediabunny.mjs";
 
 self.activeConversion = null;
@@ -309,7 +309,7 @@ async function processAudio(file, targetFormat, options, baseName, reportProgres
     const target = new BufferTarget();
     const output = new Output({
       target,
-      format: WAVE
+      format: new WavOutputFormat()
     });
 
     const conversion = await Conversion.init({ input, output });
@@ -348,16 +348,16 @@ async function processVideoWithMediabunny(file, targetFormat, options, baseName,
   });
   const target = new BufferTarget();
 
-  let outFormat = MP4;
+  let outFormat = new Mp4OutputFormat();
   let outExt = "mp4";
   let outMime = "video/mp4";
 
   if (targetFormat === "webm") {
-    outFormat = WEBM;
+    outFormat = new WebMOutputFormat();
     outExt = "webm";
     outMime = "video/webm";
   } else if (targetFormat === "mkv") {
-    outFormat = MATROSKA;
+    outFormat = new MkvOutputFormat();
     outExt = "mkv";
     outMime = "video/x-matroska";
   }
