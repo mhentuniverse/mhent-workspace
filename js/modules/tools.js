@@ -39,10 +39,17 @@ window.ToolsModule = {
   setTab(tabName) {
     this.activeTab = tabName;
 
-    // 1. Update top tabs
-    document.querySelectorAll(".tool-tab-btn").forEach(btn => {
-      btn.classList.toggle("active", btn.getAttribute("data-tab") === tabName);
-    });
+    // 1. Update stage header badge
+    const titleMap = {
+      converter: "⚡ Chuyển Đổi Tệp Đa Năng",
+      qr: "📱 QR Check-in & Scanner",
+      wiki: "📖 Wiki & Quy Chuẩn MHEnt",
+      notes: "📝 Ghi Chú & Sổ Tay Nội Bộ"
+    };
+    const titleEl = document.getElementById("tools-current-pane-title");
+    if (titleEl && titleMap[tabName]) {
+      titleEl.textContent = titleMap[tabName];
+    }
 
     // 2. Update panes
     document.querySelectorAll(".tool-pane").forEach(pane => {
@@ -53,6 +60,10 @@ window.ToolsModule = {
     document.querySelectorAll("#tools-sidebar-nav .sidebar-nav-item").forEach(item => {
       item.classList.toggle("active", item.getAttribute("data-tool-tab") === tabName);
     });
+
+    // 4. Scroll stage view to top
+    const viewTools = document.getElementById("view-tools");
+    if (viewTools) viewTools.scrollTop = 0;
 
     // Special pane inits
     if (tabName === "notes") {
@@ -192,7 +203,8 @@ window.ToolsModule = {
       const vidEl = document.getElementById("preview-video-el");
       if (vidEl && vidBox) {
         vidEl.src = objectUrl;
-        vidBox.style.display = "block";
+        vidBox.style.display = "flex";
+        this.initCinemaVideoPlayer(vidEl, file);
       }
     } else if (categoryId === "audio") {
       const audEl = document.getElementById("preview-audio-el");
@@ -213,6 +225,252 @@ window.ToolsModule = {
       };
       reader.readAsText(file.slice(0, 50000));
     }
+  },
+
+  // ==========================================
+  // MHENT CINEMA VIDEO PLAYER STUDIO
+  // ==========================================
+  cinemaHideTimeout: null,
+  currentPlaybackSpeed: 1.0,
+
+  initCinemaVideoPlayer(vidEl, file) {
+    const wrapper = document.getElementById("converter-cinema-player");
+    const filenameEl = document.getElementById("cinema-player-filename");
+    const tagRes = document.getElementById("cinema-tag-res");
+    const tagFps = document.getElementById("cinema-tag-fps");
+    const dockRes = document.getElementById("dock-meta-res");
+    const dockDur = document.getElementById("dock-meta-duration");
+    const dockSize = document.getElementById("dock-meta-size");
+    const timeDisplay = document.getElementById("cinema-player-time");
+    const progressContainer = document.getElementById("converter-progress-container");
+    const progressFill = document.getElementById("converter-progress-fill");
+    const bufferFill = document.getElementById("converter-buffer-fill");
+    const playBtn = document.getElementById("btn-cinema-play");
+    const playIconPath = document.getElementById("icon-cinema-play-path");
+    const rewindBtn = document.getElementById("btn-cinema-rewind");
+    const forwardBtn = document.getElementById("btn-cinema-forward");
+    const volumeBtn = document.getElementById("btn-cinema-volume");
+    const volumeIconPath = document.getElementById("icon-cinema-vol-path");
+    const volumeSlider = document.getElementById("cinema-volume-slider");
+    const speedBtn = document.getElementById("btn-cinema-speed");
+    const speedText = document.getElementById("cinema-speed-text");
+    const pipBtn = document.getElementById("btn-cinema-pip");
+    const fullscreenBtn = document.getElementById("btn-cinema-fullscreen");
+    const centerAction = document.getElementById("converter-center-action");
+    const centerActionPath = document.getElementById("converter-center-action-path");
+
+    if (filenameEl) filenameEl.textContent = file.name;
+    if (dockSize) dockSize.textContent = "💾 " + this.formatFileSize(file.size);
+
+    const triggerCenterAnimation = (action) => {
+      if (!centerAction || !centerActionPath) return;
+      centerAction.classList.remove("animate");
+      void centerAction.offsetWidth;
+      if (action === "play") {
+        centerActionPath.setAttribute("d", "M8 5v14l11-7z");
+      } else {
+        centerActionPath.setAttribute("d", "M6 19h4V5H6v14zm8-14v14h4V5h-4z");
+      }
+      centerAction.classList.add("animate");
+    };
+
+    const togglePlayPause = () => {
+      if (vidEl.paused) {
+        vidEl.play().catch(() => {});
+        triggerCenterAnimation("play");
+      } else {
+        vidEl.pause();
+        triggerCenterAnimation("pause");
+      }
+    };
+
+    // Auto-hide controls after 3s of playing
+    const resetHideTimeout = () => {
+      if (!wrapper) return;
+      wrapper.classList.remove("hide-controls");
+      clearTimeout(this.cinemaHideTimeout);
+      if (!vidEl.paused) {
+        this.cinemaHideTimeout = setTimeout(() => {
+          if (!vidEl.paused) wrapper.classList.add("hide-controls");
+        }, 3000);
+      }
+    };
+
+    wrapper.onmousemove = resetHideTimeout;
+    wrapper.onmouseleave = () => {
+      if (!vidEl.paused && wrapper) wrapper.classList.add("hide-controls");
+    };
+
+    vidEl.onloadedmetadata = () => {
+      const w = vidEl.videoWidth || 1920;
+      const h = vidEl.videoHeight || 1080;
+      const resLabel = h >= 1080 ? "1080p FHD" : (h >= 720 ? "720p HD" : "SD Standard");
+      if (tagRes) tagRes.textContent = resLabel;
+      if (dockRes) dockRes.textContent = `📐 ${w}x${h} (${resLabel})`;
+      if (dockDur) dockDur.textContent = `⏱️ ${this.formatDuration(vidEl.duration)}`;
+      if (timeDisplay) timeDisplay.textContent = `00:00 / ${this.formatDuration(vidEl.duration)}`;
+    };
+
+    vidEl.onplay = () => {
+      if (playIconPath) playIconPath.setAttribute("d", "M6 19h4V5H6v14zm8-14v14h4V5h-4z");
+      resetHideTimeout();
+    };
+
+    vidEl.onpause = () => {
+      if (playIconPath) playIconPath.setAttribute("d", "M8 5v14l11-7z");
+      if (wrapper) wrapper.classList.remove("hide-controls");
+    };
+
+    vidEl.ontimeupdate = () => {
+      if (timeDisplay) {
+        timeDisplay.textContent = `${this.formatDuration(vidEl.currentTime)} / ${this.formatDuration(vidEl.duration)}`;
+      }
+      if (progressFill && vidEl.duration > 0) {
+        const pct = (vidEl.currentTime / vidEl.duration) * 100;
+        progressFill.style.width = `${pct}%`;
+      }
+    };
+
+    vidEl.onprogress = () => {
+      if (bufferFill && vidEl.duration > 0 && vidEl.buffered.length > 0) {
+        for (let i = 0; i < vidEl.buffered.length; i++) {
+          if (vidEl.currentTime >= vidEl.buffered.start(i) && vidEl.currentTime <= vidEl.buffered.end(i)) {
+            const bufPct = (vidEl.buffered.end(i) / vidEl.duration) * 100;
+            bufferFill.style.width = `${bufPct}%`;
+            break;
+          }
+        }
+      }
+    };
+
+    if (playBtn) playBtn.onclick = togglePlayPause;
+    vidEl.onclick = togglePlayPause;
+
+    if (rewindBtn) rewindBtn.onclick = () => { vidEl.currentTime = Math.max(0, vidEl.currentTime - 10); };
+    if (forwardBtn) forwardBtn.onclick = () => { vidEl.currentTime = Math.min(vidEl.duration || 0, vidEl.currentTime + 10); };
+
+    if (progressContainer) {
+      progressContainer.onclick = (e) => {
+        const rect = progressContainer.getBoundingClientRect();
+        const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        if (vidEl.duration) vidEl.currentTime = pos * vidEl.duration;
+      };
+    }
+
+    if (volumeSlider) {
+      volumeSlider.oninput = (e) => {
+        const vol = parseFloat(e.target.value);
+        vidEl.volume = vol;
+        vidEl.muted = vol === 0;
+        this.updateVolumeIcon(vol, volumeIconPath);
+      };
+    }
+
+    if (volumeBtn) {
+      volumeBtn.onclick = () => {
+        vidEl.muted = !vidEl.muted;
+        if (volumeSlider) volumeSlider.value = vidEl.muted ? 0 : (vidEl.volume || 1);
+        this.updateVolumeIcon(vidEl.muted ? 0 : vidEl.volume, volumeIconPath);
+      };
+    }
+
+    // Playback Speed Toggle
+    this.currentPlaybackSpeed = 1.0;
+    const speeds = [1.0, 1.25, 1.5, 2.0, 0.75];
+    if (speedBtn) {
+      speedBtn.onclick = () => {
+        const currIdx = speeds.indexOf(this.currentPlaybackSpeed);
+        const nextIdx = (currIdx + 1) % speeds.length;
+        this.currentPlaybackSpeed = speeds[nextIdx];
+        vidEl.playbackRate = this.currentPlaybackSpeed;
+        if (speedText) speedText.textContent = `${this.currentPlaybackSpeed}x`;
+        window.UI.showToast("Tốc độ phát", `Đã chuyển sang ${this.currentPlaybackSpeed}x`, "info");
+      };
+    }
+
+    if (pipBtn) {
+      pipBtn.onclick = async () => {
+        try {
+          if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+          } else if (vidEl.requestPictureInPicture) {
+            await vidEl.requestPictureInPicture();
+          }
+        } catch (e) {
+          console.warn("PiP not supported or rejected:", e);
+        }
+      };
+    }
+
+    if (fullscreenBtn) {
+      fullscreenBtn.onclick = () => {
+        if (!document.fullscreenElement) {
+          wrapper.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      };
+    }
+  },
+
+  updateVolumeIcon(vol, iconPath) {
+    if (!iconPath) return;
+    if (vol === 0) {
+      iconPath.setAttribute("d", "M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z");
+    } else if (vol < 0.5) {
+      iconPath.setAttribute("d", "M5 9v6h4l5 5V4L9 9H5zm11.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z");
+    } else {
+      iconPath.setAttribute("d", "M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z");
+    }
+  },
+
+  formatDuration(seconds) {
+    if (!seconds || isNaN(seconds)) return "00:00";
+    const totalSecs = Math.floor(seconds);
+    const hrs = Math.floor(totalSecs / 3600);
+    const mins = Math.floor((totalSecs % 3600) / 60);
+    const secs = totalSecs % 60;
+    if (hrs > 0) {
+      return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+    return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  },
+
+  async captureCurrentFrameSnapshot() {
+    const vidEl = document.getElementById("preview-video-el");
+    if (!vidEl || !vidEl.videoWidth) {
+      window.UI.showToast("Thông báo", "Chưa có khung hình video hợp lệ!", "warning");
+      return;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = vidEl.videoWidth;
+    canvas.height = vidEl.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(vidEl, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(r => canvas.toBlob(r, "image/png"));
+    const sec = Math.round(vidEl.currentTime || 0);
+    const baseName = this.currentFile ? this.currentFile.name.replace(/\.[^/.]+$/, "") : "frame";
+    const filename = `${baseName}_frame_${sec}s.png`;
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    window.UI.showToast("Chụp Frame thành công! 📸", `Đã lưu ảnh [${filename}]`, "success");
+  },
+
+  quickExtractWav() {
+    this.selectFormat("wav_audio");
+    const chip = document.querySelector('.format-chip-btn[data-fmt="wav_audio"]');
+    if (chip) {
+      document.querySelectorAll(".format-chip-btn").forEach(b => b.classList.remove("active"));
+      chip.classList.add("active");
+    }
+    this.startConversion();
   },
 
   setupFormatChips(categoryId, currentExt) {

@@ -1,5 +1,5 @@
 // MHENT WORKSPACE - SERVICE WORKER (AUTO-PURGE CACHE & NETWORK-FIRST)
-const CACHE_NAME = 'mhent-workspace-v3.2-converter-transcode';
+const CACHE_NAME = 'mhent-workspace-v3.3-cinema-player';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

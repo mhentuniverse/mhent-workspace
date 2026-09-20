@@ -451,11 +451,21 @@
 
         <!-- 7. TOOLS APP VIEW -->
         <div class="app-stage-view tools-app-view" id="view-tools" style="display: none;">
-          <div class="tools-nav-tabs">
-            <button class="tool-tab-btn active" data-tab="converter" onclick="window.ToolsModule.setTab('converter')">⚡ Chuyển Đổi Định Dạng Đa Năng</button>
-            <button class="tool-tab-btn" data-tab="qr" onclick="window.ToolsModule.setTab('qr')">📱 QR Code & Điểm Danh</button>
-            <button class="tool-tab-btn" data-tab="wiki" onclick="window.ToolsModule.setTab('wiki')">📖 Wiki & Quy Chuẩn MHEnt</button>
-            <button class="tool-tab-btn" data-tab="notes" onclick="window.ToolsModule.setTab('notes')">📝 Ghi Chú & Wiki Nội Bộ</button>
+          <!-- Top Tool Breadcrumb & Actions (Eliminates cut-off duplicate tabs) -->
+          <div class="tools-stage-header">
+            <div class="tools-header-left">
+              <span class="tools-header-chip" id="tools-current-pane-badge">
+                <span class="pulse-dot"></span>
+                <span id="tools-current-pane-title">⚡ Chuyển Đổi Tệp Đa Năng</span>
+              </span>
+              <span class="tools-header-tagline">Phân khu xử lý media & studio cá nhân MHEnt Universe</span>
+            </div>
+            <div class="tools-header-right">
+              <button type="button" class="btn-new-tool-file" onclick="window.ToolsModule.triggerFileInput()">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Tải Lên Tệp Khác</span>
+              </button>
+            </div>
           </div>
 
           <!-- Tab 1: Universal File Converter (Central Super Tool) -->
@@ -515,15 +525,125 @@
 
                 <!-- Live Preview Section -->
                 <div class="converter-preview-wrapper" id="converter-preview-area">
+                  <!-- Image Preview -->
                   <div id="preview-image-box" style="display: none; text-align: center;">
                     <img id="preview-image-el" src="" alt="Xem trước ảnh" class="converter-img-preview">
                   </div>
-                  <div id="preview-video-box" style="display: none; text-align: center;">
-                    <video id="preview-video-el" controls class="converter-video-preview"></video>
+
+                  <!-- Cinema Style Video Studio Preview based on mhentuniverse/cinema/watch.html -->
+                  <div id="preview-video-box" class="cinema-preview-box" style="display: none;">
+                    <div class="cinema-ambient-glow" id="cinema-ambient-glow"></div>
+
+                    <div class="mhent-player-wrapper" id="converter-cinema-player">
+                      <!-- Top Video Header Bar -->
+                      <div class="mhent-video-header" id="converter-video-header-title">
+                        <div class="header-video-title-wrap">
+                          <span class="header-cinema-icon">🎬</span>
+                          <span class="header-cinema-title" id="cinema-player-filename">video_preview.mp4</span>
+                        </div>
+                        <div class="header-video-badges">
+                          <span class="cinema-tag-res" id="cinema-tag-res">1080p FHD</span>
+                          <span class="cinema-tag-fps" id="cinema-tag-fps">60 FPS</span>
+                        </div>
+                      </div>
+
+                      <!-- Center Play/Pause Zoom Pulse Icon -->
+                      <div class="mhent-center-action" id="converter-center-action">
+                        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" id="converter-center-action-path"/></svg>
+                      </div>
+
+                      <!-- Native Video Element (Controlled by Cinema UI) -->
+                      <video id="preview-video-el" playsinline preload="metadata"></video>
+
+                      <!-- Watermark Logo -->
+                      <div class="mhent-watermark">
+                        <span>MHENT CINEMA</span>
+                      </div>
+
+                      <!-- Custom Cinema Floating Controls Bar -->
+                      <div class="mhent-controls" id="converter-cinema-controls">
+                        <!-- Progress Track -->
+                        <div class="mhent-progress-container" id="converter-progress-container" title="Kéo để tua nhanh">
+                          <div class="mhent-buffer-bar" id="converter-buffer-fill"></div>
+                          <div class="mhent-progress-bar" id="converter-progress-fill"></div>
+                        </div>
+
+                        <!-- Controls Row -->
+                        <div class="mhent-controls-row">
+                          <div class="mhent-controls-left">
+                            <!-- Play / Pause -->
+                            <button type="button" class="mhent-btn" id="btn-cinema-play" title="Phát/Tạm dừng (Space)">
+                              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" id="icon-cinema-play-path"/></svg>
+                            </button>
+
+                            <!-- Rewind 10s -->
+                            <button type="button" class="mhent-btn" id="btn-cinema-rewind" title="Lùi 10 giây">
+                              <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+                            </button>
+
+                            <!-- Forward 10s -->
+                            <button type="button" class="mhent-btn" id="btn-cinema-forward" title="Tua 10 giây">
+                              <svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+                            </button>
+
+                            <!-- Volume -->
+                            <div class="mhent-volume-container">
+                              <button type="button" class="mhent-btn" id="btn-cinema-volume" title="Bật/Tắt âm thanh">
+                                <svg viewBox="0 0 24 24"><path id="icon-cinema-vol-path" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                              </button>
+                              <input type="range" class="mhent-volume-slider" id="cinema-volume-slider" min="0" max="1" step="0.05" value="1">
+                            </div>
+
+                            <!-- Time Display -->
+                            <span class="mhent-time" id="cinema-player-time">00:00 / 00:00</span>
+                          </div>
+
+                          <div class="mhent-controls-right">
+                            <!-- Playback Speed -->
+                            <button type="button" class="mhent-btn btn-speed-chip" id="btn-cinema-speed" title="Tốc độ phát">
+                              <span id="cinema-speed-text">1.0x</span>
+                            </button>
+
+                            <!-- Picture in Picture -->
+                            <button type="button" class="mhent-btn" id="btn-cinema-pip" title="Thu nhỏ Picture-in-Picture">
+                              <svg viewBox="0 0 24 24"><path d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.98h18v14.03z"/></svg>
+                            </button>
+
+                            <!-- Fullscreen -->
+                            <button type="button" class="mhent-btn" id="btn-cinema-fullscreen" title="Toàn màn hình">
+                              <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Cinema Tools Dock under Player -->
+                    <div class="cinema-tools-dock">
+                      <div class="cinema-dock-left">
+                        <span class="dock-badge" id="dock-meta-res">📐 1080p FHD</span>
+                        <span class="dock-badge" id="dock-meta-duration">⏱️ 00:00</span>
+                        <span class="dock-badge" id="dock-meta-size">💾 0.0 MB</span>
+                      </div>
+                      <div class="cinema-dock-right">
+                        <button type="button" class="dock-btn-action" onclick="window.ToolsModule.captureCurrentFrameSnapshot()" title="Chụp lại khung hình video đang dừng">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                          <span>Chụp Frame Này</span>
+                        </button>
+                        <button type="button" class="dock-btn-action accent" onclick="window.ToolsModule.quickExtractWav()" title="Trích xuất toàn bộ âm thanh WAV Studio">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                          <span>Tách Luồng WAV</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
+
+                  <!-- Audio Preview -->
                   <div id="preview-audio-box" style="display: none; text-align: center; padding: 12px 0;">
                     <audio id="preview-audio-el" controls style="width: 100%; max-width: 520px;"></audio>
                   </div>
+
+                  <!-- Text Preview -->
                   <div id="preview-text-box" style="display: none;">
                     <div class="preview-text-header">Trích đoạn nội dung tệp:</div>
                     <pre id="preview-text-el" class="converter-text-preview custom-scrollbar"></pre>
