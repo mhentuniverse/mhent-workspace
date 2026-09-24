@@ -103,7 +103,7 @@ window.AisaModule = {
         body: JSON.stringify({
           message: userText,
           mode: mode,
-          scope: 'support'
+          scope: 'workspace'
         })
       });
 
