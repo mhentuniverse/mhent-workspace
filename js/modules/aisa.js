@@ -139,6 +139,16 @@ window.AisaModule = {
       const pendingCount = (window.store.state.tasks || []).filter(t => t.status !== "done").length;
       hText = `Dạ hiện tại có ${pendingCount} nhiệm vụ đang cần hoàn thiện trên bảng Todo nè! Em tin cậu và team sẽ làm thật tốt! 🌸`;
       eText = `Còn ngồi đây hỏi à? ${pendingCount} task chưa xong kìa, làm nhanh kẻo trễ deadline bây giờ! 😈`;
+    } else if (lower.includes("lịch") || lower.includes("calendar") || lower.includes("sự kiện") || lower.includes("event")) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todayEvents = (window.store.state.events || []).filter(e => e.date === todayStr);
+      if (todayEvents.length > 0) {
+        hText = `Dạ hôm nay cậu có ${todayEvents.length} sự kiện trên lịch: ${todayEvents.map(e => e.title + ' (' + (e.time || 'Cả ngày') + ')').join(', ')} nè! 🌸`;
+        eText = `Lịch hôm nay có ${todayEvents.length} việc kìa, căn giờ giấc cho đúng, đừng có trễ giờ đấy! 😈`;
+      } else {
+        hText = `Dạ theo lịch Workspace hôm nay không có sự kiện nào được lên lịch ạ! Cậu có thể tập trung hoàn thành các task trên Todo nhé! 🌸`;
+        eText = `Hôm nay trống lịch à? Thế thì lo dọn sạch mấy cái task trên Todo đi, đừng có ngồi rung đùi lướt web! 😈`;
+      }
     } else if (lower.includes("tóm tắt") || lower.includes("summary")) {
       hText = "Em đã tóm tắt xong: Toàn team đang chuẩn bị cho các dự án MHEnt Universe và ban Media đang thiết kế poster ạ! 🌸";
       eText = "Nói chung là ai cũng đang bận, chỉ có bạn là đang rảnh rỗi ngồi bấm AI thôi đấy nhé! 😈";
@@ -162,6 +172,8 @@ window.AisaModule = {
       this.sendMessageWithText("Tóm tắt nhanh tình hình các kênh chat và công việc hôm nay giúp tôi.");
     } else if (action === "deadline") {
       this.sendMessageWithText("Kiểm tra danh sách các task sắp đến hạn deadline trong Todo.");
+    } else if (action === "calendar") {
+      this.sendMessageWithText("Check lịch trình calendar hôm nay và tuần này giúp tớ với.");
     } else if (action === "brainstorm") {
       this.sendMessageWithText("Gợi ý 3 ý tưởng kịch bản cho video trailer sắp tới của MHEnt.");
     }
