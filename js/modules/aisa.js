@@ -186,6 +186,15 @@ window.AisaModule = {
     const persona = window.store.state.aisaPersona || 'both';
     const mode = (persona === 'both') ? 'duo' : persona;
 
+    // Tính ngày giờ địa phương chính xác (tránh lỗi lệch múi giờ UTC)
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+    const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const dayName = daysOfWeek[now.getDay()];
+
     try {
       const res = await fetch(apiUrl, {
         method: "POST",
@@ -193,7 +202,15 @@ window.AisaModule = {
         body: JSON.stringify({
           message: userText,
           mode: mode,
-          scope: 'workspace'
+          scope: 'workspace',
+          clientDate: todayStr,
+          clientDay: dayName,
+          contextData: {
+            today: todayStr,
+            dayName: dayName,
+            events: (window.store.state.events || []).slice(0, 60),
+            tasks: (window.store.state.tasks || []).slice(0, 40)
+          }
         })
       });
 
@@ -230,14 +247,15 @@ window.AisaModule = {
       hText = `Dạ hiện tại có ${pendingCount} nhiệm vụ đang cần hoàn thiện trên bảng Todo nè! Em tin cậu và team sẽ làm thật tốt! 🌸`;
       eText = `Còn ngồi đây hỏi à? ${pendingCount} task chưa xong kìa, làm nhanh kẻo trễ deadline bây giờ! 😈`;
     } else if (lower.includes("lịch") || lower.includes("calendar") || lower.includes("sự kiện") || lower.includes("event")) {
-      const todayStr = new Date().toISOString().split('T')[0];
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       const todayEvents = (window.store.state.events || []).filter(e => e.date === todayStr);
       if (todayEvents.length > 0) {
-        hText = `Dạ hôm nay cậu có ${todayEvents.length} sự kiện trên lịch: ${todayEvents.map(e => e.title + ' (' + (e.time || 'Cả ngày') + ')').join(', ')} nè! 🌸`;
-        eText = `Lịch hôm nay có ${todayEvents.length} việc kìa, căn giờ giấc cho đúng, đừng có trễ giờ đấy! 😈`;
+        hText = `Dạ hôm nay (${todayStr}) cậu có ${todayEvents.length} sự kiện trên lịch:\n${todayEvents.map(e => '* ' + e.title + ' (' + (e.time || 'Cả ngày') + ')').join('\n')} nè! 🌸`;
+        eText = `Lịch hôm nay (${todayStr}) có tận ${todayEvents.length} việc kìa, căn giờ giấc cho đúng, đừng có trễ giờ đấy! 😈\n${todayEvents.map(e => '* ' + e.title + ' [' + (e.time || 'Cả ngày') + ']').join('\n')}`;
       } else {
-        hText = `Dạ theo lịch Workspace hôm nay không có sự kiện nào được lên lịch ạ! Cậu có thể tập trung hoàn thành các task trên Todo nhé! 🌸`;
-        eText = `Hôm nay trống lịch à? Thế thì lo dọn sạch mấy cái task trên Todo đi, đừng có ngồi rung đùi lướt web! 😈`;
+        hText = `Dạ theo lịch Workspace hôm nay (${todayStr}) không có sự kiện nào được lên lịch ạ! Cậu có thể tập trung hoàn thành các task trên Todo nhé! 🌸`;
+        eText = `Hôm nay (${todayStr}) trống lịch à? Thế thì lo dọn sạch mấy cái task trên Todo đi, đừng có ngồi rung đùi lướt web! 😈`;
       }
     } else if (lower.includes("tóm tắt") || lower.includes("summary")) {
       hText = "Em đã tóm tắt xong: Toàn team đang chuẩn bị cho các dự án MHEnt Universe và ban Media đang thiết kế poster ạ! 🌸";
