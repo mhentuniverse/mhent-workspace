@@ -532,6 +532,14 @@
   flex-direction: column;
   gap: 12px;
 }
+.aisa-messages-box strong {
+  font-weight: 800;
+  color: inherit;
+}
+.aisa-messages-box em {
+  font-style: italic;
+  color: inherit;
+}
 
 .aisa-quick-chips {
   padding: 6px 14px;
@@ -563,7 +571,7 @@
 }
 .aisa-input-box {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
   background: var(--bg-glass-input);
   border: 1px solid var(--border-subtle);
@@ -581,7 +589,14 @@
   border: none;
   outline: none;
   font-size: 13px;
+  font-family: inherit;
   color: var(--text-high);
+  resize: none;
+  height: 32px;
+  max-height: 100px;
+  line-height: 1.4;
+  padding: 6px 0;
+  box-sizing: border-box;
 }
 .aisa-send-btn {
   background: linear-gradient(135deg, #f472b6, #a855f7);

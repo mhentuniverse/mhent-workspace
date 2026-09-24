@@ -25,6 +25,10 @@ window.ChatModule = {
           this.sendMessage();
         }
       });
+      input.addEventListener("input", () => {
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 120) + "px";
+      });
     }
   },
 
@@ -83,7 +87,7 @@ window.ChatModule = {
       if (m.isBot === "harmony") bubbleBotClass = "harmony-bot";
       if (m.isBot === "echo") bubbleBotClass = "echo-bot";
 
-      const formattedText = this.formatMentions(m.text);
+      const formattedText = this.formatRichText(m.text);
 
       const statusIcon = m.status === 'sending'
         ? '<span class="chat-status-indicator sending" title="Đang gửi lên máy chủ...">⏳</span>'
@@ -119,11 +123,56 @@ window.ChatModule = {
     container.scrollTop = container.scrollHeight;
   },
 
-  formatMentions(text) {
-    if (!text) return "";
-    return text
-      .replace(/(@AISA|@Harmony|@Echo)/gi, '<span class="chat-mention">$1</span>')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color: var(--primary); font-weight: 800; text-decoration: underline;">$1</a>');
+  formatRichText(raw) {
+    if (window.formatRichText) return window.formatRichText(raw);
+    if (!raw) return "";
+
+    let text = String(raw).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    text = text.replace(/([^\n])\s+([*•\-])\s+(?=[^\s])/g, '$1\n$2 ');
+
+    const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    text = text.replace(/[&<>"']/g, ch => escapeMap[ch]);
+
+    text = text.replace(/```(?:[a-zA-Z0-9_\-]+)?\n?([\s\S]*?)```/g, (m, code) => `<pre class="chat-code-block"><code>${code.trim()}</code></pre>`);
+    text = text.replace(/`([^`\n]+)`/g, '<code class="chat-inline-code">$1</code>');
+    text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="chat-link">$1</a>');
+    text = text.replace(/(\*\*\*|___)(.*?)\1/g, '<strong><em>$2</em></strong>');
+    text = text.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
+    text = text.replace(/\*([^\s\*](?:[^\*\n]*?[^\s\*])?)\*/g, '<em>$1</em>');
+    text = text.replace(/(^|[\s(])_([^\s_](?:[^_\n]*?[^\s_])?)_([^\w]|$)/g, '$1<em>$2</em>$3');
+    text = text.replace(/~~(.*?)~~/g, '<del>$1</del>');
+    text = text.replace(/(@AISA|@Harmony|@Echo)/gi, '<span class="chat-mention">$1</span>');
+
+    const lines = text.split('\n');
+    const formattedLines = lines.map(line => {
+      const trimmed = line.trim();
+      if (/^[*•\-]\s+/.test(trimmed)) {
+        const content = trimmed.replace(/^[*•\-]\s+/, '');
+        return `<div class="chat-bullet-row"><span class="chat-bullet-dot">•</span><div class="chat-bullet-text">${content}</div></div>`;
+      }
+      const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+      if (numMatch) {
+        return `<div class="chat-bullet-row"><span class="chat-bullet-num">${numMatch[1]}.</span><div class="chat-bullet-text">${numMatch[2]}</div></div>`;
+      }
+      return line;
+    });
+
+    let result = "";
+    for (let i = 0; i < formattedLines.length; i++) {
+      const curr = formattedLines[i];
+      if (i > 0) {
+        const prev = formattedLines[i - 1];
+        const currIsBlock = curr.startsWith('<div class="chat-bullet-row">') || curr.startsWith('<pre class="chat-code-block">');
+        const prevIsBlock = prev.startsWith('<div class="chat-bullet-row">') || prev.startsWith('<pre class="chat-code-block">');
+        if (!currIsBlock && !prevIsBlock) {
+          result += "<br>";
+        } else if (!currIsBlock && prevIsBlock) {
+          result += "<br>";
+        }
+      }
+      result += curr;
+    }
+    return result;
   },
 
   async sendMessage() {
@@ -132,6 +181,7 @@ window.ChatModule = {
 
     const text = input.value.trim();
     input.value = "";
+    input.style.height = "auto";
 
     const user = window.store.state.currentUser;
     const now = new Date();

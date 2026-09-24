@@ -26,10 +26,14 @@ window.AisaModule = {
     if (sendBtn && input) {
       sendBtn.addEventListener("click", () => this.sendMessage());
       input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
+        if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
           this.sendMessage();
         }
+      });
+      input.addEventListener("input", () => {
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 100) + "px";
       });
     }
 
@@ -43,17 +47,102 @@ window.AisaModule = {
     });
   },
 
+  formatRichText(raw) {
+    if (!raw) return "";
+
+    // 1. Chuẩn hóa xuống dòng
+    let text = String(raw).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+    // 2. Tách gạch đầu dòng inline nếu mô hình viết dính liền " * " hoặc " • " hoặc " - "
+    text = text.replace(/([^\n])\s+([*•\-])\s+(?=[^\s])/g, '$1\n$2 ');
+
+    // 3. Escape HTML chống XSS
+    const escapeMap = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
+    text = text.replace(/[&<>"']/g, ch => escapeMap[ch]);
+
+    // 4. Khối code block ```code```
+    text = text.replace(/```(?:[a-zA-Z0-9_\-]+)?\n?([\s\S]*?)```/g, (match, code) => {
+      return `<pre class="chat-code-block"><code>${code.trim()}</code></pre>`;
+    });
+
+    // 5. Inline code `code`
+    text = text.replace(/`([^`\n]+)`/g, '<code class="chat-inline-code">$1</code>');
+
+    // 6. Markdown links [text](url)
+    text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="chat-link">$1</a>');
+
+    // 7. Bold italic ***text*** hoặc ___text___
+    text = text.replace(/(\*\*\*|___)(.*?)\1/g, '<strong><em>$2</em></strong>');
+
+    // 8. Bold **text** hoặc __text__
+    text = text.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
+
+    // 9. Italic *text* (dấu * không theo sau bởi khoảng trắng và không phải bullet)
+    text = text.replace(/\*([^\s\*](?:[^\*\n]*?[^\s\*])?)\*/g, '<em>$1</em>');
+    // Italic _text_ (chỉ khi có khoảng trắng hoặc đầu dòng phía trước để tránh nhầm tên biến vd: workspace_tasks)
+    text = text.replace(/(^|[\s(])_([^\s_](?:[^_\n]*?[^\s_])?)_([^\w]|$)/g, '$1<em>$2</em>$3');
+
+    // 10. Strikethrough ~~text~~
+    text = text.replace(/~~(.*?)~~/g, '<del>$1</del>');
+
+    // 11. Mentions (@AISA, @Harmony, @Echo)
+    text = text.replace(/(@AISA|@Harmony|@Echo)/gi, '<span class="chat-mention">$1</span>');
+
+    // 12. Danh sách gạch đầu dòng hoặc số (Bullet / Numbered lists)
+    const lines = text.split('\n');
+    const formattedLines = lines.map(line => {
+      const trimmed = line.trim();
+      if (/^[*•\-]\s+/.test(trimmed)) {
+        const content = trimmed.replace(/^[*•\-]\s+/, '');
+        return `<div class="chat-bullet-row"><span class="chat-bullet-dot">•</span><div class="chat-bullet-text">${content}</div></div>`;
+      }
+      const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+      if (numMatch) {
+        return `<div class="chat-bullet-row"><span class="chat-bullet-num">${numMatch[1]}.</span><div class="chat-bullet-text">${numMatch[2]}</div></div>`;
+      }
+      return line;
+    });
+
+    // 13. Ghép các dòng: các block không cần lặp <br>, các dòng text thông thường được ngăn cách bằng <br>
+    let result = "";
+    for (let i = 0; i < formattedLines.length; i++) {
+      const curr = formattedLines[i];
+      if (i > 0) {
+        const prev = formattedLines[i - 1];
+        const currIsBlock = curr.startsWith('<div class="chat-bullet-row">') || curr.startsWith('<pre class="chat-code-block">');
+        const prevIsBlock = prev.startsWith('<div class="chat-bullet-row">') || prev.startsWith('<pre class="chat-code-block">');
+        if (!currIsBlock && !prevIsBlock) {
+          result += "<br>";
+        } else if (!currIsBlock && prevIsBlock) {
+          result += "<br>";
+        }
+      }
+      result += curr;
+    }
+
+    return result;
+  },
+
   renderHistory() {
     const container = document.getElementById("aisa-messages-list");
     if (!container) return;
+
+    // Expose utility globally
+    window.formatRichText = this.formatRichText.bind(this);
 
     const history = window.store.state.aisaHistory || [];
 
     container.innerHTML = history.map(item => {
       if (item.role === "user") {
         return `
-          <div style="align-self: flex-end; background: var(--primary); color: white; padding: 8px 12px; border-radius: var(--radius-md); font-size: 13px; max-width: 85%; line-height: 1.4;">
-            ${item.text}
+          <div style="align-self: flex-end; background: var(--primary); color: white; padding: 8px 12px; border-radius: var(--radius-md); font-size: 13px; max-width: 85%; line-height: 1.5; word-break: break-word; overflow-wrap: break-word;">
+            ${this.formatRichText(item.text)}
           </div>
         `;
       }
@@ -65,11 +154,11 @@ window.AisaModule = {
       const icon = isHarmony ? "🌸 Harmony" : "😈 Echo";
 
       return `
-        <div style="background: ${bgStyle}; border: 1px solid ${borderStyle}; border-radius: var(--radius-md); padding: 10px 12px; font-size: 13px; line-height: 1.5; color: var(--text-high);">
+        <div style="background: ${bgStyle}; border: 1px solid ${borderStyle}; border-radius: var(--radius-md); padding: 10px 12px; font-size: 13px; line-height: 1.5; color: var(--text-high); word-break: break-word; overflow-wrap: break-word;">
           <div style="font-size: 11px; font-weight: 800; color: ${badgeColor}; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
             <span>${icon}</span>
           </div>
-          <div>${item.text}</div>
+          <div>${this.formatRichText(item.text)}</div>
         </div>
       `;
     }).join("");
@@ -83,6 +172,7 @@ window.AisaModule = {
 
     const userText = input.value.trim();
     input.value = "";
+    input.style.height = "auto";
 
     // Ghi nhận tin nhắn User
     window.store.addAisaMessage({ role: "user", text: userText });

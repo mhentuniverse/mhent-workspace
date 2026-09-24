@@ -76,7 +76,17 @@
   padding: 10px 14px;
   color: var(--text-high);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.chat-bubble strong {
+  font-weight: 800;
+  color: inherit;
+}
+.chat-bubble em {
+  font-style: italic;
+  color: inherit;
 }
 .chat-message-row.self .chat-bubble {
   background: var(--primary);
@@ -99,6 +109,55 @@
   background: rgba(56, 189, 248, 0.15);
   padding: 1px 6px;
   border-radius: 4px;
+}
+
+/* Bullet list & rich text rendering */
+.chat-bullet-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 3px 0;
+}
+.chat-bullet-dot {
+  color: currentColor;
+  opacity: 0.85;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.chat-bullet-num {
+  color: currentColor;
+  opacity: 0.9;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.chat-bullet-text {
+  flex: 1;
+}
+.chat-inline-code {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: monospace;
+  font-size: 0.9em;
+  color: #f472b6;
+}
+.chat-code-block {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 12px;
+}
+.chat-link {
+  color: #38bdf8;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 /* Messenger-style Optimistic Chat & Retry Styles */
@@ -151,11 +210,11 @@
 }
 
 .chat-input-bar {
-  padding: 14px 20px;
+  padding: 12px 20px;
   background: var(--bg-surface);
   border-top: 1px solid var(--border-subtle);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
 }
 .chat-input-field {
@@ -167,6 +226,12 @@
   color: var(--text-high);
   outline: none;
   font-size: 14px;
+  font-family: inherit;
+  resize: none;
+  height: 42px;
+  max-height: 120px;
+  line-height: 1.45;
+  box-sizing: border-box;
 }
 .chat-input-field:focus {
   border-color: var(--app-chat);
