@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MHEnt Workspace | Không Gian Làm Việc Số All-In-One</title>
-  
+
   <!-- PWA & SEO Meta -->
-  <meta name="description" content="Trạm chỉ huy số tích hợp Chat, Mail, Meet, Todo, Drive, Calendar và Trợ lý AI AISA (Harmony & Echo) cho MHEnt Universe.">
+  <meta name="description"
+    content="Trạm chỉ huy số tích hợp Chat, Mail, Meet, Todo, Drive, Calendar và Trợ lý AI AISA (Harmony & Echo) cho MHEnt Universe.">
   <meta name="theme-color" content="#090D16">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/icon.png" type="image/png">
@@ -27,55 +29,98 @@
   <link rel="stylesheet" href="css/apps.css">
   <link rel="stylesheet" href="css/mhent-ui.css">
 </head>
+
 <body>
 
   <div id="app-container">
-    
+
     <!-- ==========================================
          1. NAVIGATION RAIL (LEFT - 68px)
          ========================================== -->
     <nav id="nav-rail" aria-label="Main Navigation">
       <div class="rail-top">
         <div class="rail-brand" title="MHEnt Universe HQ" id="btn-switch-team">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8"/></svg>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#6366f1" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M3.6 9h16.8M3.6 15h16.8" />
+          </svg>
         </div>
         <div class="rail-divider"></div>
 
         <button class="rail-btn active" data-app="chat" title="MHEnt Chat (Tin nhắn realtime)" id="nav-btn-chat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
         </button>
 
         <button class="rail-btn" data-app="mail" title="MHEnt Mail (Hộp thư nội bộ)" id="nav-btn-mail">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect width="20" height="16" x="2" y="4" rx="2" />
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+          </svg>
         </button>
 
         <button class="rail-btn" data-app="meet" title="MHEnt Meet (Họp video bảo mật)" id="nav-btn-meet">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11" />
+            <rect width="14" height="12" x="2" y="6" rx="2" />
+          </svg>
         </button>
 
         <button class="rail-btn" data-app="todo" title="MHEnt Todo (Quản lý công việc Kanban)" id="nav-btn-todo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+            <path d="m9 14 2 2 4-4" />
+          </svg>
         </button>
 
         <button class="rail-btn" data-app="drive" title="MHEnt Drive (Kho tài nguyên Media)" id="nav-btn-drive">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path
+              d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
+          </svg>
         </button>
 
         <button class="rail-btn" data-app="calendar" title="MHEnt Calendar (Lịch đồng bộ)" id="nav-btn-calendar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+            <line x1="16" x2="16" y1="2" y2="6" />
+            <line x1="8" x2="8" y1="2" y2="6" />
+            <line x1="3" x2="21" y1="10" y2="10" />
+          </svg>
         </button>
 
-        <button class="rail-btn" data-app="tools" title="Phân Khu Đặc Nhiệm (QR Check-in, Wiki & Tools)" id="nav-btn-tools">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <button class="rail-btn" data-app="tools" title="Phân Khu Đặc Nhiệm (QR Check-in, Wiki & Tools)"
+          id="nav-btn-tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path
+              d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+          </svg>
         </button>
       </div>
 
       <div class="rail-bottom">
         <button class="rail-btn" id="btn-toggle-theme" title="Chuyển đổi Chế độ Sáng/Tối">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
         </button>
         <div class="rail-avatar" id="btn-open-auth-modal" title="Bấm để Đăng nhập / Cấp tài khoản Firebase">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
           <div class="rail-avatar-status"></div>
         </div>
       </div>
@@ -86,10 +131,15 @@
          ========================================== -->
     <aside id="context-sidebar">
       <div class="sidebar-header">
-        <div class="workspace-badge" onclick="window.AuthModule.openTeamModal()" style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; min-width: 0;" title="Bấm để mở Hồ Sơ & Quản Trị Không Gian">
-          <div class="workspace-icon" style="font-size: 20px; width: 34px; height: 34px; border-radius: var(--radius-sm); background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🪐</div>
+        <div class="workspace-badge" onclick="window.AuthModule.openTeamModal()"
+          style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; min-width: 0;"
+          title="Bấm để mở Hồ Sơ & Quản Trị Không Gian">
+          <div class="workspace-icon"
+            style="font-size: 20px; width: 34px; height: 34px; border-radius: var(--radius-sm); background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            🪐</div>
           <div style="flex: 1; min-width: 0;">
-            <div class="workspace-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">MHEnt Universe HQ</div>
+            <div class="workspace-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">MHEnt
+              Universe HQ</div>
             <span class="workspace-code">MHENT-CORE-2026</span>
           </div>
         </div>
@@ -97,13 +147,17 @@
       </div>
 
       <!-- Quick Action Toolbar for Master: Edit & Permissions for Current Workspace -->
-      <div id="sidebar-master-toolbar" style="padding: 8px 16px 10px 16px; border-bottom: 1px solid var(--border-subtle); display: none;">
-        <button type="button" id="sidebar-btn-view-members" class="btn btn-ghost btn-sm" onclick="window.AuthModule.openWorkspaceManage(window.store.state.workspace ? window.store.state.workspace.code : 'MHENT-CORE-2026')" style="width: 100%; font-size: 11.5px; padding: 7px 10px; background: rgba(99, 102, 241, 0.1); border: 1px dashed rgba(99, 102, 241, 0.35); border-radius: var(--radius-sm); color: var(--primary-light); display: flex; align-items: center; justify-content: space-between; transition: var(--transition-fast);">
+      <div id="sidebar-master-toolbar"
+        style="padding: 8px 16px 10px 16px; border-bottom: 1px solid var(--border-subtle); display: none;">
+        <button type="button" id="sidebar-btn-view-members" class="btn btn-ghost btn-sm"
+          onclick="window.AuthModule.openWorkspaceManage(window.store.state.workspace ? window.store.state.workspace.code : 'MHENT-CORE-2026')"
+          style="width: 100%; font-size: 11.5px; padding: 7px 10px; background: rgba(99, 102, 241, 0.1); border: 1px dashed rgba(99, 102, 241, 0.35); border-radius: var(--radius-sm); color: var(--primary-light); display: flex; align-items: center; justify-content: space-between; transition: var(--transition-fast);">
           <span style="display: flex; align-items: center; gap: 6px;">
             <span>👑</span>
             <span style="font-weight: 700;">Chỉnh Sửa & Cấp Quyền WS</span>
           </span>
-          <span class="badge badge-primary" id="sidebar-master-member-count" style="font-size: 10px; padding: 2px 6px;">4</span>
+          <span class="badge badge-primary" id="sidebar-master-member-count"
+            style="font-size: 10px; padding: 2px 6px;">4</span>
         </button>
       </div>
 
@@ -112,27 +166,41 @@
         <div class="sidebar-app-section" id="sidebar-sec-chat">
           <div class="sidebar-section-title">
             <span>Kênh Hội Thoại</span>
-            <button class="add-btn" title="Tạo kênh mới" onclick="window.UI.showToast('Tính năng đang mở rộng', 'Kênh mới sẽ được đồng bộ Firestore', 'info')">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <button class="add-btn" title="Tạo kênh mới"
+              onclick="window.UI.showToast('Tính năng đang mở rộng', 'Kênh mới sẽ được đồng bộ Firestore', 'info')">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
             </button>
           </div>
           <ul class="sidebar-nav-list" id="chat-channel-list"></ul>
 
-          <div class="sidebar-section-title" style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center;">
+          <div class="sidebar-section-title"
+            style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center;">
             <span>Trợ Lý AI & Thành Viên</span>
-            <span id="sidebar-members-count-pill" class="badge badge-purple" style="font-size: 9.5px; padding: 1px 6px; cursor: pointer;" onclick="window.AuthModule.openMembersModal()" title="Xem người dùng trong Workspace">0 người</span>
+            <span id="sidebar-members-count-pill" class="badge badge-purple"
+              style="font-size: 9.5px; padding: 1px 6px; cursor: pointer;"
+              onclick="window.AuthModule.openMembersModal()" title="Xem người dùng trong Workspace">0 người</span>
           </div>
           <ul class="sidebar-nav-list" id="sidebar-members-list">
             <li class="sidebar-nav-item" onclick="window.AisaModule.setPersona('harmony')">
               <div class="item-left">
-                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#f472b6" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#f472b6"
+                    stroke-width="2">
+                    <path
+                      d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                  </svg></span>
                 <span>Harmony (AI)</span>
               </div>
               <span class="badge badge-success">Online</span>
             </li>
             <li class="sidebar-nav-item" onclick="window.AisaModule.setPersona('echo')">
               <div class="item-left">
-                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a855f7" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a855f7"
+                    stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                  </svg></span>
                 <span>Echo (AI)</span>
               </div>
               <span class="badge badge-purple">Online</span>
@@ -143,15 +211,43 @@
         <!-- 2. MAIL SIDEBAR SECTION -->
         <div class="sidebar-app-section" id="sidebar-sec-mail" style="display: none;">
           <button class="btn btn-primary" id="btn-compose-mail" style="width: 100%; margin-bottom: 16px;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
             <span>Soạn Thư Mới</span>
           </button>
           <div class="sidebar-section-title"><span>Hộp Thư</span></div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span><span>Hộp Thư Đến</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span><span>Đã Gắn Dấu Sao</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span><span>Đã Gửi</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span>Bản Nháp</span></div></li>
+            <li class="sidebar-nav-item active">
+              <div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                    <path
+                      d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                  </svg></span><span>Hộp Thư Đến</span></div>
+            </li>
+            <li class="sidebar-nav-item">
+              <div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg></span><span>Đã Gắn Dấu Sao</span></div>
+            </li>
+            <li class="sidebar-nav-item">
+              <div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <line x1="22" x2="11" y1="2" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg></span><span>Đã Gửi</span></div>
+            </li>
+            <li class="sidebar-nav-item">
+              <div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span>Bản Nháp</span></div>
+            </li>
           </ul>
         </div>
 
@@ -159,83 +255,169 @@
         <div class="sidebar-app-section" id="sidebar-sec-meet" style="display: none;">
           <div class="sidebar-section-title"><span>Phòng Họp Team</span></div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg></span><span># HQ Conference</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect width="15" height="14" x="1" y="5" rx="2" ry="2"/></svg></span><span># Media Room</span></div></li>
-            <li class="sidebar-nav-item"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span><span># Dev Standup</span></div></li>
+            <li class="sidebar-nav-item active">
+              <div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11" />
+                    <rect width="14" height="12" x="2" y="6" rx="2" />
+                  </svg></span><span># HQ Conference</span></div>
+            </li>
+            <li class="sidebar-nav-item">
+              <div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <polygon points="23 7 16 12 23 17 23 7" />
+                    <rect width="15" height="14" x="1" y="5" rx="2" ry="2" />
+                  </svg></span><span># Media Room</span></div>
+            </li>
+            <li class="sidebar-nav-item">
+              <div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6" />
+                    <polyline points="8 6 2 12 8 18" />
+                  </svg></span><span># Dev Standup</span></div>
+            </li>
           </ul>
         </div>
 
         <!-- 4. TODO SIDEBAR SECTION -->
         <div class="sidebar-app-section" id="sidebar-sec-todo" style="display: none;">
           <button class="btn btn-primary" id="btn-add-task" style="width: 100%; margin-bottom: 16px;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
             <span>Tạo Task Mới</span>
           </button>
           <div class="sidebar-section-title"><span>Dự Án Trọng Tâm</span></div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span>Tất Cả Nhiệm Vụ</span></div></li>
+            <li class="sidebar-nav-item active">
+              <div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="m9 11 3 3L22 4" />
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                  </svg></span><span>Tất Cả Nhiệm Vụ</span></div>
+            </li>
           </ul>
         </div>
 
         <!-- 5. DRIVE SIDEBAR SECTION -->
         <div class="sidebar-app-section" id="sidebar-sec-drive" style="display: none;">
           <button class="btn btn-primary" id="btn-upload-file" style="width: 100%; margin-bottom: 16px;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" x2="12" y1="3" y2="15" />
+            </svg>
             <span>Tải Tệp Lên</span>
           </button>
           <input type="file" id="file-upload-input" style="display: none;">
           <div class="sidebar-section-title"><span>Thư Mục</span></div>
           <ul class="sidebar-nav-list">
-            <li class="sidebar-nav-item active"><div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg></span><span>Tất Cả Tệp</span></div></li>
+            <li class="sidebar-nav-item active">
+              <div class="item-left"><span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path
+                      d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
+                  </svg></span><span>Tất Cả Tệp</span></div>
+            </li>
           </ul>
         </div>
 
         <!-- 6. CALENDAR SIDEBAR SECTION -->
         <div class="sidebar-app-section" id="sidebar-sec-calendar" style="display: none;">
           <button class="btn btn-primary" id="btn-add-event" style="width: 100%; margin-bottom: 16px;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
             <span>Thêm Sự Kiện</span>
           </button>
           <div class="sidebar-section-title"><span>Bộ Lọc Lịch</span></div>
           <ul class="sidebar-nav-list" id="calendar-filter-list">
-            <li class="sidebar-nav-item active" onclick="window.CalendarModule.setFilter('all', this)"><div class="item-left"><span class="item-icon">🗓️</span><span>Tất Cả Lịch Trình</span></div></li>
-            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('meeting', this)"><div class="item-left"><span class="item-icon" style="color: #8b5cf6;">🟣</span><span>Cuộc Họp (Meeting)</span></div></li>
-            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('deadline', this)"><div class="item-left"><span class="item-icon" style="color: #ef4444;">🔴</span><span>Hạn Chót (Deadline)</span></div></li>
-            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('launch', this)"><div class="item-left"><span class="item-icon" style="color: #10b981;">🟢</span><span>Ra Mắt (Launch)</span></div></li>
-            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('media', this)"><div class="item-left"><span class="item-icon" style="color: #f59e0b;">🟡</span><span>Truyền Thông (Media)</span></div></li>
-            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('personal', this)"><div class="item-left"><span class="item-icon" style="color: #3b82f6;">🔵</span><span>Dự Án / Nội Bộ</span></div></li>
+            <li class="sidebar-nav-item active" onclick="window.CalendarModule.setFilter('all', this)">
+              <div class="item-left"><span class="item-icon">🗓️</span><span>Tất Cả Lịch Trình</span></div>
+            </li>
+            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('meeting', this)">
+              <div class="item-left"><span class="item-icon" style="color: #8b5cf6;">🟣</span><span>Cuộc Họp
+                  (Meeting)</span></div>
+            </li>
+            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('deadline', this)">
+              <div class="item-left"><span class="item-icon" style="color: #ef4444;">🔴</span><span>Hạn Chót
+                  (Deadline)</span></div>
+            </li>
+            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('launch', this)">
+              <div class="item-left"><span class="item-icon" style="color: #10b981;">🟢</span><span>Ra Mắt
+                  (Launch)</span></div>
+            </li>
+            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('media', this)">
+              <div class="item-left"><span class="item-icon" style="color: #f59e0b;">🟡</span><span>Truyền Thông
+                  (Media)</span></div>
+            </li>
+            <li class="sidebar-nav-item" onclick="window.CalendarModule.setFilter('personal', this)">
+              <div class="item-left"><span class="item-icon" style="color: #3b82f6;">🔵</span><span>Dự Án / Nội
+                  Bộ</span></div>
+            </li>
           </ul>
         </div>
 
         <!-- 7. TOOLS SIDEBAR SECTION -->
         <div class="sidebar-app-section" id="sidebar-sec-tools" style="display: none;">
-          <button class="btn btn-primary" id="btn-tools-pick-file" style="width: 100%; margin-bottom: 16px; background: linear-gradient(135deg, var(--app-tools), #ec4899); box-shadow: 0 4px 14px var(--app-tools-glow);" onclick="window.ToolsModule.triggerFileInput()">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          <button class="btn btn-primary" id="btn-tools-pick-file"
+            style="width: 100%; margin-bottom: 16px; background: linear-gradient(135deg, var(--app-tools), #ec4899); box-shadow: 0 4px 14px var(--app-tools-glow);"
+            onclick="window.ToolsModule.triggerFileInput()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+            </svg>
             <span>⚡ Chọn Tệp Chuyển Đổi</span>
           </button>
           <div class="sidebar-section-title"><span>Trạm Công Cụ</span></div>
           <ul class="sidebar-nav-list" id="tools-sidebar-nav">
-            <li class="sidebar-nav-item active" data-tool-tab="converter" onclick="window.ToolsModule.setTab('converter')">
+            <li class="sidebar-nav-item active" data-tool-tab="converter"
+              onclick="window.ToolsModule.setTab('converter')">
               <div class="item-left">
-                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <polyline points="16 3 21 3 21 8" />
+                    <line x1="4" y1="20" x2="21" y2="3" />
+                    <polyline points="21 16 21 21 16 21" />
+                    <line x1="15" y1="15" x2="21" y2="21" />
+                    <line x1="4" y1="4" x2="9" y2="9" />
+                  </svg></span>
                 <span>Chuyển Đổi Tệp Đa Năng</span>
               </div>
             </li>
             <li class="sidebar-nav-item" data-tool-tab="qr" onclick="window.ToolsModule.setTab('qr')">
               <div class="item-left">
-                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/></svg></span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <rect width="5" height="5" x="3" y="3" rx="1" />
+                    <rect width="5" height="5" x="16" y="3" rx="1" />
+                    <rect width="5" height="5" x="3" y="16" rx="1" />
+                    <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
+                    <path d="M21 21v.01" />
+                    <path d="M12 7v3a2 2 0 0 1-2 2H7" />
+                  </svg></span>
                 <span>QR Check-in & Scanner</span>
               </div>
             </li>
             <li class="sidebar-nav-item" data-tool-tab="wiki" onclick="window.ToolsModule.setTab('wiki')">
               <div class="item-left">
-                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                  </svg></span>
                 <span>Wiki & Quy Chuẩn</span>
               </div>
             </li>
             <li class="sidebar-nav-item" data-tool-tab="notes" onclick="window.ToolsModule.setTab('notes')">
               <div class="item-left">
-                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+                <span class="item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg></span>
                 <span>Ghi Chú Nhanh (Notes)</span>
               </div>
             </li>
@@ -254,7 +436,8 @@
       <!-- Topbar Header -->
       <header class="stage-topbar">
         <div class="topbar-left" style="display: flex; align-items: center; gap: 12px;">
-          <button class="mobile-sidebar-toggle-btn" onclick="window.UI.toggleMobileSidebar()" title="Mở/Đóng Danh Mục">☰</button>
+          <button class="mobile-sidebar-toggle-btn" onclick="window.UI.toggleMobileSidebar()"
+            title="Mở/Đóng Danh Mục">☰</button>
           <div class="stage-title-wrap">
             <h1 class="stage-title" id="stage-title">MHEnt Chat</h1>
             <span class="stage-desc" id="stage-desc">Kênh giao tiếp thời gian thực nội bộ</span>
@@ -263,13 +446,19 @@
 
         <div class="topbar-right">
           <button class="quick-search-btn" id="btn-open-command-palette">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
             <span>Tìm nhanh...</span>
             <kbd>Ctrl K</kbd>
           </button>
 
           <button class="aisa-toggle-btn active" id="btn-toggle-aisa">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z" />
+            </svg>
             <span>AISA Copilot</span>
           </button>
         </div>
@@ -277,16 +466,21 @@
 
       <!-- App Views Container -->
       <div id="app-content-container">
-        
+
         <!-- 1. CHAT APP VIEW -->
         <div class="app-stage-view chat-app-view" id="view-chat">
           <div class="chat-messages-container" id="chat-messages-wrap"></div>
           <form class="chat-input-bar" id="chat-form">
             <button type="button" class="btn btn-secondary btn-icon" title="Đính kèm tệp">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+              </svg>
             </button>
-            <input type="text" class="chat-input-field" id="chat-input-text" placeholder="Nhập tin nhắn... (Gõ @AISA để gọi Harmony & Echo hỗ trợ)">
-            <button type="submit" class="btn btn-primary" style="background: var(--app-chat); border-color: var(--app-chat);">Gửi 🚀</button>
+            <input type="text" class="chat-input-field" id="chat-input-text"
+              placeholder="Nhập tin nhắn... (Gõ @AISA để gọi Harmony & Echo hỗ trợ)">
+            <button type="submit" class="btn btn-primary"
+              style="background: var(--app-chat); border-color: var(--app-chat);">Gửi 🚀</button>
           </form>
         </div>
 
@@ -298,7 +492,7 @@
             </div>
             <div class="mail-items-container" id="mail-items-list"></div>
           </div>
-          
+
           <!-- Mail Resizer Splitter -->
           <div class="panel-resizer" id="resizer-mail" title="Kéo để chỉnh độ rộng Hộp thư"></div>
 
@@ -312,13 +506,15 @@
               <div class="meet-icon-circle">📹</div>
               <h2>MHEnt Meet - Phòng Họp Bảo Mật</h2>
               <p style="color: var(--text-muted); font-size: 13.5px; line-height: 1.5;">
-                Tích hợp máy chủ Jitsi Meet không giới hạn thời gian, hỗ trợ chia sẻ màn hình 4K và mã hóa cuộc gọi theo mã Team.
+                Tích hợp máy chủ Jitsi Meet không giới hạn thời gian, hỗ trợ chia sẻ màn hình 4K và mã hóa cuộc gọi theo
+                mã Team.
               </p>
               <div class="form-group" style="width: 100%;">
                 <label class="form-label" style="text-align: left;">Tên Phòng Họp</label>
                 <input type="text" class="input-text" id="meet-room-name" value="hq-conference">
               </div>
-              <button class="btn btn-primary" id="btn-start-meet" style="width: 100%; padding: 12px; background: var(--app-meet); box-shadow: 0 4px 15px var(--app-meet-glow);">
+              <button class="btn btn-primary" id="btn-start-meet"
+                style="width: 100%; padding: 12px; background: var(--app-meet); box-shadow: 0 4px 15px var(--app-meet-glow);">
                 🚀 Bắt Đầu Cuộc Họp Ngay
               </button>
             </div>
@@ -326,7 +522,8 @@
 
           <div id="jitsi-container"></div>
 
-          <div id="meet-active-controls" style="display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--bg-glass-strong); backdrop-filter: blur(16px); padding: 10px 18px; border-radius: var(--radius-full); border: 1px solid var(--border-medium); gap: 12px; z-index: 100;">
+          <div id="meet-active-controls"
+            style="display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--bg-glass-strong); backdrop-filter: blur(16px); padding: 10px 18px; border-radius: var(--radius-full); border: 1px solid var(--border-medium); gap: 12px; z-index: 100;">
             <button class="btn btn-secondary" id="btn-copy-meet-link">🔗 Sao chép link mời</button>
             <button class="btn btn-danger" id="btn-leave-meet">🔴 Kết thúc cuộc họp</button>
           </div>
@@ -336,7 +533,9 @@
         <div class="app-stage-view todo-app-view" id="view-todo" style="display: none;">
           <div class="kanban-toolbar">
             <div style="font-weight: 800; font-size: 15px; color: var(--text-high);">Bảng Tiến Độ Dự Án</div>
-            <button class="btn btn-primary" onclick="window.TodoModule.init()" style="background: var(--app-todo); box-shadow: 0 4px 12px var(--app-todo-glow);">➕ Thêm Công Việc</button>
+            <button class="btn btn-primary" onclick="window.TodoModule.init()"
+              style="background: var(--app-todo); box-shadow: 0 4px 12px var(--app-todo-glow);">➕ Thêm Công
+              Việc</button>
           </div>
           <div class="kanban-board">
             <div class="kanban-column">
@@ -378,7 +577,8 @@
             <div class="quota-progress-bar">
               <div class="quota-progress-fill"></div>
             </div>
-            <button class="btn btn-primary" onclick="document.getElementById('file-upload-input').click()" style="background: var(--app-drive); box-shadow: 0 4px 12px var(--app-drive-glow);">
+            <button class="btn btn-primary" onclick="document.getElementById('file-upload-input').click()"
+              style="background: var(--app-drive); box-shadow: 0 4px 12px var(--app-drive-glow);">
               ⬆️ Tải Tệp Mới
             </button>
           </div>
@@ -392,13 +592,17 @@
             <div class="calendar-nav-controls">
               <div class="calendar-btn-group">
                 <button class="btn btn-secondary cal-icon-btn" id="btn-calendar-prev" title="Tháng / Tuần Trước">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
                 </button>
                 <button class="btn btn-secondary" id="btn-calendar-today" title="Quay về ngày hôm nay">
                   Hôm Nay
                 </button>
                 <button class="btn btn-secondary cal-icon-btn" id="btn-calendar-next" title="Tháng / Tuần Sau">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
                 </button>
               </div>
               <h2 class="calendar-title" id="calendar-current-title">Tháng 9, 2026</h2>
@@ -407,23 +611,39 @@
             <div class="calendar-actions-bar">
               <!-- View Switcher: Tháng vs Tuần -->
               <div class="calendar-view-switcher">
-                <button class="cal-view-btn active" id="btn-view-month" onclick="window.CalendarModule.switchView('month')" title="Xem dạng bảng tháng">
-                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                <button class="cal-view-btn active" id="btn-view-month"
+                  onclick="window.CalendarModule.switchView('month')" title="Xem dạng bảng tháng">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                  </svg>
                   <span>Tháng</span>
                 </button>
-                <button class="cal-view-btn" id="btn-view-week" onclick="window.CalendarModule.switchView('week')" title="Xem dạng theo tuần">
-                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="3" x2="21" y1="10" y2="10"/><line x1="9" x2="9" y1="10" y2="22"/><line x1="15" x2="15" y1="10" y2="22"/></svg>
+                <button class="cal-view-btn" id="btn-view-week" onclick="window.CalendarModule.switchView('week')"
+                  title="Xem dạng theo tuần">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                    <line x1="9" x2="9" y1="10" y2="22" />
+                    <line x1="15" x2="15" y1="10" y2="22" />
+                  </svg>
                   <span>Tuần</span>
                 </button>
               </div>
 
               <!-- Week Layout Toggle: 7 Cột vs 7 Dòng (chỉ hiện khi xem Tuần) -->
-              <button class="btn btn-secondary" id="btn-toggle-week-layout" onclick="window.CalendarModule.toggleWeekLayout()" style="display: none;" title="Chuyển đổi giao diện hiển thị tuần: 7 Cột hoặc 7 Dòng">
+              <button class="btn btn-secondary" id="btn-toggle-week-layout"
+                onclick="window.CalendarModule.toggleWeekLayout()" style="display: none;"
+                title="Chuyển đổi giao diện hiển thị tuần: 7 Cột hoặc 7 Dòng">
                 <span id="week-layout-icon">📊</span> <span id="week-layout-text">7 Cột</span>
               </button>
 
               <button class="btn btn-secondary" id="btn-find-free-time">✨ AISA Giờ Rảnh</button>
-              <button class="btn btn-primary" id="btn-calendar-add-event" onclick="window.CalendarModule.openAddModal()" style="background: var(--app-calendar); box-shadow: 0 4px 14px var(--app-calendar-glow);">➕ Thêm Sự Kiện</button>
+              <button class="btn btn-primary" id="btn-calendar-add-event" onclick="window.CalendarModule.openAddModal()"
+                style="background: var(--app-calendar); box-shadow: 0 4px 14px var(--app-calendar-glow);">➕ Thêm Sự
+                Kiện</button>
             </div>
           </div>
 
@@ -462,7 +682,11 @@
             </div>
             <div class="tools-header-right">
               <button type="button" class="btn-new-tool-file" onclick="window.ToolsModule.triggerFileInput()">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
                 <span>Tải Lên Tệp Khác</span>
               </button>
             </div>
@@ -471,26 +695,27 @@
           <!-- Tab 1: Universal File Converter (Central Super Tool) -->
           <div class="tool-pane active" id="tool-pane-converter">
             <!-- Hidden file input -->
-            <input type="file" id="universal-file-input" style="display: none;" onchange="window.ToolsModule.onFileSelected(event)">
+            <input type="file" id="universal-file-input" style="display: none;"
+              onchange="window.ToolsModule.onFileSelected(event)">
 
             <!-- Dropzone Area -->
-            <div class="converter-dropzone" id="converter-dropzone" 
-                 onclick="window.ToolsModule.triggerFileInput()" 
-                 ondragover="window.ToolsModule.onDragOver(event)" 
-                 ondragleave="window.ToolsModule.onDragLeave(event)" 
-                 ondrop="window.ToolsModule.onFileDrop(event)">
+            <div class="converter-dropzone" id="converter-dropzone" onclick="window.ToolsModule.triggerFileInput()"
+              ondragover="window.ToolsModule.onDragOver(event)" ondragleave="window.ToolsModule.onDragLeave(event)"
+              ondrop="window.ToolsModule.onFileDrop(event)">
               <div class="dropzone-glow-ring">
                 <div class="dropzone-icon">
-                  <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
                   </svg>
                 </div>
               </div>
               <div class="dropzone-title">Kéo Thả Tệp Bất Kỳ Vào Đây Hoặc Bấm Để Chọn</div>
-              <div class="dropzone-subtitle">Chuyển đổi tức thì mọi định dạng video, âm thanh, hình ảnh và tài liệu bảng tính</div>
-              
+              <div class="dropzone-subtitle">Chuyển đổi tức thì mọi định dạng video, âm thanh, hình ảnh và tài liệu bảng
+                tính</div>
+
               <div class="dropzone-format-tags">
                 <span class="format-tag-pill video">🎬 Video (MP4, MKV, WebM, MOV, AVI)</span>
                 <span class="format-tag-pill audio">🎵 Audio (MP3, WAV, OGG, M4A, AAC)</span>
@@ -513,12 +738,17 @@
                         <span class="meta-dot">•</span>
                         <span class="converter-type-badge" id="file-meta-category">Định dạng</span>
                         <span class="meta-dot">•</span>
-                        <span id="file-meta-ext" style="font-family: var(--font-mono); color: var(--text-muted);">.ext</span>
+                        <span id="file-meta-ext"
+                          style="font-family: var(--font-mono); color: var(--text-muted);">.ext</span>
                       </div>
                     </div>
                   </div>
-                  <button type="button" class="btn btn-ghost" onclick="window.ToolsModule.triggerFileInput()" style="font-size: 12.5px;">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                  <button type="button" class="btn btn-ghost" onclick="window.ToolsModule.triggerFileInput()"
+                    style="font-size: 12.5px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="1 4 1 10 7 10" />
+                      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                    </svg>
                     <span>Đổi tệp khác</span>
                   </button>
                 </div>
@@ -549,7 +779,9 @@
 
                       <!-- Center Play/Pause Zoom Pulse Icon -->
                       <div class="mhent-center-action" id="converter-center-action">
-                        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" id="converter-center-action-path"/></svg>
+                        <svg viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" id="converter-center-action-path" />
+                        </svg>
                       </div>
 
                       <!-- Native Video Element (Controlled by Cinema UI) -->
@@ -573,25 +805,35 @@
                           <div class="mhent-controls-left">
                             <!-- Play / Pause -->
                             <button type="button" class="mhent-btn" id="btn-cinema-play" title="Phát/Tạm dừng (Space)">
-                              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" id="icon-cinema-play-path"/></svg>
+                              <svg viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" id="icon-cinema-play-path" />
+                              </svg>
                             </button>
 
                             <!-- Rewind 10s -->
                             <button type="button" class="mhent-btn" id="btn-cinema-rewind" title="Lùi 10 giây">
-                              <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+                              <svg viewBox="0 0 24 24">
+                                <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z" />
+                              </svg>
                             </button>
 
                             <!-- Forward 10s -->
                             <button type="button" class="mhent-btn" id="btn-cinema-forward" title="Tua 10 giây">
-                              <svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+                              <svg viewBox="0 0 24 24">
+                                <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" />
+                              </svg>
                             </button>
 
                             <!-- Volume -->
                             <div class="mhent-volume-container">
                               <button type="button" class="mhent-btn" id="btn-cinema-volume" title="Bật/Tắt âm thanh">
-                                <svg viewBox="0 0 24 24"><path id="icon-cinema-vol-path" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                                <svg viewBox="0 0 24 24">
+                                  <path id="icon-cinema-vol-path"
+                                    d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                                </svg>
                               </button>
-                              <input type="range" class="mhent-volume-slider" id="cinema-volume-slider" min="0" max="1" step="0.05" value="1">
+                              <input type="range" class="mhent-volume-slider" id="cinema-volume-slider" min="0" max="1"
+                                step="0.05" value="1">
                             </div>
 
                             <!-- Time Display -->
@@ -600,18 +842,26 @@
 
                           <div class="mhent-controls-right">
                             <!-- Playback Speed -->
-                            <button type="button" class="mhent-btn btn-speed-chip" id="btn-cinema-speed" title="Tốc độ phát">
+                            <button type="button" class="mhent-btn btn-speed-chip" id="btn-cinema-speed"
+                              title="Tốc độ phát">
                               <span id="cinema-speed-text">1.0x</span>
                             </button>
 
                             <!-- Picture in Picture -->
-                            <button type="button" class="mhent-btn" id="btn-cinema-pip" title="Thu nhỏ Picture-in-Picture">
-                              <svg viewBox="0 0 24 24"><path d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.98h18v14.03z"/></svg>
+                            <button type="button" class="mhent-btn" id="btn-cinema-pip"
+                              title="Thu nhỏ Picture-in-Picture">
+                              <svg viewBox="0 0 24 24">
+                                <path
+                                  d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.98h18v14.03z" />
+                              </svg>
                             </button>
 
                             <!-- Fullscreen -->
                             <button type="button" class="mhent-btn" id="btn-cinema-fullscreen" title="Toàn màn hình">
-                              <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                              <svg viewBox="0 0 24 24">
+                                <path
+                                  d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+                              </svg>
                             </button>
                           </div>
                         </div>
@@ -626,12 +876,25 @@
                         <span class="dock-badge" id="dock-meta-size">💾 0.0 MB</span>
                       </div>
                       <div class="cinema-dock-right">
-                        <button type="button" class="dock-btn-action" onclick="window.ToolsModule.captureCurrentFrameSnapshot()" title="Chụp lại khung hình video đang dừng">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        <button type="button" class="dock-btn-action"
+                          onclick="window.ToolsModule.captureCurrentFrameSnapshot()"
+                          title="Chụp lại khung hình video đang dừng">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                              d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                            <circle cx="12" cy="13" r="4" />
+                          </svg>
                           <span>Chụp Frame Này</span>
                         </button>
-                        <button type="button" class="dock-btn-action accent" onclick="window.ToolsModule.quickExtractWav()" title="Trích xuất toàn bộ âm thanh WAV Studio">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                        <button type="button" class="dock-btn-action accent"
+                          onclick="window.ToolsModule.quickExtractWav()" title="Trích xuất toàn bộ âm thanh WAV Studio">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M9 18V5l12-2v13" />
+                            <circle cx="6" cy="18" r="3" />
+                            <circle cx="18" cy="16" r="3" />
+                          </svg>
                           <span>Tách Luồng WAV</span>
                         </button>
                       </div>
@@ -669,13 +932,16 @@
                         <span class="option-label">Chất lượng nén ảnh:</span>
                         <span id="val-img-quality" class="option-val-badge">90%</span>
                       </div>
-                      <input type="range" id="converter-img-quality" min="30" max="100" value="90" oninput="document.getElementById('val-img-quality').innerText = this.value + '%'" class="converter-slider">
+                      <input type="range" id="converter-img-quality" min="30" max="100" value="90"
+                        oninput="document.getElementById('val-img-quality').innerText = this.value + '%'"
+                        class="converter-slider">
                     </div>
 
                     <!-- Audio Options -->
                     <div id="option-audio-sample" class="converter-option-item" style="display: none;">
                       <span class="option-label">Tần số lấy mẫu (Sample Rate):</span>
-                      <select id="converter-audio-rate" class="input-select-modern" style="padding: 6px 12px; font-size: 12px;">
+                      <select id="converter-audio-rate" class="input-select-modern"
+                        style="padding: 6px 12px; font-size: 12px;">
                         <option value="44100" selected>44.1 kHz (Chuẩn Studio / CD)</option>
                         <option value="48000">48.0 kHz (Chuẩn Video & Phim Ảnh)</option>
                         <option value="22050">22.05 kHz (Tiết kiệm dung lượng)</option>
@@ -685,7 +951,8 @@
                     <!-- Video Options -->
                     <div id="option-video-mode" class="converter-option-item" style="display: none;">
                       <span class="option-label">Chế độ Video:</span>
-                      <select id="converter-video-bitrate" class="input-select-modern" style="padding: 6px 12px; font-size: 12px;">
+                      <select id="converter-video-bitrate" class="input-select-modern"
+                        style="padding: 6px 12px; font-size: 12px;">
                         <option value="high">Chất lượng cao (Giữ nguyên độ sắc nét)</option>
                         <option value="medium" selected>Cân bằng (Dung lượng tối ưu)</option>
                         <option value="low">Nén siêu nhẹ (Chia sẻ nhanh)</option>
@@ -695,12 +962,14 @@
 
                   <!-- Start Action Bar -->
                   <div class="converter-action-bar">
-                    <button type="button" class="btn-convert-execute" id="btn-start-universal-convert" onclick="window.ToolsModule.startConversion()">
+                    <button type="button" class="btn-convert-execute" id="btn-start-universal-convert"
+                      onclick="window.ToolsModule.startConversion()">
                       <span class="convert-icon-spin">⚡</span>
                       <span id="btn-convert-label">Bắt Đầu Chuyển Đổi Ngay</span>
                     </button>
                     <div class="converter-security-badge">
-                      <span>🔒 100% Xử lý nội bộ trên máy khách (Client-Side), an toàn và bảo mật riêng tư tuyệt đối</span>
+                      <span>🔒 100% Xử lý nội bộ trên máy khách (Client-Side), an toàn và bảo mật riêng tư tuyệt
+                        đối</span>
                     </div>
                   </div>
 
@@ -708,12 +977,16 @@
                   <div id="converter-progress-box" class="converter-progress-box" style="display: none;">
                     <div class="progress-info-row">
                       <div class="progress-info-left">
-                        <span id="converter-progress-status" class="progress-status-text">Đang nạp và phân tích cấu trúc dữ liệu...</span>
-                        <span id="converter-progress-timer" class="progress-timer-text">⏱️ Đang ước tính thời gian...</span>
+                        <span id="converter-progress-status" class="progress-status-text">Đang nạp và phân tích cấu trúc
+                          dữ liệu...</span>
+                        <span id="converter-progress-timer" class="progress-timer-text">⏱️ Đang ước tính thời
+                          gian...</span>
                       </div>
                       <div class="progress-info-right">
                         <span id="converter-progress-percent" class="progress-percent-text">0%</span>
-                        <button type="button" class="btn-cancel-convert" id="btn-cancel-convert" onclick="window.ToolsModule.cancelConversion()" title="Hủy quá trình chuyển đổi">✕ Hủy</button>
+                        <button type="button" class="btn-cancel-convert" id="btn-cancel-convert"
+                          onclick="window.ToolsModule.cancelConversion()" title="Hủy quá trình chuyển đổi">✕
+                          Hủy</button>
                       </div>
                     </div>
                     <div class="converter-progress-bar-bg">
@@ -731,15 +1004,28 @@
                       </div>
                     </div>
                     <div class="result-buttons-row">
-                      <button type="button" class="btn-result-action download" id="btn-download-result" onclick="window.ToolsModule.downloadResult()">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                      <button type="button" class="btn-result-action download" id="btn-download-result"
+                        onclick="window.ToolsModule.downloadResult()">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                          stroke-width="2.2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" x2="12" y1="15" y2="3" />
+                        </svg>
                         <span>Tải Tệp Về Máy</span>
                       </button>
-                      <button type="button" class="btn-result-action drive" id="btn-save-to-drive" onclick="window.ToolsModule.saveResultToDrive()">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+                      <button type="button" class="btn-result-action drive" id="btn-save-to-drive"
+                        onclick="window.ToolsModule.saveResultToDrive()">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                          stroke-width="2">
+                          <ellipse cx="12" cy="5" rx="9" ry="3" />
+                          <path d="M3 5v14a9 3 0 0 0 18 0V5" />
+                          <path d="M3 12a9 3 0 0 0 18 0" />
+                        </svg>
                         <span>Lưu Vào MHEnt Media Drive</span>
                       </button>
-                      <button type="button" class="btn-result-action reset" onclick="window.ToolsModule.resetConverter()">
+                      <button type="button" class="btn-result-action reset"
+                        onclick="window.ToolsModule.resetConverter()">
                         <span>🔄 Chuyển tệp khác</span>
                       </button>
                     </div>
@@ -752,23 +1038,29 @@
           <!-- Tab 2: QR Checkin & Scanner -->
           <div class="tool-pane" id="tool-pane-qr">
             <div style="display: flex; gap: 24px; flex-wrap: wrap;">
-              <div style="flex: 1; min-width: 280px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 22px; box-shadow: 0 4px 18px rgba(0,0,0,0.2);">
+              <div
+                style="flex: 1; min-width: 280px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 22px; box-shadow: 0 4px 18px rgba(0,0,0,0.2);">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
                   <span style="font-size: 20px;">📱</span>
                   <h3 style="font-size: 16px; font-weight: 700; color: #fff;">Tạo Mã QR Điểm Danh & Truy Cập</h3>
                 </div>
                 <div class="form-group">
                   <label class="form-label-modern">Nội Dung Hoặc Đường Dẫn Cần Tạo QR</label>
-                  <input type="text" class="input-text-modern" id="qr-input-text" value="https://workspace.mhentuniverse.com">
+                  <input type="text" class="input-text-modern" id="qr-input-text"
+                    value="https://workspace.mhentuniverse.com">
                 </div>
-                <button class="btn btn-primary" id="btn-gen-qr" style="background: var(--app-tools); width: 100%; padding: 10px;">Tạo Mã QR Mới</button>
+                <button class="btn btn-primary" id="btn-gen-qr"
+                  style="background: var(--app-tools); width: 100%; padding: 10px;">Tạo Mã QR Mới</button>
                 <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center;">
-                  <canvas id="qr-display-canvas" width="220" height="220" style="border-radius: var(--radius-sm); box-shadow: var(--shadow-md);"></canvas>
-                  <span id="qr-code-content-text" style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 10px; word-break: break-all; text-align: center;"></span>
+                  <canvas id="qr-display-canvas" width="220" height="220"
+                    style="border-radius: var(--radius-sm); box-shadow: var(--shadow-md);"></canvas>
+                  <span id="qr-code-content-text"
+                    style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 10px; word-break: break-all; text-align: center;"></span>
                 </div>
               </div>
 
-              <div style="flex: 1; min-width: 280px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 22px; box-shadow: 0 4px 18px rgba(0,0,0,0.2);">
+              <div
+                style="flex: 1; min-width: 280px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 22px; box-shadow: 0 4px 18px rgba(0,0,0,0.2);">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
                   <span style="font-size: 20px;">📷</span>
                   <h3 style="font-size: 16px; font-weight: 700; color: #fff;">Máy Quét Mã QR Thành Viên</h3>
@@ -777,7 +1069,8 @@
                   <div class="qr-scan-line"></div>
                   <span style="color: var(--text-muted); font-size: 13px; z-index: 2;">Khung ngắm Camera Scanner</span>
                 </div>
-                <button class="btn btn-secondary" style="width: 100%; margin-top: 18px; padding: 10px;" onclick="window.UI.showToast('Điểm danh thành công! ✅', 'Thành viên đã check-in vào sự kiện', 'success')">
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 18px; padding: 10px;"
+                  onclick="window.UI.showToast('Điểm danh thành công! ✅', 'Thành viên đã check-in vào sự kiện', 'success')">
                   Bấm Thử Quét Mã Điểm Danh
                 </button>
               </div>
@@ -786,19 +1079,26 @@
 
           <!-- Tab 3: Wiki -->
           <div class="tool-pane" id="tool-pane-wiki">
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; box-shadow: 0 4px 18px rgba(0,0,0,0.2);">
+            <div
+              style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; box-shadow: 0 4px 18px rgba(0,0,0,0.2);">
               <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
                 <span style="font-size: 24px;">🌟</span>
-                <h2 style="font-size: 19px; font-weight: 800; color: #fff;">MHEnt Universe - Quy Chuẩn & Thiết Lập Thế Giới</h2>
+                <h2 style="font-size: 19px; font-weight: 800; color: #fff;">MHEnt Universe - Quy Chuẩn & Thiết Lập Thế
+                  Giới</h2>
               </div>
-              <div style="line-height: 1.7; color: var(--text-medium); font-size: 14px; display: flex; flex-direction: column; gap: 12px;">
-                <p><strong>1. Tôn chỉ hoạt động:</strong> Sáng tạo vô cực, kết nối không gian mạng, tối ưu năng suất và bảo tồn bản sắc MHEnt.</p>
+              <div
+                style="line-height: 1.7; color: var(--text-medium); font-size: 14px; display: flex; flex-direction: column; gap: 12px;">
+                <p><strong>1. Tôn chỉ hoạt động:</strong> Sáng tạo vô cực, kết nối không gian mạng, tối ưu năng suất và
+                  bảo tồn bản sắc MHEnt.</p>
                 <p><strong>2. Hệ thống nhân cách AISA:</strong></p>
                 <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
-                  <li>🌸 <strong>Harmony:</strong> Luôn hỗ trợ tận tình, ngọt ngào, xưng 'em' và gọi người dùng là 'Master'.</li>
-                  <li>😈 <strong>Echo:</strong> Đanh đá, sắc sảo, thích cà khịa nhưng luôn bám sát tiến độ công việc để nhắc nhở team.</li>
+                  <li>🌸 <strong>Harmony:</strong> Luôn hỗ trợ tận tình, ngọt ngào, xưng 'em' và gọi người dùng là
+                    'Master'.</li>
+                  <li>😈 <strong>Echo:</strong> Đanh đá, sắc sảo, thích cà khịa nhưng luôn bám sát tiến độ công việc để
+                    nhắc nhở team.</li>
                 </ul>
-                <p><strong>3. Tiêu chuẩn bảo mật dữ liệu:</strong> Mọi thao tác xử lý hình ảnh, video và tài liệu đều ưu tiên vận hành tại máy khách (client-side) để đảm bảo quyền riêng tư nội bộ tối đa.</p>
+                <p><strong>3. Tiêu chuẩn bảo mật dữ liệu:</strong> Mọi thao tác xử lý hình ảnh, video và tài liệu đều ưu
+                  tiên vận hành tại máy khách (client-side) để đảm bảo quyền riêng tư nội bộ tối đa.</p>
               </div>
             </div>
           </div>
@@ -810,7 +1110,8 @@
                 <span style="font-size: 22px;">📝</span>
                 <h3 style="font-size: 17px; font-weight: 700; color: #fff;">Ghi Chú Nhanh & Sổ Tay Nội Bộ</h3>
               </div>
-              <button type="button" class="btn btn-primary" onclick="window.ToolsModule.createQuickNote()" style="background: var(--app-tools);">
+              <button type="button" class="btn btn-primary" onclick="window.ToolsModule.createQuickNote()"
+                style="background: var(--app-tools);">
                 ➕ Thêm Ghi Chú Mới
               </button>
             </div>
@@ -833,7 +1134,10 @@
       <div class="aisa-drawer-header">
         <div class="aisa-header-info">
           <div class="aisa-logo-badge">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f472b6" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f472b6" stroke-width="2">
+              <path
+                d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z" />
+            </svg>
           </div>
           <div>
             <div class="aisa-title-text">AISA Copilot</div>
@@ -845,30 +1149,49 @@
 
       <div class="persona-switch">
         <button class="persona-btn active both" data-persona="both">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z" />
+          </svg>
           <span>Cả Hai</span>
         </button>
         <button class="persona-btn harmony" data-persona="harmony">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#f472b6" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#f472b6" stroke-width="2">
+            <path
+              d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+          </svg>
           <span>Harmony</span>
         </button>
         <button class="persona-btn echo" data-persona="echo">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a855f7" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a855f7" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
           <span>Echo</span>
         </button>
       </div>
 
       <div class="aisa-quick-chips">
         <button class="quick-chip" data-action="summary">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z" />
+          </svg>
           <span>Tóm tắt</span>
         </button>
         <button class="quick-chip" data-action="deadline">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
           <span>Deadline</span>
         </button>
         <button class="quick-chip" data-action="brainstorm">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18h6" />
+            <path d="M10 22h4" />
+            <path
+              d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
+          </svg>
           <span>Ý tưởng</span>
         </button>
       </div>
@@ -877,9 +1200,13 @@
 
       <div class="aisa-input-wrapper">
         <div class="aisa-input-box">
-          <input type="text" class="aisa-input-field" id="aisa-input-text" placeholder="Hỏi Harmony & Echo bất cứ điều gì...">
+          <input type="text" class="aisa-input-field" id="aisa-input-text"
+            placeholder="Hỏi Harmony & Echo bất cứ điều gì...">
           <button class="aisa-send-btn" id="aisa-send-btn" title="Gửi">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
           </button>
         </div>
       </div>
@@ -902,7 +1229,8 @@
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label">Người Nhận</label>
-            <input type="text" class="input-text" id="mail-to-recipient" value="all-team@mhentuniverse.internal" required>
+            <input type="text" class="input-text" id="mail-to-recipient" value="all-team@mhentuniverse.internal"
+              required>
           </div>
           <div class="form-group">
             <label class="form-label">Chủ Đề</label>
@@ -911,9 +1239,11 @@
           <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
               <label class="form-label">Nội Dung</label>
-              <button type="button" class="btn btn-ghost" id="btn-ai-draft-mail" style="font-size: 11px; color: var(--aisa-harmony);">✨ AISA Viết Hộ</button>
+              <button type="button" class="btn btn-ghost" id="btn-ai-draft-mail"
+                style="font-size: 11px; color: var(--aisa-harmony);">✨ AISA Viết Hộ</button>
             </div>
-            <textarea class="input-textarea" id="mail-to-body" rows="6" placeholder="Nhập nội dung thư..." required></textarea>
+            <textarea class="input-textarea" id="mail-to-body" rows="6" placeholder="Nhập nội dung thư..."
+              required></textarea>
           </div>
         </div>
         <div class="modal-footer">
@@ -979,7 +1309,8 @@
       <div class="modal-header">
         <div class="modal-header-brand">
           <div class="modal-header-icon-box">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="3" ry="3"></rect>
               <line x1="16" y1="2" x2="16" y2="6"></line>
               <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -987,8 +1318,10 @@
             </svg>
           </div>
           <div>
-            <h3 class="modal-title" id="modal-add-event-title" style="font-size: 16px; font-weight: 800; color: #ffffff;">Thêm Sự Kiện Lịch Trình</h3>
-            <p class="modal-subtitle" id="modal-add-event-subtitle">Lên kế hoạch, lịch họp hoặc lịch làm việc định kỳ</p>
+            <h3 class="modal-title" id="modal-add-event-title"
+              style="font-size: 16px; font-weight: 800; color: #ffffff;">Thêm Sự Kiện Lịch Trình</h3>
+            <p class="modal-subtitle" id="modal-add-event-subtitle">Lên kế hoạch, lịch họp hoặc lịch làm việc định kỳ
+            </p>
           </div>
         </div>
         <button type="button" class="modal-close-btn" title="Đóng">✕</button>
@@ -998,14 +1331,16 @@
         <!-- Hidden Edit Event ID -->
         <input type="hidden" id="event-edit-id" value="">
 
-        <div class="modal-body custom-scrollbar" style="max-height: 74vh; padding: 18px 22px; gap: 14px; display: flex; flex-direction: column;">
+        <div class="modal-body custom-scrollbar"
+          style="max-height: 74vh; padding: 18px 22px; gap: 14px; display: flex; flex-direction: column;">
           <!-- Tên sự kiện -->
           <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label-modern">
               <span>Tên Sự Kiện</span>
               <span class="required-star">*</span>
             </label>
-            <input type="text" class="input-text-modern" id="event-title" placeholder="VD: Họp tổng duyệt kịch bản / Ca làm việc sáng" required autofocus>
+            <input type="text" class="input-text-modern" id="event-title"
+              placeholder="VD: Họp tổng duyệt kịch bản / Ca làm việc sáng" required autofocus>
           </div>
 
           <!-- Ngày & Khung giờ dạng Time Picker Selection -->
@@ -1015,7 +1350,8 @@
                 <span>Ngày Diễn Ra</span>
                 <span class="required-star">*</span>
               </label>
-              <input type="date" class="input-text-modern" id="event-date" onchange="window.CalendarModule.updateWeekdayIndicator()" required>
+              <input type="date" class="input-text-modern" id="event-date"
+                onchange="window.CalendarModule.updateWeekdayIndicator()" required>
             </div>
 
             <!-- Khung giờ dạng Time Selection -->
@@ -1024,21 +1360,27 @@
                 <label class="form-label-modern" style="margin-bottom: 0;">
                   <span>Khung Giờ</span>
                 </label>
-                <label style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); cursor: pointer; user-select: none;">
-                  <input type="checkbox" id="event-is-all-day" onchange="window.CalendarModule.toggleAllDay(this.checked)" style="width: 14px; height: 14px; accent-color: var(--primary); cursor: pointer;">
+                <label
+                  style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); cursor: pointer; user-select: none;">
+                  <input type="checkbox" id="event-is-all-day"
+                    onchange="window.CalendarModule.toggleAllDay(this.checked)"
+                    style="width: 14px; height: 14px; accent-color: var(--primary); cursor: pointer;">
                   <span>Cả ngày</span>
                 </label>
               </div>
 
               <!-- Time Pickers Row -->
               <div id="event-time-pickers-row" style="display: flex; align-items: center; gap: 6px;">
-                <input type="time" class="input-text-modern" id="event-time-start" value="09:00" style="padding: 9px 8px; font-size: 13px;" onchange="window.CalendarModule.onTimePickerChange()">
+                <input type="time" class="input-text-modern" id="event-time-start" value="09:00"
+                  style="padding: 9px 8px; font-size: 13px;" onchange="window.CalendarModule.onTimePickerChange()">
                 <span style="color: var(--text-muted); font-size: 12px; font-weight: 700;">-</span>
-                <input type="time" class="input-text-modern" id="event-time-end" value="10:30" style="padding: 9px 8px; font-size: 13px;" onchange="window.CalendarModule.onTimePickerChange()">
+                <input type="time" class="input-text-modern" id="event-time-end" value="10:30"
+                  style="padding: 9px 8px; font-size: 13px;" onchange="window.CalendarModule.onTimePickerChange()">
               </div>
 
               <!-- All day banner (hidden by default) -->
-              <div id="event-all-day-banner" style="display: none; padding: 8px 10px; border-radius: 9px; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); font-size: 12px; color: #c4b5fd; font-weight: 600; text-align: center;">
+              <div id="event-all-day-banner"
+                style="display: none; padding: 8px 10px; border-radius: 9px; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); font-size: 12px; color: #c4b5fd; font-weight: 600; text-align: center;">
                 ☀️ Sự kiện diễn ra cả ngày
               </div>
 
@@ -1047,11 +1389,16 @@
 
               <!-- Quick Time Preset Chips -->
               <div id="event-time-quick-presets" style="display: flex; gap: 4px; margin-top: 5px; overflow-x: auto;">
-                <button type="button" class="time-preset-btn" onclick="window.CalendarModule.setTimeDuration(30)">+30p</button>
-                <button type="button" class="time-preset-btn" onclick="window.CalendarModule.setTimeDuration(60)">+1h</button>
-                <button type="button" class="time-preset-btn" onclick="window.CalendarModule.setTimeDuration(120)">+2h</button>
-                <button type="button" class="time-preset-btn" onclick="window.CalendarModule.setTimeRange('08:00', '12:00')">Sáng</button>
-                <button type="button" class="time-preset-btn" onclick="window.CalendarModule.setTimeRange('13:30', '17:30')">Chiều</button>
+                <button type="button" class="time-preset-btn"
+                  onclick="window.CalendarModule.setTimeDuration(30)">+30p</button>
+                <button type="button" class="time-preset-btn"
+                  onclick="window.CalendarModule.setTimeDuration(60)">+1h</button>
+                <button type="button" class="time-preset-btn"
+                  onclick="window.CalendarModule.setTimeDuration(120)">+2h</button>
+                <button type="button" class="time-preset-btn"
+                  onclick="window.CalendarModule.setTimeRange('08:00', '12:00')">Sáng</button>
+                <button type="button" class="time-preset-btn"
+                  onclick="window.CalendarModule.setTimeRange('13:30', '17:30')">Chiều</button>
               </div>
             </div>
           </div>
@@ -1073,7 +1420,8 @@
                 </div>
               </div>
               <label class="ui-switch" onclick="event.stopPropagation()">
-                <input type="checkbox" id="event-is-recurring" onchange="window.CalendarModule.toggleRecurringFields(this.checked)">
+                <input type="checkbox" id="event-is-recurring"
+                  onchange="window.CalendarModule.toggleRecurringFields(this.checked)">
                 <span class="switch-slider"></span>
               </label>
             </div>
@@ -1092,22 +1440,26 @@
               <div class="recur-field-group">
                 <div class="recur-field-label">Tần Suất Lặp Lại</div>
                 <div class="recur-freq-grid">
-                  <button type="button" class="recur-freq-btn active" data-pattern="weekly" onclick="window.CalendarModule.setRecurrencePattern('weekly')">
+                  <button type="button" class="recur-freq-btn active" data-pattern="weekly"
+                    onclick="window.CalendarModule.setRecurrencePattern('weekly')">
                     <span class="freq-icon">🗓️</span>
                     <span class="freq-text">Hàng Tuần</span>
                     <span class="freq-sub" id="recur-weekly-sub">Vào Thứ Hai</span>
                   </button>
-                  <button type="button" class="recur-freq-btn" data-pattern="daily" onclick="window.CalendarModule.setRecurrencePattern('daily')">
+                  <button type="button" class="recur-freq-btn" data-pattern="daily"
+                    onclick="window.CalendarModule.setRecurrencePattern('daily')">
                     <span class="freq-icon">☀️</span>
                     <span class="freq-text">Mỗi Ngày</span>
                     <span class="freq-sub">Tất cả các ngày</span>
                   </button>
-                  <button type="button" class="recur-freq-btn" data-pattern="weekdays" onclick="window.CalendarModule.setRecurrencePattern('weekdays')">
+                  <button type="button" class="recur-freq-btn" data-pattern="weekdays"
+                    onclick="window.CalendarModule.setRecurrencePattern('weekdays')">
                     <span class="freq-icon">💼</span>
                     <span class="freq-text">Thứ 2 - Thứ 6</span>
                     <span class="freq-sub">Ngày làm việc</span>
                   </button>
-                  <button type="button" class="recur-freq-btn" data-pattern="monthly" onclick="window.CalendarModule.setRecurrencePattern('monthly')">
+                  <button type="button" class="recur-freq-btn" data-pattern="monthly"
+                    onclick="window.CalendarModule.setRecurrencePattern('monthly')">
                     <span class="freq-icon">📅</span>
                     <span class="freq-text">Hàng Tháng</span>
                     <span class="freq-sub">Cùng ngày hàng tháng</span>
@@ -1133,10 +1485,12 @@
               <div class="recur-field-group">
                 <div class="recur-field-label">Thời Hạn Kết Thúc Chuỗi</div>
                 <div class="recur-mode-switch">
-                  <button type="button" class="recur-mode-btn active" id="btn-recur-mode-never" onclick="window.CalendarModule.setRecurrenceEndMode('never')">
+                  <button type="button" class="recur-mode-btn active" id="btn-recur-mode-never"
+                    onclick="window.CalendarModule.setRecurrenceEndMode('never')">
                     <span>♾️ Vô Hạn (Không dừng)</span>
                   </button>
-                  <button type="button" class="recur-mode-btn" id="btn-recur-mode-until" onclick="window.CalendarModule.setRecurrenceEndMode('until')">
+                  <button type="button" class="recur-mode-btn" id="btn-recur-mode-until"
+                    onclick="window.CalendarModule.setRecurrenceEndMode('until')">
                     <span>⏳ Đến ngày cụ thể</span>
                   </button>
                 </div>
@@ -1144,12 +1498,16 @@
                 <div id="recur-until-picker-box" style="display: none; margin-top: 8px;">
                   <div style="display: flex; gap: 8px; align-items: center;">
                     <div style="flex: 1;">
-                      <input type="date" class="input-text-modern" id="event-recurrence-end" placeholder="VD: 2026-10-15" onchange="window.CalendarModule.updateRecurSummary()">
+                      <input type="date" class="input-text-modern" id="event-recurrence-end"
+                        placeholder="VD: 2026-10-15" onchange="window.CalendarModule.updateRecurSummary()">
                     </div>
                     <div class="recur-quick-chips">
-                      <button type="button" class="quick-date-btn" onclick="window.CalendarModule.setRecurQuickEnd(1)">+1T</button>
-                      <button type="button" class="quick-date-btn" onclick="window.CalendarModule.setRecurQuickEnd(3)">+3T</button>
-                      <button type="button" class="quick-date-btn" onclick="window.CalendarModule.setRecurQuickEnd('year')">Hết Năm</button>
+                      <button type="button" class="quick-date-btn"
+                        onclick="window.CalendarModule.setRecurQuickEnd(1)">+1T</button>
+                      <button type="button" class="quick-date-btn"
+                        onclick="window.CalendarModule.setRecurQuickEnd(3)">+3T</button>
+                      <button type="button" class="quick-date-btn"
+                        onclick="window.CalendarModule.setRecurQuickEnd('year')">Hết Năm</button>
                     </div>
                   </div>
                   <div class="recur-live-summary" id="recur-live-summary">
@@ -1165,7 +1523,8 @@
             <label class="form-label-modern">
               <span>Phân Loại Sự Kiện</span>
             </label>
-            <select class="input-select-modern" id="event-type" onchange="window.CalendarModule.onEventTypeChange(this.value)">
+            <select class="input-select-modern" id="event-type"
+              onchange="window.CalendarModule.onEventTypeChange(this.value)">
               <option value="meeting">🟣 Cuộc họp (Meeting)</option>
               <option value="deadline">🔴 Hạn chót (Deadline)</option>
               <option value="launch">🟢 Ra mắt sản phẩm (Launch)</option>
@@ -1225,7 +1584,8 @@
             <label class="form-label-modern">
               <span>Địa Điểm / Phòng Họp (Tùy chọn)</span>
             </label>
-            <input type="text" class="input-text-modern" id="event-location" placeholder="VD: Phòng Họp Trực Tuyến A / Studio 1">
+            <input type="text" class="input-text-modern" id="event-location"
+              placeholder="VD: Phòng Họp Trực Tuyến A / Studio 1">
           </div>
 
           <!-- Ghi Chú / Mô Tả -->
@@ -1233,7 +1593,9 @@
             <label class="form-label-modern">
               <span>Ghi Chú / Mô Tả Chi Tiết (Tùy chọn)</span>
             </label>
-            <textarea class="input-text-modern" id="event-description" rows="2" placeholder="Ghi chú nội dung, checklist, link tài liệu hoặc lưu ý quan trọng..." style="resize: vertical; min-height: 52px; font-family: inherit; font-size: 13px; line-height: 1.4;"></textarea>
+            <textarea class="input-text-modern" id="event-description" rows="2"
+              placeholder="Ghi chú nội dung, checklist, link tài liệu hoặc lưu ý quan trọng..."
+              style="resize: vertical; min-height: 52px; font-family: inherit; font-size: 13px; line-height: 1.4;"></textarea>
           </div>
         </div>
 
@@ -1257,20 +1619,26 @@
     <div class="modal-card modal-calendar-card" style="max-width: 480px; padding: 0; overflow: hidden;">
       <div class="modal-top-accent" id="event-detail-accent" style="background: #8b5cf6;"></div>
 
-      <div class="modal-header" style="padding: 16px 20px 12px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between;">
+      <div class="modal-header"
+        style="padding: 16px 20px 12px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span id="event-detail-type-badge" class="event-detail-badge" style="background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.4);">
+          <span id="event-detail-type-badge" class="event-detail-badge"
+            style="background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.4);">
             🟣 Cuộc họp
           </span>
-          <span id="event-detail-recur-badge" class="event-detail-badge" style="display: none; background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4);">
+          <span id="event-detail-recur-badge" class="event-detail-badge"
+            style="display: none; background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4);">
             🔁 Lặp lại
           </span>
         </div>
-        <button type="button" class="modal-close-btn" onclick="window.UI.closeModal('modal-event-detail')" title="Đóng">✕</button>
+        <button type="button" class="modal-close-btn" onclick="window.UI.closeModal('modal-event-detail')"
+          title="Đóng">✕</button>
       </div>
 
-      <div class="modal-body custom-scrollbar" style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
-        <h2 id="event-detail-title" style="margin: 0; font-size: 18px; font-weight: 800; color: #ffffff; line-height: 1.35; word-break: break-word;">
+      <div class="modal-body custom-scrollbar"
+        style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+        <h2 id="event-detail-title"
+          style="margin: 0; font-size: 18px; font-weight: 800; color: #ffffff; line-height: 1.35; word-break: break-word;">
           Tên sự kiện
         </h2>
 
@@ -1317,18 +1685,22 @@
             <div class="event-detail-item-icon">📝</div>
             <div style="flex: 1; min-width: 0;">
               <div class="event-detail-item-label">Ghi chú / Mô tả chi tiết</div>
-              <div class="event-detail-item-val" id="event-detail-desc" style="white-space: pre-wrap; font-weight: 500; font-size: 12.5px; line-height: 1.45; color: #e2e8f0; margin-top: 2px;"></div>
+              <div class="event-detail-item-val" id="event-detail-desc"
+                style="white-space: pre-wrap; font-weight: 500; font-size: 12.5px; line-height: 1.45; color: #e2e8f0; margin-top: 2px;">
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <div class="modal-footer-modern" style="padding: 12px 20px; justify-content: space-between;">
-        <button type="button" class="btn-modern-ghost" id="event-detail-delete-btn" style="color: #f87171; border-color: rgba(239, 68, 68, 0.35);">
+        <button type="button" class="btn-modern-ghost" id="event-detail-delete-btn"
+          style="color: #f87171; border-color: rgba(239, 68, 68, 0.35);">
           🗑️ Xóa sự kiện
         </button>
         <div style="display: flex; gap: 8px;">
-          <button type="button" class="btn-modern-ghost" onclick="window.UI.closeModal('modal-event-detail')">Đóng</button>
+          <button type="button" class="btn-modern-ghost"
+            onclick="window.UI.closeModal('modal-event-detail')">Đóng</button>
           <button type="button" class="btn-modern-primary" id="event-detail-edit-btn">
             ✏️ Chỉnh sửa
           </button>
@@ -1357,9 +1729,14 @@
       </div>
       <div class="modal-body">
         <!-- Tabs in Profile Modal -->
-        <div style="display: flex; gap: 8px; margin-bottom: 20px; background: var(--bg-surface-elevated); padding: 4px; border-radius: var(--radius-sm);">
-          <button type="button" class="btn profile-tab-btn active" data-tab="info" onclick="window.AuthModule.switchProfileTab('info')" style="flex: 1; padding: 8px; font-size: 13px;">👤 Hồ Sơ & Không Gian</button>
-          <button type="button" class="btn profile-tab-btn" id="tab-btn-master-create-acc" data-tab="create" onclick="window.AuthModule.switchProfileTab('create')" style="flex: 1; padding: 8px; font-size: 13px; display: none;">➕ Cấp Tài Khoản</button>
+        <div
+          style="display: flex; gap: 8px; margin-bottom: 20px; background: var(--bg-surface-elevated); padding: 4px; border-radius: var(--radius-sm);">
+          <button type="button" class="btn profile-tab-btn active" data-tab="info"
+            onclick="window.AuthModule.switchProfileTab('info')" style="flex: 1; padding: 8px; font-size: 13px;">👤 Hồ
+            Sơ & Không Gian</button>
+          <button type="button" class="btn profile-tab-btn" id="tab-btn-master-create-acc" data-tab="create"
+            onclick="window.AuthModule.switchProfileTab('create')"
+            style="flex: 1; padding: 8px; font-size: 13px; display: none;">➕ Cấp Tài Khoản</button>
         </div>
 
         <!-- Pane 1: User Info & Workspace Management -->
@@ -1367,16 +1744,19 @@
           <!-- Căn cước người dùng -->
           <div class="form-group">
             <label class="form-label">Căn Cước Người Dùng</label>
-            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
               <div style="display: flex; align-items: center; gap: 12px;">
                 <div class="user-display-avatar" style="font-size: 32px;">👑</div>
                 <div>
                   <div style="font-weight: 800; font-size: 15px;" class="user-display-name">Master Yurika</div>
-                  <div style="font-size: 12px; color: var(--text-muted);" class="user-display-email">yurika@mhentuniverse.internal</div>
+                  <div style="font-size: 12px; color: var(--text-muted);" class="user-display-email">
+                    yurika@mhentuniverse.internal</div>
                   <div style="margin-top: 4px;"><span class="badge badge-primary user-display-role">MASTER</span></div>
                 </div>
               </div>
-              <button class="btn btn-secondary btn-sm" onclick="window.AuthModule.toggleRole()" title="Chuyển đổi quyền nhanh để test">Đổi Role</button>
+              <button class="btn btn-secondary btn-sm" onclick="window.AuthModule.toggleRole()"
+                title="Chuyển đổi quyền nhanh để test">Đổi Role</button>
             </div>
           </div>
 
@@ -1384,31 +1764,48 @@
           <div class="form-group" style="margin-top: 18px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <div>
-                <label class="form-label" style="margin-bottom: 0; display: inline-block;">Không Gian Làm Việc Của Tôi</label>
-                <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">(Nhấp vào Không Gian để Chỉnh Sửa & Cấp Quyền 👑)</div>
+                <label class="form-label" style="margin-bottom: 0; display: inline-block;">Không Gian Làm Việc Của
+                  Tôi</label>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">(Nhấp vào Không Gian để Chỉnh
+                  Sửa & Cấp Quyền 👑)</div>
               </div>
               <div style="display: flex; gap: 6px;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.toggleCreateWorkspaceBox()" style="font-size: 11.5px; padding: 4px 8px;">➕ Tạo Mới</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.toggleJoinWorkspaceBox()" style="font-size: 11.5px; padding: 4px 8px;">🔗 Nhập Mã</button>
+                <button type="button" class="btn btn-secondary btn-sm"
+                  onclick="window.AuthModule.toggleCreateWorkspaceBox()" style="font-size: 11.5px; padding: 4px 8px;">➕
+                  Tạo Mới</button>
+                <button type="button" class="btn btn-secondary btn-sm"
+                  onclick="window.AuthModule.toggleJoinWorkspaceBox()" style="font-size: 11.5px; padding: 4px 8px;">🔗
+                  Nhập Mã</button>
               </div>
             </div>
 
             <!-- Box Tạo Workspace Mới (Mặc định ẩn) -->
-            <div id="box-create-workspace" style="display: none; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
-              <div style="font-weight: 800; font-size: 13px; margin-bottom: 10px; color: var(--text-high);">➕ Khởi Tạo Không Gian Mới (Bạn Là Master 👑)</div>
-              
+            <div id="box-create-workspace"
+              style="display: none; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
+              <div style="font-weight: 800; font-size: 13px; margin-bottom: 10px; color: var(--text-high);">➕ Khởi Tạo
+                Không Gian Mới (Bạn Là Master 👑)</div>
+
               <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
                 <div>
-                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; display: block;">Tên Không Gian</label>
-                  <input type="text" class="input-text" id="new-ws-name" placeholder="VD: Game Dev Studio hoặc Team Media" oninput="window.AuthModule.suggestWorkspaceCode(this.value)" required>
+                  <label
+                    style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; display: block;">Tên
+                    Không Gian</label>
+                  <input type="text" class="input-text" id="new-ws-name"
+                    placeholder="VD: Game Dev Studio hoặc Team Media"
+                    oninput="window.AuthModule.suggestWorkspaceCode(this.value)" required>
                 </div>
                 <div style="display: flex; gap: 8px;">
                   <div style="flex: 1;">
-                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; display: block;">Mã Định Danh (Tùy chỉnh)</label>
-                    <input type="text" class="input-text" id="new-ws-code" placeholder="VD: MHENT-GAME-DEV" style="font-family: var(--font-mono); text-transform: uppercase;">
+                    <label
+                      style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; display: block;">Mã
+                      Định Danh (Tùy chỉnh)</label>
+                    <input type="text" class="input-text" id="new-ws-code" placeholder="VD: MHENT-GAME-DEV"
+                      style="font-family: var(--font-mono); text-transform: uppercase;">
                   </div>
                   <div style="width: 100px;">
-                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; display: block;">Biểu Tượng</label>
+                    <label
+                      style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; display: block;">Biểu
+                      Tượng</label>
                     <select class="input-select" id="new-ws-icon" style="height: 38px;">
                       <option value="planet">🪐 Planet</option>
                       <option value="code">💻 Dev</option>
@@ -1422,22 +1819,29 @@
                 </div>
               </div>
 
-              <button type="button" class="btn btn-primary btn-sm" onclick="window.AuthModule.handleCreateWorkspace()" style="width: 100%; padding: 8px;">
+              <button type="button" class="btn btn-primary btn-sm" onclick="window.AuthModule.handleCreateWorkspace()"
+                style="width: 100%; padding: 8px;">
                 ✨ Tạo & Trở Thành Master
               </button>
             </div>
 
             <!-- Box Nhập Mã Gia Nhập (Mặc định ẩn) -->
-            <div id="box-join-workspace" style="display: none; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
-              <div style="font-weight: 800; font-size: 13px; margin-bottom: 8px; color: var(--text-high);">🔗 Gia Nhập Không Gian Của Đồng Đội</div>
+            <div id="box-join-workspace"
+              style="display: none; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
+              <div style="font-weight: 800; font-size: 13px; margin-bottom: 8px; color: var(--text-high);">🔗 Gia Nhập
+                Không Gian Của Đồng Đội</div>
               <div style="display: flex; gap: 8px;">
-                <input type="text" class="input-text" id="join-team-code-input" placeholder="VD: MHENT-GAME-2026" style="flex: 1;">
-                <button type="button" class="btn btn-primary btn-sm" onclick="window.AuthModule.joinTeam(document.getElementById('join-team-code-input').value)">Gia Nhập</button>
+                <input type="text" class="input-text" id="join-team-code-input" placeholder="VD: MHENT-GAME-2026"
+                  style="flex: 1;">
+                <button type="button" class="btn btn-primary btn-sm"
+                  onclick="window.AuthModule.joinTeam(document.getElementById('join-team-code-input').value)">Gia
+                  Nhập</button>
               </div>
             </div>
 
             <!-- Container danh sách Workspace Cards -->
-            <div id="my-workspaces-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 190px; overflow-y: auto;">
+            <div id="my-workspaces-list"
+              style="display: flex; flex-direction: column; gap: 8px; max-height: 190px; overflow-y: auto;">
               <!-- Sẽ render động qua AuthModule.renderWorkspacesList() -->
             </div>
           </div>
@@ -1451,9 +1855,12 @@
 
         <!-- Pane 2: Master Create Account Form (Only for Master/Admin) -->
         <div id="profile-pane-create" style="display: none;">
-          <form id="form-master-create-member" onsubmit="event.preventDefault(); window.AuthModule.createMemberAccount(document.getElementById('master-reg-user').value, document.getElementById('master-reg-name').value, document.getElementById('master-reg-pass').value, document.getElementById('master-reg-role').value);">
-            <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px; font-size: 12.5px; color: var(--text-high); line-height: 1.5;">
-              👑 <strong>Quyền Hạn Quản Trị:</strong> Bạn có thể cấp tài khoản thành viên mới để nhân sự đăng nhập vào tổ chức mà không làm mất phiên làm việc hiện tại của bạn.
+          <form id="form-master-create-member"
+            onsubmit="event.preventDefault(); window.AuthModule.createMemberAccount(document.getElementById('master-reg-user').value, document.getElementById('master-reg-name').value, document.getElementById('master-reg-pass').value, document.getElementById('master-reg-role').value);">
+            <div
+              style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px; font-size: 12.5px; color: var(--text-high); line-height: 1.5;">
+              👑 <strong>Quyền Hạn Quản Trị:</strong> Bạn có thể cấp tài khoản thành viên mới để nhân sự đăng nhập vào
+              tổ chức mà không làm mất phiên làm việc hiện tại của bạn.
             </div>
             <div class="form-group">
               <label class="form-label">Họ & Tên Thành Viên</label>
@@ -1462,11 +1869,13 @@
             <div class="form-group">
               <label class="form-label">Tên Đăng Nhập (Username)</label>
               <input type="text" class="input-text" id="master-reg-user" placeholder="VD: sara" required>
-              <span style="font-size: 11px; color: var(--text-muted); margin-top: 3px; display: block;">Tự động gắn đuôi @mhentuniverse.internal</span>
+              <span style="font-size: 11px; color: var(--text-muted); margin-top: 3px; display: block;">Tự động gắn đuôi
+                @mhentuniverse.internal</span>
             </div>
             <div class="form-group">
               <label class="form-label">Mật Khẩu Khởi Tạo</label>
-              <input type="password" class="input-text" id="master-reg-pass" placeholder="Ít nhất 6 ký tự" minlength="6" required>
+              <input type="password" class="input-text" id="master-reg-pass" placeholder="Ít nhất 6 ký tự" minlength="6"
+                required>
             </div>
             <div class="form-group">
               <label class="form-label">Phân Cấp Quyền Hạn (Role)</label>
@@ -1485,8 +1894,10 @@
         <!-- Pane 3: Workspace Drill-down: Edit Workspace & Manage Members / Permissions -->
         <div id="profile-pane-ws-manage" style="display: none;">
           <!-- Navigation & Header Bar -->
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.backToWorkspacesList()" style="font-size: 12px; display: flex; align-items: center; gap: 5px;">
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.backToWorkspacesList()"
+              style="font-size: 12px; display: flex; align-items: center; gap: 5px;">
               ← Quay Lại
             </button>
             <div id="ws-manage-active-status">
@@ -1495,20 +1906,26 @@
           </div>
 
           <!-- Section 1: ⚙️ Chỉnh Sửa Thông Tin Không Gian -->
-          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;">
-            <div style="font-weight: 800; font-size: 13.5px; margin-bottom: 10px; color: var(--text-high); display: flex; align-items: center; justify-content: space-between;">
+          <div
+            style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;">
+            <div
+              style="font-weight: 800; font-size: 13.5px; margin-bottom: 10px; color: var(--text-high); display: flex; align-items: center; justify-content: space-between;">
               <span style="display: flex; align-items: center; gap: 6px;">
                 <span id="ws-manage-icon-display" style="font-size: 18px;">🪐</span>
                 <span>Chỉnh Sửa Không Gian</span>
               </span>
-              <span class="badge badge-primary" id="ws-manage-code-badge" style="font-family: var(--font-mono); font-size: 10.5px;">MHENT-CORE-2026</span>
+              <span class="badge badge-primary" id="ws-manage-code-badge"
+                style="font-family: var(--font-mono); font-size: 10.5px;">MHENT-CORE-2026</span>
             </div>
 
-            <form id="form-edit-workspace-info" onsubmit="event.preventDefault(); window.AuthModule.handleSaveWorkspaceInfo();">
+            <form id="form-edit-workspace-info"
+              onsubmit="event.preventDefault(); window.AuthModule.handleSaveWorkspaceInfo();">
               <div style="display: flex; flex-direction: column; gap: 10px;">
                 <div>
-                  <label class="form-label" style="font-size: 11.5px; margin-bottom: 4px;">Tên Không Gian Làm Việc</label>
-                  <input type="text" class="input-text" id="ws-manage-name-input" placeholder="Tên không gian..." required>
+                  <label class="form-label" style="font-size: 11.5px; margin-bottom: 4px;">Tên Không Gian Làm
+                    Việc</label>
+                  <input type="text" class="input-text" id="ws-manage-name-input" placeholder="Tên không gian..."
+                    required>
                 </div>
                 <div style="display: flex; gap: 10px;">
                   <div style="flex: 1;">
@@ -1526,13 +1943,17 @@
                   <div style="flex: 1;">
                     <label class="form-label" style="font-size: 11.5px; margin-bottom: 4px;">Mã Định Danh (Code)</label>
                     <div style="display: flex; gap: 4px;">
-                      <input type="text" class="input-text" id="ws-manage-code-input" readonly style="font-family: var(--font-mono); background: rgba(0,0,0,0.2); font-size: 11px;">
-                      <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.copyWorkspaceCode(document.getElementById('ws-manage-code-input').value)" title="Sao chép mã mời">📋</button>
+                      <input type="text" class="input-text" id="ws-manage-code-input" readonly
+                        style="font-family: var(--font-mono); background: rgba(0,0,0,0.2); font-size: 11px;">
+                      <button type="button" class="btn btn-secondary btn-sm"
+                        onclick="window.AuthModule.copyWorkspaceCode(document.getElementById('ws-manage-code-input').value)"
+                        title="Sao chép mã mời">📋</button>
                     </div>
                   </div>
                 </div>
                 <div style="display: flex; gap: 8px; margin-top: 4px;">
-                  <button type="submit" class="btn btn-primary btn-sm" id="btn-save-ws-info" style="flex: 1; padding: 8px;">
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-save-ws-info"
+                    style="flex: 1; padding: 8px;">
                     💾 Lưu Thay Đổi Không Gian
                   </button>
                 </div>
@@ -1541,33 +1962,46 @@
           </div>
 
           <!-- Section 2: 👑 Cấp Quyền & Quản Lý Thành Viên -->
-          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
+          <div
+            style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <div style="font-weight: 800; font-size: 13.5px; color: var(--text-high); display: flex; align-items: center; gap: 6px;">
+              <div
+                style="font-weight: 800; font-size: 13.5px; color: var(--text-high); display: flex; align-items: center; gap: 6px;">
                 <span>👥</span>
                 <span>Thành Viên & Cấp Quyền (<span id="ws-manage-members-count">4</span>)</span>
               </div>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="window.AuthModule.refreshMembersFromCloud(window.AuthModule.currentManageWsCode)" style="font-size: 11px; padding: 3px 8px;" title="Đồng bộ lại từ Cloud">
+              <button type="button" class="btn btn-secondary btn-sm"
+                onclick="window.AuthModule.refreshMembersFromCloud(window.AuthModule.currentManageWsCode)"
+                style="font-size: 11px; padding: 3px 8px;" title="Đồng bộ lại từ Cloud">
                 🔄 Tải Lại
               </button>
             </div>
 
             <!-- Search bar -->
             <div style="margin-bottom: 10px;">
-              <input type="text" class="input-text" id="ws-manage-member-search" placeholder="🔍 Tìm thành viên theo tên, email..." style="width: 100%; font-size: 12px; padding: 7px 10px;" oninput="window.AuthModule.filterManageMembers(this.value)">
+              <input type="text" class="input-text" id="ws-manage-member-search"
+                placeholder="🔍 Tìm thành viên theo tên, email..."
+                style="width: 100%; font-size: 12px; padding: 7px 10px;"
+                oninput="window.AuthModule.filterManageMembers(this.value)">
             </div>
 
             <!-- Members list container -->
-            <div id="ws-manage-members-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 2px;">
+            <div id="ws-manage-members-list"
+              style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 2px;">
               <!-- Rendered dynamically -->
             </div>
 
             <!-- Action buttons bottom -->
-            <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
-              <button type="button" class="btn btn-primary btn-sm" onclick="window.AuthModule.openCreateAccountForCurrentWorkspace()" style="flex: 1; font-size: 11.5px; padding: 6px;">
+            <div
+              style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+              <button type="button" class="btn btn-primary btn-sm"
+                onclick="window.AuthModule.openCreateAccountForCurrentWorkspace()"
+                style="flex: 1; font-size: 11.5px; padding: 6px;">
                 ➕ Cấp Tài Khoản Cho Không Gian Này
               </button>
-              <button type="button" class="btn btn-danger btn-sm" id="btn-ws-manage-delete" onclick="window.AuthModule.handleDeleteWorkspace(window.AuthModule.currentManageWsCode)" style="font-size: 11.5px; padding: 6px 10px;">
+              <button type="button" class="btn btn-danger btn-sm" id="btn-ws-manage-delete"
+                onclick="window.AuthModule.handleDeleteWorkspace(window.AuthModule.currentManageWsCode)"
+                style="font-size: 11.5px; padding: 6px 10px;">
                 🗑️ Xóa WS
               </button>
             </div>
@@ -1583,41 +2017,62 @@
   <!-- ==========================================
        CỔNG XÁC THỰC (GATEKEEPER OVERLAY - CHỈ ĐĂNG NHẬP)
        ========================================== -->
-  <div id="auth-gatekeeper-overlay" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(9, 13, 22, 0.94); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
-    <div style="background: var(--bg-surface); border: 1px solid var(--border-medium); border-radius: var(--radius-lg); padding: 34px 28px; max-width: 420px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
+  <div id="auth-gatekeeper-overlay"
+    style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(9, 13, 22, 0.94); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+    <div
+      style="background: var(--bg-surface); border: 1px solid var(--border-medium); border-radius: var(--radius-lg); padding: 34px 28px; max-width: 420px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
       <div style="text-align: center; margin-bottom: 22px;">
         <div style="font-size: 44px; margin-bottom: 8px;">🪐</div>
-        <h2 style="font-size: 21px; font-weight: 900; color: var(--text-high); margin-bottom: 4px;">Cổng Xác Thực MHEnt Org</h2>
+        <h2 style="font-size: 21px; font-weight: 900; color: var(--text-high); margin-bottom: 4px;">Cổng Xác Thực MHEnt
+          Org</h2>
         <p style="color: var(--text-muted); font-size: 13px;">Không gian làm việc số nội bộ MHEnt Universe</p>
       </div>
 
       <!-- Single Focus Login Form -->
-      <form id="gate-form-login" onsubmit="event.preventDefault(); window.AuthModule.login(document.getElementById('gate-login-user').value, document.getElementById('gate-login-pass').value);">
+      <form id="gate-form-login"
+        onsubmit="event.preventDefault(); window.AuthModule.login(document.getElementById('gate-login-user').value, document.getElementById('gate-login-pass').value);">
         <div class="form-group">
           <label class="form-label">Tên Định Danh / Email Tổ Chức</label>
-          <input type="text" class="input-text" id="gate-login-user" placeholder="yurika (hoặc yurika@mhentuniverse.internal)" required>
-          <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block;">Tự động gắn đuôi @mhentuniverse.internal nếu chỉ gõ tên.</span>
+          <input type="text" class="input-text" id="gate-login-user"
+            placeholder="yurika (hoặc yurika@mhentuniverse.internal)" required>
+          <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block;">Tự động gắn đuôi
+            @mhentuniverse.internal nếu chỉ gõ tên.</span>
         </div>
         <div class="form-group">
           <label class="form-label">Mật Khẩu</label>
           <input type="password" class="input-text" id="gate-login-pass" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 11px; margin-top: 8px; font-size: 14.5px;">
+        <button type="submit" class="btn btn-primary"
+          style="width: 100%; padding: 11px; margin-top: 8px; font-size: 14.5px;">
           🚀 Đăng Nhập Firebase
         </button>
       </form>
 
       <div style="text-align: center; margin: 16px 0; color: var(--text-muted); font-size: 11.5px; position: relative;">
-        <span style="background: var(--bg-surface); padding: 0 8px; position: relative; z-index: 1;">HOẶC TIẾP TỤC VỚI</span>
-        <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border-subtle); z-index: 0;"></div>
+        <span style="background: var(--bg-surface); padding: 0 8px; position: relative; z-index: 1;">HOẶC TIẾP TỤC
+          VỚI</span>
+        <div
+          style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border-subtle); z-index: 0;">
+        </div>
       </div>
 
-      <button type="button" class="btn btn-secondary" onclick="window.AuthModule.loginWithGoogle()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; padding: 10px;">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+      <button type="button" class="btn btn-secondary" onclick="window.AuthModule.loginWithGoogle()"
+        style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; padding: 10px;">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+          <path fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+        </svg>
         Đăng nhập bằng Google
       </button>
 
-      <button type="button" class="btn btn-ghost" onclick="window.AuthModule.useDemoGuest()" style="width: 100%; font-size: 13px; color: var(--text-muted);">
+      <button type="button" class="btn btn-ghost" onclick="window.AuthModule.useDemoGuest()"
+        style="width: 100%; font-size: 13px; color: var(--text-muted);">
         👀 Vào Thử Chế Độ Khách (Demo Mode)
       </button>
     </div>
@@ -1629,8 +2084,12 @@
   <div id="command-palette-overlay">
     <div class="command-palette-box">
       <div class="command-search-header">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" class="command-search-input" id="command-search-input" placeholder="Gõ lệnh hoặc tìm kiếm ứng dụng, task, email...">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <input type="text" class="command-search-input" id="command-search-input"
+          placeholder="Gõ lệnh hoặc tìm kiếm ứng dụng, task, email...">
       </div>
       <div class="command-results-list" id="command-results-list"></div>
       <div class="command-footer">
@@ -1650,23 +2109,43 @@
        ========================================== -->
   <nav id="mobile-nav-bar">
     <button class="mobile-nav-btn active" data-app="chat">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
       <span>Chat</span>
     </button>
     <button class="mobile-nav-btn" data-app="mail">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <rect width="20" height="16" x="2" y="4" rx="2" />
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+      </svg>
       <span>Mail</span>
     </button>
     <button class="mobile-nav-btn" data-app="todo">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+        <path d="m9 14 2 2 4-4" />
+      </svg>
       <span>Todo</span>
     </button>
     <button class="mobile-nav-btn" data-app="drive">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path
+          d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
+      </svg>
       <span>Drive</span>
     </button>
     <button class="mobile-nav-btn" data-app="tools">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path
+          d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+      </svg>
       <span>Tools</span>
     </button>
   </nav>
@@ -1694,12 +2173,13 @@
       window.AuthModule.init();
       window.UI.init();
       window.AisaModule.init();
-      
+
       // PWA Service Worker Registration
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("sw.js").catch(() => {});
+        navigator.serviceWorker.register("sw.js").catch(() => { });
       }
     });
   </script>
 </body>
+
 </html>

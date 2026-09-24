@@ -4,7 +4,7 @@
 window.MHENT_CONFIG = {
   APP_NAME: "MHEnt Workspace",
   VERSION: "1.0.0",
-  API_BASE_URL: "http://localhost:8000", // AISA FastAPI Server Endpoint
+  API_BASE_URL: "https://api.mhentuniverse.com", // AISA Cloudflare Core Endpoint
   JITSI_DOMAIN: "meet.jit.si",
   ORG_DOMAIN: "@mhentuniverse.internal",
 
@@ -21,7 +21,7 @@ window.MHENT_CONFIG = {
     URL: "https://ctzkgchjheirxwejctvl.supabase.co",
     KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0emtnY2hqaGVpcnh3ZWpjdHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNjA0MTgsImV4cCI6MjA5MTgzNjQxOH0.Wl-sBpH1VvcR6-Y4D4UAVm1f5_brGK3cVIHRJBEhOJ0"
   },
-  
+
   DEFAULT_WORKSPACE: {
     id: "mhent-core",
     name: "MHEnt Universe HQ",

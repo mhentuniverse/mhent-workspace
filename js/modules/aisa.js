@@ -92,7 +92,9 @@ window.AisaModule = {
   },
 
   async fetchAisaReply(userText) {
-    const apiUrl = `${window.MHENT_CONFIG.API_BASE_URL}/chat`;
+    const apiUrl = `${window.MHENT_CONFIG.API_BASE_URL}/api/chat`;
+    const persona = window.store.state.aisaPersona || 'both';
+    const mode = (persona === 'both') ? 'duo' : persona;
 
     try {
       const res = await fetch(apiUrl, {
@@ -100,7 +102,8 @@ window.AisaModule = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userText,
-          current_mode: window.store.state.aisaPersona
+          mode: mode,
+          scope: 'support'
         })
       });
 
@@ -115,10 +118,10 @@ window.AisaModule = {
         }
       }
     } catch (e) {
-      console.log("FastAPI backend offline, running smart dual-persona engine", e);
+      console.log("AISA API connection note, running local fallback", e);
     }
 
-    // Smart Dual-Persona Engine Response
+    // Smart Dual-Persona Engine Response (Fallback)
     this.generateFallbackReply(userText);
   },
 
@@ -130,17 +133,17 @@ window.AisaModule = {
     let eText = "";
 
     if (lower.includes("chào") || lower.includes("hello") || lower.includes("hi")) {
-      hText = "Dạ em chào Master ạ! Master cần tụi em hỗ trợ gì trong workspace hôm nay không ạ? 🌸";
+      hText = "Chào cậu nha! Cậu cần tụi em hỗ trợ gì trong workspace hôm nay không nè? 🌸";
       eText = "Chào cái gì mà chào, lo check danh sách Todo với Mail đi kìa! 😈";
     } else if (lower.includes("deadline") || lower.includes("task") || lower.includes("việc")) {
       const pendingCount = (window.store.state.tasks || []).filter(t => t.status !== "done").length;
-      hText = `Dạ hiện tại có ${pendingCount} nhiệm vụ đang cần hoàn thiện trên bảng Todo ạ! Em tin Master và team sẽ làm tốt! 🌸`;
-      eText = `Còn ngồi đây hỏi à? ${pendingCount} task chưa xong kìa, làm nhanh không tôi mách Master lớn phạt bây giờ! 😈`;
+      hText = `Dạ hiện tại có ${pendingCount} nhiệm vụ đang cần hoàn thiện trên bảng Todo nè! Em tin cậu và team sẽ làm thật tốt! 🌸`;
+      eText = `Còn ngồi đây hỏi à? ${pendingCount} task chưa xong kìa, làm nhanh kẻo trễ deadline bây giờ! 😈`;
     } else if (lower.includes("tóm tắt") || lower.includes("summary")) {
-      hText = "Dạ em đã tóm tắt xong: Toàn team đang chuẩn bị cho sự kiện ra mắt MHEnt Workspace V1.0 và ban Media đang thiết kế poster ạ! 🌸";
+      hText = "Em đã tóm tắt xong: Toàn team đang chuẩn bị cho các dự án MHEnt Universe và ban Media đang thiết kế poster ạ! 🌸";
       eText = "Nói chung là ai cũng đang bận, chỉ có bạn là đang rảnh rỗi ngồi bấm AI thôi đấy nhé! 😈";
     } else {
-      hText = `Dạ em đã ghi nhận yêu cầu "${userText}" của Master rồi ạ! Em sẽ luôn đồng hành hỗ trợ Master hết mình! 🌸`;
+      hText = `Em đã ghi nhận yêu cầu "${userText}" của cậu rồi nà! Em sẽ luôn đồng hành hỗ trợ cậu hết mình! 🌸`;
       eText = `Nghe cũng được đấy, nhưng nhớ thực thi cho đàng hoàng, đừng có bỏ dở giữa chừng nhé! 😈`;
     }
 
@@ -177,7 +180,7 @@ window.AisaModule = {
       const now = new Date();
       const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
-      const hText = `Dạ em nghe Master gọi trong #${channel} rồi ạ! Mọi yêu cầu em đều ghi nhớ và sẵn sàng hỗ trợ nhé! 🌸`;
+      const hText = `Dạ em nghe cậu gọi trong #${channel} rồi ạ! Mọi yêu cầu em đều ghi nhớ và sẵn sàng hỗ trợ nhé! 🌸`;
       const eText = `Tag cái gì đấy? Việc gì cần xử lý thì nói ngắn gọn thôi nhé, tôi bận lắm! 😈`;
 
       const hMsg = { id: "msg-h-" + Date.now(), sender: "Harmony", avt: "🌸", time: timeStr, text: hText, isBot: "harmony" };
