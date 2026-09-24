@@ -53,10 +53,7 @@ window.AisaModule = {
     // 1. Chuẩn hóa xuống dòng
     let text = String(raw).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-    // 2. Tách gạch đầu dòng inline nếu mô hình viết dính liền " * " hoặc " • " hoặc " - "
-    text = text.replace(/([^\n])\s+([*•\-])\s+(?=[^\s])/g, '$1\n$2 ');
-
-    // 3. Escape HTML chống XSS
+    // 2. Escape HTML chống XSS
     const escapeMap = {
       '&': '&amp;',
       '<': '&lt;',
