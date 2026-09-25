@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/apps.css">
   <link rel="stylesheet" href="css/mhent-ui.css">
+  <link rel="stylesheet" href="css/mhent-mobile.css">
 </head>
 
 <body>
@@ -2114,17 +2115,99 @@
   <div id="toast-container"></div>
 
   <!-- ==========================================
-       8. MOBILE BOTTOM NAVIGATION BAR
+       8. MOBILE OVERLAY & SIDE DRAWER (V2.0 APP STYLE)
+       ========================================== -->
+  <div class="mhent-workspace-overlay" id="mhent-workspace-overlay" onclick="window.UI.closeAllMobileDrawers()"></div>
+
+  <div class="mhent-ws-drawer" id="mhent-ws-drawer">
+    <div class="ws-drawer-header">
+      <div class="ws-drawer-avt" id="ws-drawer-avatar">👑</div>
+      <div>
+        <h4 class="ws-drawer-user-name" id="ws-drawer-username">Master Yurika</h4>
+        <span class="ws-drawer-user-role" id="ws-drawer-role">MASTER CLEARANCE</span>
+      </div>
+      <button type="button" class="ws-drawer-close" onclick="window.UI.toggleMobileDrawer(false)">&times;</button>
+    </div>
+
+    <div class="ws-drawer-menu-list">
+      <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 6px 0 2px 4px;">Ứng Dụng Mở Rộng</div>
+      
+      <div class="ws-drawer-item" onclick="window.UI.switchApp('meet', true); window.UI.toggleMobileDrawer(false);">
+        <div class="ws-drawer-item-left">
+          <span class="icon">📹</span>
+          <span>MHEnt Meet (Họp Video)</span>
+        </div>
+        <span style="font-size: 12px; color: var(--text-muted);">Mở ➔</span>
+      </div>
+
+      <div class="ws-drawer-item" onclick="window.UI.switchApp('calendar', true); window.UI.toggleMobileDrawer(false);">
+        <div class="ws-drawer-item-left">
+          <span class="icon">📅</span>
+          <span>MHEnt Calendar (Lịch)</span>
+        </div>
+        <span style="font-size: 12px; color: var(--text-muted);">Mở ➔</span>
+      </div>
+
+      <div class="ws-drawer-item" onclick="window.UI.switchApp('tools', true); window.UI.toggleMobileDrawer(false);">
+        <div class="ws-drawer-item-left">
+          <span class="icon">🛠️</span>
+          <span>Phân Khu Đặc Nhiệm (Tools)</span>
+        </div>
+        <span style="font-size: 12px; color: var(--text-muted);">Mở ➔</span>
+      </div>
+
+      <div class="ws-drawer-item" onclick="window.store.setAisaOpen(true); window.UI.updateAisaDrawerState(); window.UI.toggleMobileDrawer(false);">
+        <div class="ws-drawer-item-left">
+          <span class="icon">🌸</span>
+          <span>AISA Copilot (Harmony & Echo)</span>
+        </div>
+        <span style="font-size: 11px; padding: 2px 6px; border-radius: 6px; background: rgba(236,72,153,0.15); color: #ec4899; font-weight: 800;">AI</span>
+      </div>
+
+      <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 12px 0 2px 4px;">Không Gian & Hệ Thống</div>
+
+      <div class="ws-drawer-item" onclick="window.AuthModule.openTeamModal(); window.UI.toggleMobileDrawer(false);">
+        <div class="ws-drawer-item-left">
+          <span class="icon">🪐</span>
+          <span>Quản Trị Không Gian Số</span>
+        </div>
+      </div>
+
+      <div class="ws-drawer-item" onclick="document.getElementById('btn-toggle-theme').click();">
+        <div class="ws-drawer-item-left">
+          <span class="icon">🌓</span>
+          <span>Đổi Giao Diện Sáng / Tối</span>
+        </div>
+      </div>
+
+      <div class="ws-drawer-item" onclick="window.location.href='https://mhentuniverse.com';">
+        <div class="ws-drawer-item-left">
+          <span class="icon">🌌</span>
+          <span>Về Đại Sảnh MHEnt Universe</span>
+        </div>
+        <span style="font-size: 12px; color: var(--text-muted);">↗</span>
+      </div>
+    </div>
+
+    <div style="padding-top: 16px; border-top: 1px solid var(--border-subtle); margin-top: auto;">
+      <button type="button" class="btn btn-outline" style="width: 100%; border-color: rgba(239, 68, 68, 0.4); color: #ef4444; border-radius: 12px; min-height: 42px; font-weight: 800;" onclick="window.AuthModule.logout(); window.UI.toggleMobileDrawer(false);">
+        🚪 Đăng Xuất Khỏi Workspace
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       9. MOBILE BOTTOM NAVIGATION BAR
        ========================================== -->
   <nav id="mobile-nav-bar">
-    <button class="mobile-nav-btn active" data-app="chat">
+    <button class="mobile-nav-btn active" data-app="chat" title="Tin nhắn">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
       <span>Chat</span>
     </button>
-    <button class="mobile-nav-btn" data-app="mail">
+    <button class="mobile-nav-btn" data-app="mail" title="Hòm thư">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round">
         <rect width="20" height="16" x="2" y="4" rx="2" />
@@ -2132,7 +2215,7 @@
       </svg>
       <span>Mail</span>
     </button>
-    <button class="mobile-nav-btn" data-app="todo">
+    <button class="mobile-nav-btn" data-app="todo" title="Công việc">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round">
         <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
@@ -2141,7 +2224,7 @@
       </svg>
       <span>Todo</span>
     </button>
-    <button class="mobile-nav-btn" data-app="drive">
+    <button class="mobile-nav-btn" data-app="drive" title="Tài liệu">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round">
         <path
@@ -2149,13 +2232,14 @@
       </svg>
       <span>Drive</span>
     </button>
-    <button class="mobile-nav-btn" data-app="tools">
+    <button class="mobile-nav-btn" data-app="more" id="mobile-nav-btn-more" title="Menu & Tiện ích">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round">
-        <path
-          d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+        <circle cx="12" cy="12" r="1.5"></circle>
+        <circle cx="19" cy="12" r="1.5"></circle>
+        <circle cx="5" cy="12" r="1.5"></circle>
       </svg>
-      <span>Tools</span>
+      <span>Menu</span>
     </button>
   </nav>
 

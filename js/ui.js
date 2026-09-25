@@ -56,9 +56,27 @@ window.UI = {
     mobileBtns.forEach(btn => {
       btn.addEventListener("click", () => {
         const appId = btn.getAttribute("data-app");
-        this.switchApp(appId, true);
+        if (appId === "more") {
+          this.toggleMobileDrawer();
+        } else {
+          this.closeAllMobileDrawers();
+          this.switchApp(appId, true);
+        }
       });
     });
+
+    // Auto-close sidebar on mobile when clicking nav items inside sidebar
+    const sidebar = document.getElementById("context-sidebar");
+    if (sidebar) {
+      sidebar.addEventListener("click", (e) => {
+        if (window.innerWidth <= 768) {
+          const item = e.target.closest(".sidebar-nav-item, .chat-channel-item, .chat-dm-item, .folder-item");
+          if (item) {
+            setTimeout(() => this.toggleMobileSidebar(false), 200);
+          }
+        }
+      });
+    }
   },
 
   switchApp(appId, updateHistory = true) {
@@ -352,11 +370,56 @@ window.UI = {
 
   toggleMobileSidebar(forceState) {
     const sidebar = document.getElementById("context-sidebar");
+    const overlay = document.getElementById("mhent-workspace-overlay");
+    const drawer = document.getElementById("mhent-ws-drawer");
+    
+    if (drawer) drawer.classList.remove("open");
+
     if (sidebar) {
-      if (typeof forceState === "boolean") {
-        sidebar.classList.toggle("open", forceState);
-      } else {
-        sidebar.classList.toggle("open");
+      const next = typeof forceState === "boolean" ? forceState : !sidebar.classList.contains("open");
+      sidebar.classList.toggle("open", next);
+      if (overlay) overlay.classList.toggle("show", next);
+    }
+  },
+
+  toggleMobileDrawer(forceState) {
+    const drawer = document.getElementById("mhent-ws-drawer");
+    const overlay = document.getElementById("mhent-workspace-overlay");
+    const sidebar = document.getElementById("context-sidebar");
+
+    if (sidebar) sidebar.classList.remove("open");
+
+    if (drawer) {
+      const next = typeof forceState === "boolean" ? forceState : !drawer.classList.contains("open");
+      drawer.classList.toggle("open", next);
+      if (overlay) overlay.classList.toggle("show", next);
+      if (next) this.syncMobileProfile();
+    }
+  },
+
+  closeAllMobileDrawers() {
+    const sidebar = document.getElementById("context-sidebar");
+    const drawer = document.getElementById("mhent-ws-drawer");
+    const overlay = document.getElementById("mhent-workspace-overlay");
+
+    if (sidebar) sidebar.classList.remove("open");
+    if (drawer) drawer.classList.remove("open");
+    if (overlay) overlay.classList.remove("show");
+  },
+
+  syncMobileProfile() {
+    const nameEl = document.getElementById("ws-drawer-username");
+    const roleEl = document.getElementById("ws-drawer-role");
+    const avtEl = document.getElementById("ws-drawer-avatar");
+
+    const user = window.store?.state?.user;
+    if (user && nameEl) {
+      nameEl.textContent = user.displayName || user.email?.split('@')[0] || "Thành viên MHEnt";
+      if (roleEl) {
+        roleEl.textContent = (user.role || "MASTER CLEARANCE").toUpperCase();
+      }
+      if (avtEl && user.photoURL) {
+        avtEl.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
       }
     }
   },
