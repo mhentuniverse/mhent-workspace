@@ -507,6 +507,64 @@ window.CalendarModule = {
     this.setupCalendarDragAndDrop();
   },
 
+  selectDay(dateStr) {
+    if (!dateStr) return;
+    const events = (window.store && window.store.state && window.store.state.events ? window.store.state.events : [])
+      .filter(e => e.date === dateStr && !String(e.id).startsWith("ev-demo-"));
+    if (window.innerWidth <= 768 && events.length > 0) {
+      this.showMobileDayAgenda(dateStr, events);
+    } else {
+      this.openAddModal(dateStr);
+    }
+  },
+
+  showMobileDayAgenda(dateStr, dayEvents) {
+    let old = document.getElementById("mobile-calendar-agenda-overlay");
+    if (old) old.remove();
+
+    const dParts = dateStr.split('-');
+    const formattedDate = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : dateStr;
+
+    let eventsHtml = dayEvents.map(ev => {
+      const color = ev.color || this.getColorForType(ev.type);
+      return `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: rgba(255,255,255,0.05); border-left: 3.5px solid ${color}; border-radius: 10px; margin-bottom: 6px; cursor: pointer;" onclick="document.getElementById('mobile-calendar-agenda-overlay').remove(); window.CalendarModule.showEventDetail('${ev.originalId || ev.id}')">
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-weight: 800; font-size: 13px; color: #fff;">${this.escapeHtml(ev.title)}</span>
+            <span style="font-size: 11px; color: #94a3b8;">🕒 ${ev.time || 'Cả ngày'}</span>
+          </div>
+          <span style="font-size: 11px; color: #cbd5e1; font-weight: 700;">Xem ➔</span>
+        </div>
+      `;
+    }).join("");
+
+    let overlay = document.createElement("div");
+    overlay.id = "mobile-calendar-agenda-overlay";
+    overlay.className = "modal-overlay";
+    overlay.style.cssText = "display: flex; position: fixed; inset: 0; background: rgba(5,8,15,0.72); backdrop-filter: blur(8px); z-index: 999999; align-items: center; justify-content: center; padding: 14px;";
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+    overlay.innerHTML = `
+      <div style="background: rgba(15,23,42,0.98); border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; width: 100%; max-width: 360px; padding: 16px; box-shadow: 0 20px 45px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
+          <div>
+            <h3 style="font-size: 14.5px; font-weight: 800; margin: 0; color: #fff;">📅 Sự kiện ngày ${formattedDate}</h3>
+            <span style="font-size: 11px; color: #94a3b8;">Có ${dayEvents.length} sự kiện được xếp lịch</span>
+          </div>
+          <button style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; padding: 4px;" onclick="document.getElementById('mobile-calendar-agenda-overlay').remove()">✕</button>
+        </div>
+        <div style="max-height: 220px; overflow-y: auto;">
+          ${eventsHtml}
+        </div>
+        <button class="btn btn-primary" style="width: 100%; min-height: 35px; font-size: 11.5px; font-weight: 800; border-radius: 10px; background: var(--app-calendar, #0ea5e9);" onclick="document.getElementById('mobile-calendar-agenda-overlay').remove(); window.CalendarModule.openAddModal('${dateStr}')">
+          ➕ Thêm sự kiện mới vào ngày này
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+  },
+
   /**
    * Helper: Calculate Monday of the current viewDate's week
    */
