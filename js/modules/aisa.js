@@ -200,6 +200,7 @@ window.AisaModule = {
           message: userText,
           mode: mode,
           scope: 'workspace',
+          model: (window.MHENT_CONFIG && window.MHENT_CONFIG.AISA_MODEL) || 'aisa-workspace-v1',
           clientDate: todayStr,
           clientDay: dayName,
           contextData: {

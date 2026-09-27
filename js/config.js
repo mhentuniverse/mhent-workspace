@@ -5,6 +5,7 @@ window.MHENT_CONFIG = {
   APP_NAME: "MHEnt Workspace",
   VERSION: "1.0.0",
   API_BASE_URL: "https://api.mhentuniverse.com", // AISA Cloudflare Core Endpoint
+  AISA_MODEL: "aisa-workspace-v1", // Multiverse Operations & Task Coordinator
   JITSI_DOMAIN: "meet.jit.si",
   ORG_DOMAIN: "@mhentuniverse.internal",
 
