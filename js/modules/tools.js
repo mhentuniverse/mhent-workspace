@@ -1853,11 +1853,26 @@ window.ToolsModule = {
   },
 
   createQuickNote() {
-    const title = prompt("Tiêu đề ghi chú:", "Quy trình làm việc mới");
-    if (!title || !title.trim()) return;
+    let title = "Quy trình làm việc mới";
+    let content = "1. Kiểm tra tài nguyên\n2. Cập nhật tiến độ dự án\n3. Báo cáo cuối ngày";
+    if (typeof window.mhentPrompt === "function") {
+      window.mhentPrompt("Tiêu đề ghi chú:", "Tiêu đề ghi chú", title).then(t => {
+        if (!t || !t.trim()) return;
+        window.mhentPrompt("Nội dung ghi chú:", "Nội dung...", content).then(c => {
+          if (c === null) return;
+          this.saveQuickNote(t.trim(), c.trim());
+        });
+      });
+      return;
+    }
+    const t = prompt("Tiêu đề ghi chú:", title);
+    if (!t || !t.trim()) return;
+    const c = prompt("Nội dung ghi chú:", content);
+    if (c === null) return;
+    this.saveQuickNote(t.trim(), c.trim());
+  },
 
-    const content = prompt("Nội dung ghi chú:", "1. Kiểm tra tài nguyên\n2. Cập nhật tiến độ dự án\n3. Báo cáo cuối ngày");
-    if (content === null) return;
+  saveQuickNote(title, content) {
 
     const newNote = {
       id: "note-" + Date.now(),
@@ -1883,7 +1898,10 @@ window.ToolsModule = {
   },
 
   async deleteNote(noteId) {
-    if (!confirm("Bạn có chắc chắn muốn xóa ghi chú này không?")) return;
+    if (typeof window.mhentConfirm === "function") {
+      const ok = await window.mhentConfirm("Xóa Ghi Chú", "Bạn có chắc chắn muốn xóa ghi chú này không?");
+      if (!ok) return;
+    }
 
     if (window.store && typeof window.store.deleteNote === "function") {
       window.store.deleteNote(noteId);
